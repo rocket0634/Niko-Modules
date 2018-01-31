@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/Backgrounds.unity
-  isLoaded: 1
-  isActive: 1
