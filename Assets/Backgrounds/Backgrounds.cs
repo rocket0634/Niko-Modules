@@ -17,6 +17,7 @@ public class Backgrounds : MonoBehaviour
     public MeshRenderer BackingMesh;
     public TextMesh CounterText;
     public TextMesh ButtonTextMesh;
+    Color orange = new Color(1, 0.5f, 0);
     protected int LetterA;
     protected int LetterB;
     protected int RuleA;
@@ -100,9 +101,8 @@ public class Backgrounds : MonoBehaviour
         }
         if (ColBacking == 2)
         {
-            ColBacking = 3;
-            //BackingMesh.material.color = Color.orange;
-            //ColBackingName = "orange";
+            BackingMesh.material.color = orange;
+            ColBackingName = "orange";
         }
         if (ColBacking == 3)
         {
@@ -143,9 +143,8 @@ public class Backgrounds : MonoBehaviour
         }
         if (ColButton == 2)
         {
-            ColBacking = 3;
-            //ButtonMesh.material.color = Color.orange;
-            //ColButtonName = "orange";
+           ButtonMesh.material.color = orange;
+           ColButtonName = "orange";
         }
         if (ColButton == 3)
         {
