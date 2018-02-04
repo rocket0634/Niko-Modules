@@ -380,8 +380,8 @@ public class Backgrounds : MonoBehaviour
 
 
         DebugLog("Backing is {0}, Button is {1}", ColBackingName, ColButtonName);
-        DebugLog("Column in table is {0} due to rule {1}", LetterA, RuleA + 1);
-        DebugLog("Row in table is {0} due to rule {1}", LetterB, RuleB + 1);
+        DebugLog("Column in table is {0} due to rule {1}", (LetterA + 9).ToString("X"), RuleA + 1);
+        DebugLog("Row in table is {0} due to rule {1}", (LetterB + 9).ToString("X"), RuleB + 1);
         DebugLog("Number needed is {0}", GoalPresses);
     }
 
@@ -419,7 +419,6 @@ public class Backgrounds : MonoBehaviour
             {
                 Presses = 0;
             };
-            DebugLog("Counter is now {0}", Presses, GoalPresses);
             CounterText.text = Presses.ToString();
         }
         return false;
@@ -435,6 +434,6 @@ public class Backgrounds : MonoBehaviour
     private void DebugLog(string log, params object[] args)
     {
         var logData = string.Format(log, args);
-        Debug.LogFormat("[Backgrounds #{0}]: {1}", Backgrounds_moduleId, logData);
+        Debug.LogFormat("[Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);
     }
 }
