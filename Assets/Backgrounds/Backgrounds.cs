@@ -36,45 +36,54 @@ public class Backgrounds : MonoBehaviour
     protected int GoalPresses;
     protected int Presses;
 
-    public string TwitchHelpMessage = "Use \'!{0} press 5\' to press the \"Push Me\" button 5 times, Use \'!{0} Submit\' to Submit the current answer. Note: Only takes numbers 1-9";
+#pragma warning disable 414
+    private string TwitchHelpMessage = "Use \'!{0} press 5\' to press the \"Push Me\" button 5 times, Use \'!{0} Submit\' to Submit the current answer. Note: Only takes numbers 1-9";
+#pragma warning restore 414
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
     {
-        string lowertpinput = TPInput.ToLowerInvariant();
-        bool Incomp = false;
+        var split = TPInput.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         int TPcurPresses = 0;
         List<KMSelectable> Moves = new List<KMSelectable>();
 
-        string[] split = lowertpinput.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
         int TPGoalPresses;
 
-        if (split.Length == 2 && split[0] == "press" && int.TryParse(split[1], out TPGoalPresses))
+        if (split.Length == 1 && split[0] == "submit")
+        {
+            return new KMSelectable[] { Submit };
+        }
+
+        else if ((split.Length == 2 || split.Length == 3) && split[0] == "press" && int.TryParse(split[1], out TPGoalPresses))
         {
             while (TPcurPresses != TPGoalPresses)
             {
                 Moves.Add(Button);
                 TPcurPresses++;
             }
-        }
-        else if (lowertpinput == "submit")
-        {
-            Moves.Add(Submit);
-        }
-        else
-        {
-            Incomp = true;
-        }
-
-        if (Incomp == false)
-        {
+            if (split.Contains("submit"))
+            {
+                Moves.Add(Submit);
+            }
             KMSelectable[] MovesArray = Moves.ToArray();
             return MovesArray;
         }
-        else
+
+        else if (split.Length == 2 && split[0] == "submit" && int.TryParse(split[1], out TPGoalPresses))
         {
-            return null;
+            if (int.Parse(CounterText.text) != TPGoalPresses)
+            {
+                if (int.Parse(CounterText.text) > TPGoalPresses)
+                {
+                    TPcurPresses = 10 - (int.Parse(CounterText.text) - TPGoalPresses);
+                }
+                else if (TPGoalPresses < 10)
+                {
+                    TPcurPresses = TPGoalPresses - int.Parse(CounterText.text);
+                }
+            }
+            return Enumerable.Repeat(Button, TPcurPresses).Concat(new[] { Submit }).ToArray();
         }
+        return null;
     }
 
     int GetSolvedCount()
@@ -193,11 +202,11 @@ public class Backgrounds : MonoBehaviour
         bool ButtonGreyscale = false;
         bool Mixrule = false;
 
-        if (ColBacking == 7 || ColBacking == 8 || ColBacking == 9)
+        if (ColBacking == 7 || ColBacking == 9)
         {
             BackingGreyscale = true;
         }
-        if (ColButton == 7 || ColButton == 8 || ColButton == 9)
+        if (ColButton == 7 || ColButton == 9)
         {
             ButtonGreyscale = true;
         }
@@ -257,7 +266,7 @@ public class Backgrounds : MonoBehaviour
             }
         }
 
-        if (BombInfo.GetBatteryCount() == 0)
+        if (BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D) == 0)
         {
             if (letterpos == 0)
             {
@@ -272,7 +281,7 @@ public class Backgrounds : MonoBehaviour
                 letterpos++;
             }
         }
-        if (BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA) > 1)
+        if (BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA) == 0)
         {
             if (letterpos == 0)
             {
