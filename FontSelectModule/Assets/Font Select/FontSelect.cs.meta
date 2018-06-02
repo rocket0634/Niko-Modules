@@ -1,0 +1,38 @@
+fileFormatVersion: 2
+guid: c827559f34f093d49991961052ca763a
+timeCreated: 1521239207
+licenseType: Free
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - BombInfo: {instanceID: 0}
+  - BombModule: {instanceID: 0}
+  - KMAudio: {instanceID: 0}
+  - Left: {instanceID: 0}
+  - Right: {instanceID: 0}
+  - Submit: {instanceID: 0}
+  - TextMesh: {instanceID: 0}
+  - MMerriweather: {instanceID: 0}
+  - MSpecialElite: {instanceID: 0}
+  - MRockSalt: {instanceID: 0}
+  - MChewy: {instanceID: 0}
+  - MKarma: {instanceID: 0}
+  - MLobster: {instanceID: 0}
+  - MComingSoon: {instanceID: 0}
+  - MGochiHand: {instanceID: 0}
+  - MIndieFlower: {instanceID: 0}
+  - Merriweather: {instanceID: 0}
+  - SpecialElite: {instanceID: 0}
+  - RockSalt: {instanceID: 0}
+  - Chewy: {fileID: 12800000, guid: 3e3c0aa9ad6c58b41b7b3f00455accf1, type: 3}
+  - Karma: {instanceID: 0}
+  - Lobster: {instanceID: 0}
+  - ComingSoon: {instanceID: 0}
+  - GochiHand: {instanceID: 0}
+  - IndieFlower: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
