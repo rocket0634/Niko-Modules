@@ -217,11 +217,11 @@ public class FontSelect : MonoBehaviour
                 TextMesh.color = Color.cyan;
                 if (TextMesh.font == RockSalt)
                 {
-                    TextMesh.fontSize = 20;
+                    TextMesh.fontSize = 80;
                 }
                 else
                 {
-                    TextMesh.fontSize = 30;
+                    TextMesh.fontSize = 120;
                 }
             }
             else if (CurrentFont == 2 && TextMesh.GetComponent<Renderer>().material != FontList[SecondFont])
@@ -231,11 +231,11 @@ public class FontSelect : MonoBehaviour
                 TextMesh.color = Color.cyan;
                 if (TextMesh.font == RockSalt)
                 {
-                    TextMesh.fontSize = 20;
+                    TextMesh.fontSize = 80;
                 }
                 else
                 {
-                    TextMesh.fontSize = 30;
+                    TextMesh.fontSize = 120;
                 }
             }
             else if (CurrentFont == 3 && TextMesh.GetComponent<Renderer>().material != FontList[ThirdFont])
@@ -245,12 +245,12 @@ public class FontSelect : MonoBehaviour
                 TextMesh.color = Color.cyan;
                 if (TextMesh.font == RockSalt)
                 {
-                    TextMesh.fontSize = 20;
+                    TextMesh.fontSize = 80;
                 }
                 else
                 {
-                    TextMesh.fontSize = 30;
-                }
+                    TextMesh.fontSize = 120;
+                }   
             }
         }
     }
