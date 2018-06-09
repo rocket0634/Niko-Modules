@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 public class FaultyBG : MonoBehaviour
 {
+    //Obsolete. Replaced with Backgrounds.cs
+    //Hopefully it won't hurt to just keep it here, though.
     protected int ColButton;
     protected int ColBacking;
     private static int FBackgrounds_moduleIdCounter = 1;

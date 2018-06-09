@@ -218,8 +218,8 @@ GameObject:
   - component: {fileID: 114368453825603002}
   - component: {fileID: 114814753448158972}
   - component: {fileID: 114216268186194120}
-  - component: {fileID: 114067216914256884}
   - component: {fileID: 114191464517672852}
+  - component: {fileID: 114580923143937418}
   m_Layer: 0
   m_Name: Backgrounds 1
   m_TagString: Untagged
@@ -762,26 +762,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlightScale: {x: 1, y: 1, z: 1}
   OutlineAmount: 0.0001
---- !u!114 &114067216914256884
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1987653641768508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1371eb068e6b2074ca7688d02f789852, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BombInfo: {fileID: 114216268186194120}
-  BombModule: {fileID: 114368453825603002}
-  KMAudio: {fileID: 114191464517672852}
-  Submit: {fileID: 114577826197164984}
-  Button: {fileID: 114576806746767492}
-  ButtonMesh: {fileID: 23991021758152176}
-  BackingMesh: {fileID: 23743804219928000}
-  CounterText: {fileID: 102229169308798336}
-  ButtonTextMesh: {fileID: 102404704731527708}
 --- !u!114 &114191464517672852
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -852,8 +832,8 @@ MonoBehaviour:
   m_Script: {fileID: -119419473, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ModuleType: Backgrounds
-  ModuleDisplayName: Backgrounds
+  ModuleType: BackgroundsTest
+  ModuleDisplayName: BackgroundsTest
   RequiresTimerVisibility: 0
 --- !u!114 &114534471791355448
 MonoBehaviour:
@@ -912,6 +892,32 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
+--- !u!114 &114580923143937418
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1987653641768508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1371eb068e6b2074ca7688d02f789852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BombInfo: {fileID: 114216268186194120}
+  BombModule: {fileID: 114368453825603002}
+  KMAudio: {fileID: 114191464517672852}
+  Submit: {fileID: 114577826197164984}
+  ButtonA: {fileID: 114576806746767492}
+  ButtonB: {fileID: 114576806746767492}
+  ButtonAMesh: {fileID: 23991021758152176}
+  ButtonBMesh: {fileID: 23991021758152176}
+  BackingMesh: {fileID: 23743804219928000}
+  CounterText: {fileID: 102229169308798336}
+  ButtonATextMesh: {fileID: 102404704731527708}
+  ButtonBTextMesh: {fileID: 102507627984979826}
+  ModuleType: 0
+  TwitchHelpMessage: 'Use ''!{0} press 5'' to press the "Push Me" button 5 times,
+    Use ''!{0} Submit'' to Submit the current answer. Note: Only takes numbers 1-9'
 --- !u!114 &114594797764209378
 MonoBehaviour:
   m_ObjectHideFlags: 1

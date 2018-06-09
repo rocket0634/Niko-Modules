@@ -3,25 +3,36 @@ using System;
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 public class Backgrounds : MonoBehaviour
 {
+    public enum Type
+    {
+        Normal,
+        Faulty
+    }
+
     private static int Backgrounds_moduleIdCounter = 1;
     private int Backgrounds_moduleId;
     public KMBombInfo BombInfo;
     public KMBombModule BombModule;
     public KMAudio KMAudio;
     public KMSelectable Submit;
-    public KMSelectable Button;
-    public MeshRenderer ButtonMesh;
-    public MeshRenderer BackingMesh;
-    public TextMesh CounterText;
-    public TextMesh ButtonTextMesh;
+    public KMSelectable ButtonA, ButtonB;
+    public MeshRenderer ButtonAMesh, ButtonBMesh, BackingMesh;
+    public TextMesh CounterText, ButtonATextMesh, ButtonBTextMesh;
+    public Type ModuleType;
+    private bool activated;
+    private List<bool> check = new List<bool>();
     Color orange = new Color(1, 0.5f, 0);
-    protected int LetterA;
-    protected int LetterB;
-    protected int RuleA;
-    protected int RuleB;
+    protected int LetterA, LetterB, RuleA, RuleB, RandomFaultRule;
+    protected int FaultButton, ColBacking, ColButton;
+    private readonly Color[] color = { Color.red, new Color(1, 0.5f, 0), Color.yellow, Color.green, Color.blue, Color.magenta, Color.white, Color.grey, Color.black };
+    private readonly string[] colorList = { "red", "orange", "yellow", "green", "blue", "purple", "white", "gray", "black" };
+
+    private readonly int[] list1 = { 0, 3, 2, 3, 1, 5, 4, 1, 2, 4 };
+    private readonly int[] list2 = { 2, 1, 4, 3, 5, 4, 1, 2, 3, 0 };
 
     int[,] BGmanualTable = new int[6, 6]{
                  { 3, 2, 9, 1, 7, 4 },
@@ -35,55 +46,76 @@ public class Backgrounds : MonoBehaviour
     protected bool SOLVED;
     protected int GoalPresses;
     protected int Presses;
-
-#pragma warning disable 414
-    private string TwitchHelpMessage = "Use \'!{0} press 5\' to press the \"Push Me\" button 5 times, Use \'!{0} Submit\' to Submit the current answer. Note: Only takes numbers 1-9";
-#pragma warning restore 414
+    
+    public string TwitchHelpMessage = "Use \'!{0} press 5\' to press the \"Push Me\" button 5 times, Use \'!{0} Submit\' to Submit the current answer. Note: Only takes numbers 1-9";
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
     {
         var split = TPInput.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         int TPcurPresses = 0;
         List<KMSelectable> Moves = new List<KMSelectable>();
-
+        KMSelectable Button;
         int TPGoalPresses;
+        bool faulty = ModuleType.Equals(Type.Faulty);
+        bool submit = false;
+        var Match = Regex.Match(TPInput, @"^\s*(?:press |submit )([0-9])(?: submit|)\s*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        var FaultyMatch = Regex.Match(TPInput, @"^\s*(?:press |submit )(?:left |right |l |r)([0-9])(?: submit|)\s*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-        if (split.Length == 1 && split[0] == "submit")
+        if (FaultyMatch.Success && !faulty) throw new FormatException("This command is invalid for Backgrounds.");
+        if (Match.Success && faulty) throw new FormatException("Please indicate which button you are interacting with.");
+
+        if (split.Last().Equals("submit"))
         {
-            return new KMSelectable[] { Submit };
+            submit = true;
+            if (split.Count() > 1) split = split.Take(split.Count() - 1).ToArray();
         }
-
-        else if ((split.Length == 2 || split.Length == 3) && split[0] == "press" && int.TryParse(split[1], out TPGoalPresses))
+        switch (split.Count())
         {
+            case 3:
+                if (!faulty || !FaultyMatch.Success || !int.TryParse(split[2], out TPGoalPresses)) return null;
+                if (split[1].Equals("left") || split[1].Equals("l")) Button = ButtonA;
+                else if (split[1].Equals("right") || split[1].Equals("r")) Button = ButtonB;
+                else return null;
+                break;
+            case 2:
+                if ((faulty && !split[0].Equals("submit")) || !Match.Success || !int.TryParse(split[1], out TPGoalPresses)) return null;
+                Button = ButtonA;
+                if (faulty)
+                {
+                    if (split[1].Equals("left") || split[1].Equals("l")) Button = ButtonA;
+                    else if (split[1].Equals("right") || split[1].Equals("r")) Button = ButtonB;
+                }
+                break;
+            case 1:
+                if (faulty || !submit) return null;
+                TPcurPresses = int.Parse(CounterText.text);
+                TPGoalPresses = TPcurPresses;
+                Button = ButtonA;
+                break;
+            default:
+                return null;
+        }
+        if (split[0].Equals("submit") && !submit)
+        {
+            if (int.Parse(CounterText.text) != TPGoalPresses)
+            {
+                if (int.Parse(CounterText.text) > TPGoalPresses) TPcurPresses = 10 - (int.Parse(CounterText.text) - TPGoalPresses);
+                else if (TPGoalPresses < 10) TPcurPresses = TPGoalPresses - int.Parse(CounterText.text);
+            }
+            return Enumerable.Repeat(Button, TPcurPresses).Concat(new[] { Submit }).ToArray();
+        }
+        else
+        {
+            if (split[0].Equals("submit")) return null;
             while (TPcurPresses != TPGoalPresses)
             {
                 Moves.Add(Button);
                 TPcurPresses++;
             }
-            if (split.Contains("submit"))
-            {
-                Moves.Add(Submit);
-            }
-            KMSelectable[] MovesArray = Moves.ToArray();
-            return MovesArray;
+            if (submit) Moves.Add(Submit);
+            return Moves.ToArray();
         }
 
-        else if (split.Length == 2 && split[0] == "submit" && int.TryParse(split[1], out TPGoalPresses))
-        {
-            if (int.Parse(CounterText.text) != TPGoalPresses)
-            {
-                if (int.Parse(CounterText.text) > TPGoalPresses)
-                {
-                    TPcurPresses = 10 - (int.Parse(CounterText.text) - TPGoalPresses);
-                }
-                else if (TPGoalPresses < 10)
-                {
-                    TPcurPresses = TPGoalPresses - int.Parse(CounterText.text);
-                }
-            }
-            return Enumerable.Repeat(Button, TPcurPresses).Concat(new[] { Submit }).ToArray();
-        }
-        return null;
     }
 
     int GetSolvedCount()
@@ -94,308 +126,153 @@ public class Backgrounds : MonoBehaviour
     protected void Start()
     {
         Backgrounds_moduleId = Backgrounds_moduleIdCounter++;
-        int ColBacking = UnityEngine.Random.Range(1, 9);
-        int ColButton = UnityEngine.Random.Range(1, 10);
+        ColBacking = UnityEngine.Random.Range(0, 8);
+        ColButton = UnityEngine.Random.Range(0, 9);
 
-        Button.OnInteract += HandlePressButton;
         Submit.OnInteract += HandlePressSubmit;
 
-        //Determine Values of the Knobs and Color the knobs 1RED 2GREEN 3WHITE 4GREY 5 YELLOW
-        string ColButtonName = "";
-        string ColBackingName = "";
-        if (ColBacking == 1)
-        {
-            BackingMesh.material.color = Color.red;
-            ColBackingName = "red";
-        }
-        if (ColBacking == 2)
-        {
-            BackingMesh.material.color = orange;
-            ColBackingName = "orange";
-        }
-        if (ColBacking == 3)
-        {
-            BackingMesh.material.color = Color.yellow;
-            ColBackingName = "yellow";
-        }
-        if (ColBacking == 4)
-        {
-            BackingMesh.material.color = Color.green;
-            ColBackingName = "green";
-        }
-        if (ColBacking == 5)
-        {
-            BackingMesh.material.color = Color.blue;
-            ColBackingName = "blue";
-        }
-        if (ColBacking == 6)
-        {
-            BackingMesh.material.color = Color.magenta;
-            ColBackingName = "purple";
-        }
-        if (ColBacking == 7)
-        {
-            BackingMesh.material.color = Color.white;
-            ColBackingName = "white";
-        }
-        if (ColBacking == 8)
-        {
-            BackingMesh.material.color = Color.grey;
-            ColBackingName = "grey";
-        }
+        //Add each rule into a boolean list
+        //Same color rule
+        check.Add(ColButton == ColBacking);
+        //Greyscale rule
+        check.Add(ColBacking == 6 || ColButton == 6 || ColButton == 8);
+        //No D Battery rule
+        check.Add(BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D) == 0);
+        //No AA Battery rule
+        check.Add(BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA) == 0);
+        //Primary colors rule
+        check.Add((ColButton == 0 || ColButton == 2 || ColButton == 4) && (ColBacking == 0 || ColBacking == 2 || ColBacking == 4));
+        //Secondary colors rule
+        check.Add(ColButton == 1 || ColButton == 3 || ColButton == 5);
+        //Unlit SND rule
+        check.Add(BombInfo.GetOffIndicators().Contains("SND"));
+        //Serial port rule
+        check.Add(BombInfo.GetPorts().Contains("Serial"));
+        //Mix with blue rule
+        check.Add((ColBacking == 0 && ColButton == 5) || (ColBacking == 2 && ColButton == 3));
+        //Otherwise rule, always true
+        check.Add(true);
 
+        var correctMesh = new MeshRenderer();
+        var correctTextMesh = new TextMesh();
 
-        if (ColButton == 1)
+        if (ModuleType.Equals(Type.Normal))
         {
-            ButtonMesh.material.color = Color.red;
-            ColButtonName = "red";
+            ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
+            correctMesh = ButtonAMesh;
+            correctTextMesh = ButtonATextMesh;
+            DebugLog("Backing is {0}, Button is {1}", colorList[ColBacking], colorList[ColButton]);
         }
-        if (ColButton == 2)
+        if (ModuleType.Equals(Type.Faulty))
         {
-           ButtonMesh.material.color = orange;
-           ColButtonName = "orange";
+            RandomFaultRule = UnityEngine.Random.Range(0, 10);
+            if (RandomFaultRule > 0) RandomFaultRule += 1;
+            if (check[0]) RandomFaultRule = 1;
+            FaultButton = UnityEngine.Random.Range(0, 2);
+            var faultButton = new [] { ButtonATextMesh, ButtonBTextMesh };
+            var faultText = UnityEngine.Random.Range(0, 2);
+            var faultyMesh = new MeshRenderer();
+            var faultyTextMesh = new TextMesh();
+            int colFault = UnityEngine.Random.Range(0, 9);
+            while (colFault == ColBacking || colFault == ColButton)
+            {
+                colFault = UnityEngine.Random.Range(0, 9);
+            }
+            switch (RandomFaultRule)
+            {
+                case 0:
+                    if (FaultButton == 0) ButtonB.OnInteract += delegate () { HandlePressButton(ButtonB); return false; };
+                    else ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
+                    goto broke;
+                case 2:
+                    FaultButton = 0;
+                    faultButton[faultText].text = "BUSH\nME!";
+                    break;
+                case 3:
+                    FaultButton = 1;
+                    faultButton[faultText].text = "PUSH\nNE!";
+                    break;
+                case 4:
+                    faultText = FaultButton;
+                    faultButton[faultText].text = "PUSH\nHE!";
+                    break;
+                case 5:
+                    if (FaultButton == faultText) faultText = (faultText + 1) % 2;
+                    faultButton[faultText].text = "PUSH\nSHE!";
+                    break;
+                case 6:
+                    FaultButton = 0;
+                    CounterText.color = Color.black;
+                    break;
+                case 7:
+                    FaultButton = 1;
+                    break;
+                case 8:
+                    if (colFault != 9) goto case 9;
+                    break;
+                case 9:
+                    RandomFaultRule = 9;
+                    if (BombInfo.GetSerialNumber().Last() % 2 == 0) FaultButton = 1;
+                    else goto default;
+                    break;
+                default:
+                    FaultButton = 0;
+                    break;
+            }
+            ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
+            ButtonB.OnInteract += delegate () { HandlePressButton(ButtonB); return false; };
+            broke:
+            if (FaultButton == 0)
+            {
+                faultyTextMesh = ButtonATextMesh;
+                faultyMesh = ButtonAMesh;
+                correctTextMesh = ButtonBTextMesh;
+                correctMesh = ButtonBMesh;
+                DebugLog("Fake Button is on the Left");
+            }
+            else
+            {
+                faultyTextMesh = ButtonBTextMesh;
+                faultyMesh = ButtonBMesh;
+                correctTextMesh = ButtonATextMesh;
+                correctMesh = ButtonAMesh;
+                DebugLog("Fake Button is on the Right");
+            }
+            if (colFault == 4 || colFault == 8) faultyTextMesh.color = Color.white;
+            faultyMesh.material.color = color[colFault];
+            DebugLog("Fake Button was determined by rule {0}", RandomFaultRule + 1);
+            DebugLog("Backing is {0}, Button is {1}, Fake Button is {2}", colorList[ColBacking], colorList[ColButton], colorList[colFault]);
         }
-        if (ColButton == 3)
-        {
-            ButtonMesh.material.color = Color.yellow;
-            ColButtonName = "yellow";
-        }
-        if (ColButton == 4)
-        {
-            ButtonMesh.material.color = Color.green;
-            ColButtonName = "green";
-        }
-        if (ColButton == 5)
-        {
-            ButtonMesh.material.color = Color.blue;
-            ButtonTextMesh.color = Color.white;
-            ColButtonName = "blue";
-        }
-        if (ColButton == 6)
-        {
-            ButtonMesh.material.color = Color.magenta;
-            ColButtonName = "purple";
-        }
-        if (ColButton == 7)
-        {
-            ButtonMesh.material.color = Color.white;
-            ColButtonName = "white";
+        
+        BackingMesh.material.color = color[ColBacking];
+        correctMesh.material.color = color[ColButton];
 
-        }
-        if (ColButton == 8)
-        {
-            ButtonMesh.material.color = Color.grey;
-            ColButtonName = "grey";
-        }
-        if (ColButton == 9)
-        {
-            ButtonMesh.material.color = Color.black;
-            ButtonTextMesh.color = Color.white;
-            ColButtonName = "black";
-        }
+        if (ColButton == 4 || ColButton == 8) correctTextMesh.color = Color.white;
 
-        //Check Categories of button and backing where necessary
-        bool BackingPrimary = false;
-        bool BackingGreyscale = false;
-        bool ButtonPrimary = false;
-        bool ButtonSecondary = false;
-        bool ButtonGreyscale = false;
-        bool Mixrule = false;
+        //Grab our X value for the table (the first instance of "true")
+        RuleA = check.IndexOf(true);
+        //Remove RuleA from check
+        check[RuleA] = false;
+        //If there are no true values left, it means the otherwise rule was reached twice
+        if (!check.Contains(true)) RuleB = RuleA;
+        //Otherwise, there's still another true value in check
+        else RuleB = check.IndexOf(true);
 
-        if (ColBacking == 7 || ColBacking == 9)
-        {
-            BackingGreyscale = true;
-        }
-        if (ColButton == 7 || ColButton == 9)
-        {
-            ButtonGreyscale = true;
-        }
-        if (ColButton == 1 || ColButton == 3 || ColButton == 5)
-        {
-            ButtonPrimary = true;
-        }
-        if (ColBacking == 1 || ColBacking == 3 || ColBacking == 5)
-        {
-            BackingPrimary = true;
-        }
-        if (ColButton == 2 || ColButton == 4 || ColButton == 6)
-        {
-            ButtonSecondary = true;
-        }
+        //list1 contains X values for the first letter,
+        //and list 2 contains Y values for the second letter
+        GoalPresses = BGmanualTable[list1[RuleA], list2[RuleB]];
 
-        if (ColBacking == 1 && ColButton == 6)
-        {
-            Mixrule = true;
-        }
-        if (ColBacking == 3 && ColButton == 4)
-        {
-            Mixrule = true;
-        }
-
-        //determine letters
-        int letterpos = 0;
-        if (ColBacking == ColButton)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 1;
-                RuleA = 0;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 3;
-                RuleB = 0;
-                letterpos++;
-            }
-        }
-
-        if (BackingGreyscale || ButtonGreyscale)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 4;
-                RuleA = 1;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 2;
-                RuleB = 1;
-                letterpos++;
-            }
-        }
-
-        if (BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D) == 0)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 3;
-                RuleA = 2;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 5;
-                RuleB = 2;
-                letterpos++;
-            }
-        }
-        if (BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA) == 0)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 4;
-                RuleA = 3;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 4;
-                RuleB = 3;
-                letterpos++;
-            }
-        }
-        if (BackingPrimary && ButtonPrimary)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 2;
-                RuleA = 4;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 6;
-                RuleB = 4;
-                letterpos++;
-            }
-        }
-        if (ButtonSecondary)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 6;
-                RuleA = 5;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 5;
-                RuleB = 5;
-                letterpos++;
-            }
-        }
-        if (BombInfo.GetOffIndicators().Contains("SND"))
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 5;
-                RuleA = 6;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 2;
-                RuleB = 6;
-                letterpos++;
-            }
-        }
-        if (BombInfo.GetPorts().Contains("Serial"))
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 2;
-                RuleA = 7;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 3;
-                RuleB = 7;
-                letterpos++;
-            }
-        }
-        if (Mixrule)
-        {
-            if (letterpos == 0)
-            {
-                LetterA = 3;
-                RuleA = 8;
-                letterpos++;
-            }
-            else if (letterpos == 1)
-            {
-                LetterB = 4;
-                RuleB = 8;
-                letterpos++;
-            }
-        }
-
-        if (letterpos == 0)
-        {
-            LetterA = 5;
-            RuleA = 9;
-            LetterB = 1;
-            RuleB = 9;
-        }
-        else if (letterpos == 1)
-        {
-            LetterB = 1;
-            RuleB = 9;
-        }
-
-        GoalPresses = BGmanualTable[LetterA - 1, LetterB - 1];
-
-
-        DebugLog("Backing is {0}, Button is {1}", ColBackingName, ColButtonName);
-        DebugLog("Column in table is {0} due to rule {1}", (LetterA + 9).ToString("X"), RuleA + 1);
-        DebugLog("Row in table is {0} due to rule {1}", (LetterB + 9).ToString("X"), RuleB + 1);
+        //ToString("X") translates the number into a hexidecimal.
+        //As it so happens, the columns use letters A-F, which fits perfectly into hexidecimal values.
+        DebugLog("Row in table is {0} due to rule {1}", (list1[RuleA] + 10).ToString("X"), RuleA + 1);
+        DebugLog("Column in table is {0} due to rule {1}", (list2[RuleB] + 10).ToString("X"), RuleB + 1);
         DebugLog("Number needed is {0}", GoalPresses);
+        BombModule.OnActivate += delegate { activated = true; };
     }
 
     protected bool HandlePressSubmit()
     {
+        if (!activated) return false;
         KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonPress, transform);
         Submit.AddInteractionPunch(0.5f);
 
@@ -405,7 +282,7 @@ public class Backgrounds : MonoBehaviour
             if (Presses == GoalPresses)
             {
                 BombModule.HandlePass();
-                SOLVED = false;
+                SOLVED = true;
                 DebugLog("The module has been defused.");
             }
             else
@@ -416,21 +293,52 @@ public class Backgrounds : MonoBehaviour
         return false;
     }
 
-    protected bool HandlePressButton()
+    void HandlePressButton(KMSelectable Button)
     {
+        if (!activated) return;
         KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonPress, transform);
         Button.AddInteractionPunch(0.5f);
 
-        if (!SOLVED)
-        {
+        if (!SOLVED) {
             Presses++;
             if (Presses == 10)
             {
                 Presses = 0;
             };
+
             CounterText.text = Presses.ToString();
+            if (ModuleType.Equals(Type.Faulty))
+            {
+                switch (RandomFaultRule)
+                {
+                    case 6:
+                        if (Presses % 2 == 0)
+                        {
+                            CounterText.color = Color.black;
+                            break;
+                        }
+                        goto default;
+                    case 7:
+                        if (Presses % 2 == 1)
+                        {
+                            CounterText.color = Color.black;
+                            break;
+                        }
+                        goto default;
+                    case 8:
+                        if (Presses == 5)
+                        {
+                            CounterText.color = Color.black;
+                            break;
+                        }
+                        goto default;
+                    default:
+                        CounterText.color = Color.white;
+                        break;
+                }
+            }
         }
-        return false;
+        return;
     }
 
     protected bool HandleLightsToggle()
@@ -438,11 +346,10 @@ public class Backgrounds : MonoBehaviour
         return false;
     }
 
-
-
     private void DebugLog(string log, params object[] args)
     {
         var logData = string.Format(log, args);
-        Debug.LogFormat("[Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);
+        if (ModuleType == Type.Normal) Debug.LogFormat("[Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);
+        else Debug.LogFormat("[Faulty Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);
     }
 }

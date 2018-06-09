@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -508,16 +509,15 @@ public class TestHarness : MonoBehaviour
 
     protected void PlaySoundHandler(string clipName, Transform t)
     {
-        if (AudioClips != null && AudioClips.Count > 0)
-        {
-            AudioClip clip = AudioClips.Where(a => a.name == clipName).First();
+        AudioClip clip = AudioClips == null ? null : AudioClips.Where(a => a.name == clipName).FirstOrDefault();
 
-            if (clip != null)
-            {
-                audioSource.transform.position = t.position;
-                audioSource.PlayOneShot(clip);
-            }
+        if (clip != null)
+        {
+            audioSource.transform.position = t.position;
+            audioSource.PlayOneShot(clip);
         }
+        else
+            Debug.Log("Audio clip not found: " + clipName);
     }
 
     void Update()
@@ -654,6 +654,7 @@ public class TestHarness : MonoBehaviour
                 selectableSequence = (KMSelectable[]) method.Invoke(component, new object[] { command });
                 if (selectableSequence == null)
                 {
+                    Debug.LogFormat("Twitch Plays handler reports invalid command (by returning null).", method.DeclaringType.FullName, method.Name);
                     yield break;
                 }
             }
@@ -695,7 +696,10 @@ public class TestHarness : MonoBehaviour
             }
 
             if (responseCoroutine == null)
+            {
+                Debug.LogFormat("Twitch Plays handler reports invalid command (by returning null).", method.DeclaringType.FullName, method.Name);
                 yield break;
+            }
 
             if (!ComponentHelds.ContainsKey(component))
                 ComponentHelds[component] = new HashSet<KMSelectable>();
@@ -703,6 +707,20 @@ public class TestHarness : MonoBehaviour
 
             int initialStrikes = fakeInfo.strikes;
             int initialSolved = fakeInfo.GetSolvedModuleNames().Count;
+
+            if (!responseCoroutine.MoveNext())
+            {
+                Debug.LogFormat("Twitch Plays handler reports invalid command (by returning empty sequence).", method.DeclaringType.FullName, method.Name);
+                yield break;
+            }
+
+            if (responseCoroutine.Current is string)
+            {
+                var str = (string) responseCoroutine.Current;
+                if (str.StartsWith("sendtochat"))
+                    Debug.Log("Twitch handler sent: " + str);
+                yield break;
+            }
 
             while (responseCoroutine.MoveNext())
             {
@@ -723,8 +741,25 @@ public class TestHarness : MonoBehaviour
                         heldSelectables.Add(selectable);
                     }
                 }
+                else if (currentObject is IEnumerable<KMSelectable>)
+                {
+                    foreach (var selectable in (IEnumerable<KMSelectable>) currentObject)
+                    {
+                        DoInteractionStart(selectable);
+                        yield return new WaitForSeconds(.1f);
+                        DoInteractionEnd(selectable);
+                    }
+                }
                 else if (currentObject is string)
                 {
+                    string currentString = (string) currentObject;
+                    float waitTime;
+                    Match match = Regex.Match(currentString, "^trywaitcancel ([0-9]+(?:\\.[0-9])?)((?: (?:.|\\n)+)?)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+                    if (match.Success && float.TryParse(match.Groups[1].Value, out waitTime))
+                    {
+                        yield return new WaitForSeconds(waitTime);
+                    }
+
                     Debug.Log("Twitch handler sent: " + currentObject);
                     yield return currentObject;
                 }
