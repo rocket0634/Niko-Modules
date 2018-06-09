@@ -100,7 +100,7 @@ public class Sink : MonoBehaviour
     {
         ModConfig modConfig = new ModConfig("SinkSettings", typeof(SinkSettings));
         Settings = (SinkSettings)modConfig.Settings;
-        if (moduleType == Type.Faulty && Settings.fault == "1")
+        if (moduleType == Type.Faulty && Settings.fault == "0")
         {
             moduleType = Type.Normal;
             BombModule.ModuleDisplayName = "Sink";
@@ -123,8 +123,7 @@ public class Sink : MonoBehaviour
         }
         if (moduleType == Type.Faulty)
         {
-            //spin = UnityEngine.Random.Range(0, 20);
-            spin = 16;
+            spin = UnityEngine.Random.Range(0, 20);
             if (spin > 15) rotate = true;
             var faulty = UnityEngine.Random.Range(0, 5);
             Faucet = BombModule.GetComponent<KMSelectable>().Children[1];
@@ -492,7 +491,7 @@ public class Sink : MonoBehaviour
             }
             if (curknob == 2)
             {
-                if (rotate && c == 0)
+                if (rotate && c == 0 && spin > 1500)
                 {
                     c = 1;
                     WaitForSol();
@@ -540,7 +539,6 @@ public class Sink : MonoBehaviour
             hotP = 0;
             coldP = 0;
             BombModule.HandleStrike();
-            DebugLog("It's here, it seems. " + r.name + " " + curknob.ToString() + " " + knob3.ToString());
             curknob = 0;
         }
         hold = 0;
