@@ -759,7 +759,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 70f397f63c1c5304d91c169126aed763, type: 3}
+  - {fileID: 2100000, guid: 53fdb76ab8d6fca4ba4ba2cfee3c7cda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -886,11 +886,15 @@ TextMesh:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1086318563177112}
-  m_Text: 'Testing,
+  m_Text: 'The quick
 
-    testing,
+    brown fox
 
-    one two 3'
+    jumps over
+
+    the lazy
+
+    dog. 1-8'
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -1197,24 +1201,32 @@ MonoBehaviour:
   Right: {fileID: 114405154902631598}
   Submit: {fileID: 114542598007811438}
   TextMesh: {fileID: 102258399282766038}
-  MMerriweather: {fileID: 2100000, guid: 5578ac88f8fe27645b02202287f6510a, type: 2}
-  MSpecialElite: {fileID: 2100000, guid: 53fdb76ab8d6fca4ba4ba2cfee3c7cda, type: 2}
-  MRockSalt: {fileID: 2100000, guid: 282c3cf03ab2d3645937aff1ffa34136, type: 2}
-  MChewy: {fileID: 2100000, guid: 38137815a0cb06143bd181d365a69c6c, type: 2}
-  MKarma: {fileID: 2100000, guid: 5062d4f9b0d498a4ba6494db85d37655, type: 2}
-  MLobster: {fileID: 2100000, guid: 319fb6fe6e87c6d4ebf92e3307980613, type: 2}
-  MComingSoon: {fileID: 2100000, guid: 8522584529d41ab4c9330895b4716975, type: 2}
-  MGochiHand: {fileID: 2100000, guid: c2a283d7af6400e40b53ad9f92af75cc, type: 2}
-  MIndieFlower: {fileID: 2100000, guid: 5d9f651ab86747045803ba8e3e8727eb, type: 2}
-  Merriweather: {fileID: 12800000, guid: 58d903f84d353ec4c8630d49a17fbe27, type: 3}
-  SpecialElite: {fileID: 12800000, guid: 70f397f63c1c5304d91c169126aed763, type: 3}
-  RockSalt: {fileID: 12800000, guid: 56d4d99f15a77414b8053c775da97f90, type: 3}
-  Chewy: {fileID: 12800000, guid: 3e3c0aa9ad6c58b41b7b3f00455accf1, type: 3}
-  Karma: {fileID: 12800000, guid: 76bb3ffda5644cc4594c343b7ed10518, type: 3}
-  Lobster: {fileID: 12800000, guid: 92e8dd9d864b12a4484a2e50110ee102, type: 3}
-  ComingSoon: {fileID: 12800000, guid: ce7c008aed194c4408568660ef1999ad, type: 3}
-  GochiHand: {fileID: 12800000, guid: b7734b86e0b1e5145b39fffae32664f7, type: 3}
-  IndieFlower: {fileID: 12800000, guid: 253569e1a9fea8447993803a02496de2, type: 3}
+  TextMaterials:
+  - {fileID: 2100000, guid: 5578ac88f8fe27645b02202287f6510a, type: 2}
+  - {fileID: 2100000, guid: 53fdb76ab8d6fca4ba4ba2cfee3c7cda, type: 2}
+  - {fileID: 2100000, guid: 282c3cf03ab2d3645937aff1ffa34136, type: 2}
+  - {fileID: 2100000, guid: 38137815a0cb06143bd181d365a69c6c, type: 2}
+  - {fileID: 2100000, guid: 5062d4f9b0d498a4ba6494db85d37655, type: 2}
+  - {fileID: 2100000, guid: 319fb6fe6e87c6d4ebf92e3307980613, type: 2}
+  - {fileID: 2100000, guid: 8522584529d41ab4c9330895b4716975, type: 2}
+  - {fileID: 2100000, guid: c2a283d7af6400e40b53ad9f92af75cc, type: 2}
+  - {fileID: 2100000, guid: 5d9f651ab86747045803ba8e3e8727eb, type: 2}
+  - {fileID: 2100000, guid: 752a8201fce5ef040a128199ad0868b1, type: 2}
+  - {fileID: 2100000, guid: e803396489ddd26478786aef76f892fe, type: 2}
+  - {fileID: 2100000, guid: ec1b52cd25d82594596f89ed5aafd631, type: 2}
+  Fonts:
+  - {fileID: 12800000, guid: c371689b30dcbeb40af4aec534e00fa7, type: 3}
+  - {fileID: 12800000, guid: 70f397f63c1c5304d91c169126aed763, type: 3}
+  - {fileID: 12800000, guid: 56d4d99f15a77414b8053c775da97f90, type: 3}
+  - {fileID: 12800000, guid: 3e3c0aa9ad6c58b41b7b3f00455accf1, type: 3}
+  - {fileID: 12800000, guid: b04a9c363f21ca845bc0e3fe30f7317d, type: 3}
+  - {fileID: 12800000, guid: 92e8dd9d864b12a4484a2e50110ee102, type: 3}
+  - {fileID: 12800000, guid: ce7c008aed194c4408568660ef1999ad, type: 3}
+  - {fileID: 12800000, guid: b7734b86e0b1e5145b39fffae32664f7, type: 3}
+  - {fileID: 12800000, guid: 253569e1a9fea8447993803a02496de2, type: 3}
+  - {fileID: 12800000, guid: fcdb5809bb9d04543a887cc465af05a3, type: 3}
+  - {fileID: 12800000, guid: 76bb3ffda5644cc4594c343b7ed10518, type: 3}
+  - {fileID: 12800000, guid: 58d903f84d353ec4c8630d49a17fbe27, type: 3}
   TwitchHelpMessage: Use !{0} Left or !{0} Right to cycle fonts, !{0} Submit to submit
     the current font.
 --- !u!114 &114695171497680248
@@ -1264,7 +1276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShaderNames:
-  - GUI/Text Shader
+  - GUI/KT 3D Text
 --- !u!114 &114929052375034626
 MonoBehaviour:
   m_ObjectHideFlags: 1
