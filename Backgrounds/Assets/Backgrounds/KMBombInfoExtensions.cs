@@ -27,6 +27,7 @@ namespace KMBombInfoExtensions
 		private class BatteryJSON
 		{
 			public int numbatteries = 0;
+			public int typebatteries = 0;
 		}
 
 		private class PortsJSON
@@ -47,9 +48,8 @@ namespace KMBombInfoExtensions
 		{
 			Unknown = 0,
 			D = 1,
-			//D batteries currently always come as 1 battery in the one battery holder
 			AA = 2,
-			//AA batteries currently always comes in 2 batteries in the one battery holder
+			NineVolt = 3
 		}
 
 		public enum KnownPortType
@@ -160,7 +160,7 @@ namespace KMBombInfoExtensions
 
 		public static int GetBatteryCount (this KMBombInfo bombInfo, KnownBatteryType batteryType)
 		{
-			return GetBatteryEntries (bombInfo).Where ((x) => x.numbatteries == (int)batteryType).Sum ((x) => x.numbatteries);
+			return GetBatteryEntries (bombInfo).Where ((x) => x.typebatteries == 0 ? (((int)batteryType == 2 && x.numbatteries >= 2 && x.numbatteries <= 4) || ((int)batteryType == 1 && x.numbatteries == 1)) : x.typebatteries == (int)batteryType).Sum ((x) => x.numbatteries);
 		}
 
 		public static int GetBatteryHolderCount (this KMBombInfo bombInfo)
