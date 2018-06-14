@@ -64,6 +64,8 @@ public class Backgrounds : MonoBehaviour
         if (FaultyMatch.Success && !faulty) throw new FormatException("This command is invalid for Backgrounds.");
         if (Match.Success && faulty) throw new FormatException("Please indicate which button you are interacting with.");
 
+        if (TPInput.ToLowerInvariant() == "submit") return new[] { Submit };
+
         if (split.Last().Equals("submit"))
         {
             submit = true;
