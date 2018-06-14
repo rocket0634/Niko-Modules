@@ -165,7 +165,7 @@ public class Backgrounds : MonoBehaviour
         }
         if (ModuleType.Equals(Type.Faulty))
         {
-            RandomFaultRule = UnityEngine.Random.Range(0, 10);
+            RandomFaultRule = UnityEngine.Random.Range(0, 9);
             if (RandomFaultRule > 0) RandomFaultRule += 1;
             if (check[0]) RandomFaultRule = 1;
             FaultButton = UnityEngine.Random.Range(0, 2);
@@ -184,6 +184,8 @@ public class Backgrounds : MonoBehaviour
                     if (FaultButton == 0) ButtonB.OnInteract += delegate () { HandlePressButton(ButtonB); return false; };
                     else ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
                     goto broke;
+                case 1:
+                    break;
                 case 2:
                     FaultButton = 0;
                     faultButton[faultText].text = "BUSH\nME!";
@@ -216,6 +218,7 @@ public class Backgrounds : MonoBehaviour
                     else goto default;
                     break;
                 default:
+                    RandomFaultRule = 10;
                     FaultButton = 0;
                     break;
             }
