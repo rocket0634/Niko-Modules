@@ -35,7 +35,7 @@ public class BlindMaze : MonoBehaviour
 	public MeshRenderer EastMesh;
 	public MeshRenderer SouthMesh;
 	public MeshRenderer WestMesh;
-	int MazeRot;
+	int MazeRot, startRot;
 	int currentMaze = -1;
 
 	bool Solved = false;
@@ -187,14 +187,12 @@ public class BlindMaze : MonoBehaviour
 			BombModule.HandlePass();
 			Solved = true;
 			DebugLog("Moving {0}: The module has been defused.", Direction);
-            //DebugLog("Moving North, the module has been defused.");
 		}
 		else
 		{
             ButtonRotation(CurX, CurY);
 			CurrentP = MazeWalls[CurY, CurX];
             if (log) DebugLog("Moving {0}: ({1}, {2})", Direction, RotX, RotY);
-            //if (log) DebugLog("Moving {0}: ({1}, {2} on original rotation.", Direction, CurX, CurY);
 		}
 	}
 
@@ -248,44 +246,51 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
 		// Look for mazebased modules
-		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze" };
+		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze" };
 		int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
 
 		// Determine rotation
 		int MazeRule;
-		if (BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D) == 1 && BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA) == 0)
+		if (REDKEY > 1)
 		{
 			MazeRot = 1;
+            startRot = 1;
 			MazeRule = 1;
 		}
-		else if (BombInfo.GetPorts().Distinct().Count() < 3)
+		else if (BombInfo.GetBatteryCount() > 4)
 		{
-			MazeRot = 3;
+			MazeRot = 1;
+            startRot = 0;
 			MazeRule = 2;
 		}
-		else if (BombInfo.GetSerialNumberLetters().Any("AEIOU".Contains) && BombInfo.GetOnIndicators().Contains("IND"))
+		else if (BombInfo.GetIndicators().Contains("IND"))
 		{
 			MazeRot = 2;
+            startRot = 2;
 			MazeRule = 3;
 		}
 		else if (REDKEY > 0 && NOYELLOW == true)
 		{
 			MazeRot = 3;
+            startRot = 3;
 			MazeRule = 4;
 		}
-		else if (MazeBased > 2)
+		else if (MazeBased > 1)
 		{
 			MazeRot = 2;
+            startRot = 0;
 			MazeRule = 5;
 		}
-		else if (BombInfo.GetOffIndicators().Contains("MSA") && REDKEY > 1)
+		else if (BombInfo.GetPorts().Distinct().Count() == 1)
 		{
-			MazeRot = 1;
+			MazeRot = 3;
+            startRot = 0;
 			MazeRule = 6;
 		}
 		else
 		{
 			MazeRot = 0;
+            startRot = 0;
 			MazeRule = 7;
 		}
 
@@ -308,7 +313,7 @@ public class BlindMaze : MonoBehaviour
 		Reset.OnInteract += GetInteractHandler(Reset, new ButtonInfo(0, 0, null, true));
 
         //Determine Starting Position
-		switch (MazeRot)
+		switch (startRot)
 		{
 			case 0:
 				CurX = SumNS;
@@ -332,8 +337,9 @@ public class BlindMaze : MonoBehaviour
 		StartX = CurX;
 		StartY = CurY;
 
-		DebugLog("Starting location is ({0}, {1}).", SumNS + 1, SumEW + 1);
-        //DebugLog("Non-Rotation values for debugging are: {0}, {1}", CurX + 1, CurY + 1);
+        DebugLog("Starting location is: ({0}, {1}).", SumNS + 1, SumEW + 1);
+        if (MazeRot != startRot) DebugLog("Location is determined before rotation. Starting location on rotated maze is ({0}, {1}).", RotX, RotY);
+        else if (MazeRule != 7) DebugLog("Location is determined after rotation.");
 	}
 
     void ButtonRotation(int x, int y)
@@ -376,13 +382,11 @@ public class BlindMaze : MonoBehaviour
                     UpdatePosition();
                     ButtonRotation(CurX, CurY);
                     DebugLog("Resetted, now at ({0}, {1})", RotX, RotY);
-                    //DebugLog("Resetted, now at ({0}, {1})", CurX + 1, CurY + 1);
                 }
                 else if (CurrentP.Contains(buttonInfo.invalidDirection))
                 {
                     ButtonRotation(CurX, CurY);
                     DebugLog("There is a wall to the {0} at ({1}, {2}). Strike.", Direction, RotX, RotY);
-                    //DebugLog("There is a wall at {1}, {2}, and it doesn't match the manual. SOMEone should fix this.", CurX + 1, CurY + 1);
                     BombModule.HandleStrike();
                 }
                 else
