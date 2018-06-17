@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 114459180913947216}
   - component: {fileID: 114431581113691404}
   m_Layer: 0
-  m_Name: FaultySink
+  m_Name: Sink
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1038,8 +1038,8 @@ MonoBehaviour:
   m_Script: {fileID: -119419473, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ModuleType: FaultySink
-  ModuleDisplayName: Faulty Sink
+  ModuleType: Sink
+  ModuleDisplayName: Sink
   RequiresTimerVisibility: 0
 --- !u!114 &114238378155682722
 MonoBehaviour:
@@ -1172,7 +1172,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 817676c5cf9da1947927c5c661c7a6e4, type: 3}
   - {fileID: 2800000, guid: 4700e2fda51eafd418b416fa8171bf79, type: 3}
   - {fileID: 2800000, guid: 15fe469a69f51a24f93e3eeb857e326e, type: 3}
-  moduleType: 1
+  moduleType: 0
 --- !u!114 &114449345875360990
 MonoBehaviour:
   m_ObjectHideFlags: 1

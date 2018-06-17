@@ -357,6 +357,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1758913223124706, guid: 939d31f6ad17e424890e4f13d33e9be5, type: 2}
+      propertyPath: m_Name
+      value: FaultySink
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 939d31f6ad17e424890e4f13d33e9be5, type: 2}
   m_IsPrefabParent: 0

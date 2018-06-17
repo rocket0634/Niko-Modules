@@ -16,6 +16,7 @@ public class Sink : MonoBehaviour
     }
     private SinkSettings Settings = new SinkSettings(); 
     private static int Sink_moduleIdCounter = 1;
+    private static int FSink_moduleIdCounter = 1;
     private int Sink_moduleId;
     public KMBombInfo BombInfo;
     public KMBombModule BombModule;
@@ -100,13 +101,12 @@ public class Sink : MonoBehaviour
     {
         ModConfig modConfig = new ModConfig("SinkSettings", typeof(SinkSettings));
         Settings = (SinkSettings)modConfig.Settings;
-        if (moduleType == Type.Faulty && Settings.fault == "0")
+        if (Settings.fault == "1")
         {
-            moduleType = Type.Normal;
-            BombModule.ModuleDisplayName = "Sink";
-            BombModule.ModuleType = "Sink";
+            moduleType = UnityEngine.Random.Range(0,2).Equals(0)? Type.Normal : Type.Faulty;
+            BombModule.ModuleDisplayName = "Faulty Sink";
+            BombModule.ModuleType = "Faulty Sink";
         }
-        Sink_moduleId = Sink_moduleIdCounter++;
 
         ColKnobs = UnityEngine.Random.Range(0, 3);
         ColFaucet = UnityEngine.Random.Range(0, 3);
@@ -120,9 +120,11 @@ public class Sink : MonoBehaviour
             {
                 if (i != 2) BombModule.GetComponent<KMSelectable>().Children[i] = null;
             }
+            Sink_moduleId = Sink_moduleIdCounter++;
         }
         if (moduleType == Type.Faulty)
         {
+            Sink_moduleId = FSink_moduleIdCounter++;
             spin = UnityEngine.Random.Range(0, 20);
             if (spin > 15) rotate = true;
             var faulty = UnityEngine.Random.Range(0, 5);
