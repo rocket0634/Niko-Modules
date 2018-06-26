@@ -313,7 +313,7 @@ public class MazeScrambler : MonoBehaviour
 
     protected bool HandlePressRed()
     {
-        //KMAudio.HandlePlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         BRed.AddInteractionPunch(0.5f);
 
         if (SOLVED)
@@ -366,7 +366,7 @@ public class MazeScrambler : MonoBehaviour
 
     protected bool HandlePressBlue()
     {
-        //KMAudio.HandlePlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         BBlue.AddInteractionPunch(0.5f);
 
         if (SOLVED)
@@ -420,7 +420,7 @@ public class MazeScrambler : MonoBehaviour
 
     protected bool HandlePressGreen()
     {
-        //KMAudio.HandlePlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         BGreen.AddInteractionPunch(0.5f);
 
         if (SOLVED)
@@ -473,7 +473,7 @@ public class MazeScrambler : MonoBehaviour
 
     protected bool HandlePressYellow()
     {
-        //KMAudio.HandlePlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         BYellow.AddInteractionPunch(0.5f);
 
         if (SOLVED)
@@ -526,7 +526,7 @@ public class MazeScrambler : MonoBehaviour
 
     protected bool HandlePressReset()
     {
-        //KMAudio.HandlePlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         Reset.AddInteractionPunch(0.5f);
 
         if (SOLVED)
