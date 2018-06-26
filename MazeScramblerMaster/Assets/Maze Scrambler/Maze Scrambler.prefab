@@ -1684,7 +1684,7 @@ MonoBehaviour:
   - {fileID: 114991212187932110}
   - {fileID: 114827810995937736}
   - {fileID: 114689761630091664}
-  IsPassThrough: 1
+  IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114448499106589194}
   SelectableColliders: []
@@ -1692,7 +1692,7 @@ MonoBehaviour:
   AllowSelectionWrapX: 0
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
-  ForceInteractionHighlight: 1
+  ForceInteractionHighlight: 0
 --- !u!114 &114448499106589194
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -38,73 +38,43 @@ public class MazeScrambler : MonoBehaviour
     protected string CurrentP;
     protected Color Orange = new Color(1, 0.5f, 0);
 
-    public string TwitchHelpMessage = "Use !{0} NWSE, !{0} nwse, !{0} ULDR, or !{0} uldr to move North West South East.";
+    public string TwitchHelpMessage = "Use !{0} rgby to move North West South East.";
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
     {
         string tpinput = TPInput.ToLowerInvariant();
-        bool Incomp = false;
+        var command = tpinput.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (command[0] != "press") return null;
+        if (tpinput.Equals("r") || tpinput.Equals("reset")) return new KMSelectable[] { Reset };
         List<KMSelectable> Moves = new List<KMSelectable>();
-        if (tpinput == "reset")
+        foreach (string s in command)
         {
-            Moves.Add(Reset);
-        }
-        else if (tpinput == "red")
-        {
-            Moves.Add(BRed);
-        }
-        else if (tpinput == "blue")
-        {
-            Moves.Add(BBlue);
-        }
-        else if (tpinput == "yellow")
-        {
-            Moves.Add(BYellow);
-        }
-        else if (tpinput == "green")
-        {
-            Moves.Add(BGreen);
-        }
-        else
-        {
-
-            foreach (char c in tpinput)
+            switch (s)
             {
-                if (c == 'r')
-                {
+                case "press":
+                case " ":
+                    break;
+                case "red":
+                case "r":
                     Moves.Add(BRed);
-                }
-                else if (c == 'g')
-                {
-                    Moves.Add(BGreen);
-                }
-                else if (c == 'b')
-                {
+                    break;
+                case "blue":
+                case "b":
                     Moves.Add(BBlue);
-                }
-                else if (c == 'y')
-                {
+                    break;
+                case "green":
+                case "g":
+                    Moves.Add(BGreen);
+                    break;
+                case "yellow":
+                case "y":
                     Moves.Add(BYellow);
-                }
-                else if (c == ' ')
-                {
-                }
-                else
-                {
-                    Moves.Clear();
-                    Incomp = true;
-                }
+                    break;
+                default:
+                    return null;
             }
         }
-        if (Incomp == false)
-        {
-            KMSelectable[] MovesArray = Moves.ToArray();
-            return MovesArray;
-        }
-        else
-        {
-            return null;
-        }
+        return Moves.ToArray();
     }
 
 

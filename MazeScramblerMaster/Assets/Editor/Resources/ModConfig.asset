@@ -11,8 +11,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615501dbe4f3fe94fbf4b564abb10237, type: 3}
   m_Name: ModConfig
   m_EditorClassIdentifier: 
-  id: BlindMaze
-  title: Blind Maze
+  id: MazeScrambler
+  title: Maze Scrambler
   description: "Navigate through a Maze You can't see! Not that you couldn't see the
     walls before, so how hard could it be?\n\nModule ID: BlindMaze\r\n\r\nManual Page:
     https://ktane.timwi.de/HTML/Blind%20Maze.html"
