@@ -38,13 +38,12 @@ public class MazeScrambler : MonoBehaviour
     protected string CurrentP;
     protected Color Orange = new Color(1, 0.5f, 0);
 
-    public string TwitchHelpMessage = "Use !{0} rgby to move North West South East.";
+    private string TwitchHelpMessage = "Use !{0} rgby to move North West South East.";
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
     {
         string tpinput = TPInput.ToLowerInvariant();
         var command = tpinput.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (command[0] != "press") return null;
         if (tpinput.Equals("r") || tpinput.Equals("reset")) return new KMSelectable[] { Reset };
         List<KMSelectable> Moves = new List<KMSelectable>();
         foreach (string s in command)
@@ -55,23 +54,39 @@ public class MazeScrambler : MonoBehaviour
                 case " ":
                     break;
                 case "red":
-                case "r":
                     Moves.Add(BRed);
                     break;
                 case "blue":
-                case "b":
                     Moves.Add(BBlue);
                     break;
                 case "green":
-                case "g":
                     Moves.Add(BGreen);
                     break;
                 case "yellow":
-                case "y":
                     Moves.Add(BYellow);
                     break;
                 default:
-                    return null;
+                    foreach (char c in s)
+                    {
+                        switch (c)
+                        {
+                            case 'r':
+                                Moves.Add(BRed);
+                                break;
+                            case 'b':
+                                Moves.Add(BBlue);
+                                break;
+                            case 'g':
+                                Moves.Add(BGreen);
+                                break;
+                            case 'y':
+                                Moves.Add(BYellow);
+                                break;
+                            default:
+                                return null;
+                        }
+                    }
+                    break;
             }
         }
         return Moves.ToArray();
