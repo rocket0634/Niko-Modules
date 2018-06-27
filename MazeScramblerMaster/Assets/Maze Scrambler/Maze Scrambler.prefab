@@ -1312,7 +1312,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1085335538003402}
-  m_Mesh: {fileID: 4300024, guid: a339cc39b3d6be747bec49f5f8c9c3ce, type: 3}
+  m_Mesh: {fileID: 4300024, guid: 6b57244539f69a249a5f8adee9a56a8b, type: 3}
 --- !u!33 &33205632812841294
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -1340,7 +1340,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1369816957813804}
-  m_Mesh: {fileID: 4300024, guid: a339cc39b3d6be747bec49f5f8c9c3ce, type: 3}
+  m_Mesh: {fileID: 4300024, guid: 6b57244539f69a249a5f8adee9a56a8b, type: 3}
 --- !u!33 &33336982394055424
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -1361,7 +1361,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1301530593817612}
-  m_Mesh: {fileID: 4300024, guid: a339cc39b3d6be747bec49f5f8c9c3ce, type: 3}
+  m_Mesh: {fileID: 4300024, guid: 6b57244539f69a249a5f8adee9a56a8b, type: 3}
 --- !u!33 &33560491510154212
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -1445,7 +1445,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1725523723839890}
-  m_Mesh: {fileID: 4300024, guid: a339cc39b3d6be747bec49f5f8c9c3ce, type: 3}
+  m_Mesh: {fileID: 4300024, guid: 6b57244539f69a249a5f8adee9a56a8b, type: 3}
 --- !u!95 &95843578885181360
 Animator:
   serializedVersion: 3
@@ -1599,8 +1599,6 @@ MonoBehaviour:
   - {fileID: 23842987631520692}
   - {fileID: 23927263485740694}
   - {fileID: 23854664381214968}
-  TwitchHelpMessage: Use !{0} NWSE, !{0} nwse, !{0} ULDR, or !{0} uldr to move North
-    West South East.
 --- !u!114 &114295656811880144
 MonoBehaviour:
   m_ObjectHideFlags: 1

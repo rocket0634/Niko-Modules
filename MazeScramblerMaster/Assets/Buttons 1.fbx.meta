@@ -1,0 +1,154 @@
+fileFormatVersion: 2
+guid: 6b57244539f69a249a5f8adee9a56a8b
+timeCreated: 1530088740
+licenseType: Free
+ModelImporter:
+  serializedVersion: 21
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: KeyboardKey
+    100004: KeyboardKey_0.1
+    100006: KeyboardKeyRounded
+    100008: KeyboardKeyRounded_0.1
+    100010: RoundButton
+    100012: RoundButton_0.1
+    100014: RoundButton_0.2
+    100016: SquareButton
+    100018: SquareButton_0.1
+    100020: SquareButton_0.2
+    100022: SquareButtonPlunger
+    100024: SquareButtonPlunger_Rounded0.3
+    100026: SquareButtonPlunger_Rounded0.3_0.06
+    100028: SquareButtonPlunger_Square0.06
+    400000: //RootNode
+    400002: KeyboardKey
+    400004: KeyboardKey_0.1
+    400006: KeyboardKeyRounded
+    400008: KeyboardKeyRounded_0.1
+    400010: RoundButton
+    400012: RoundButton_0.1
+    400014: RoundButton_0.2
+    400016: SquareButton
+    400018: SquareButton_0.1
+    400020: SquareButton_0.2
+    400022: SquareButtonPlunger
+    400024: SquareButtonPlunger_Rounded0.3
+    400026: SquareButtonPlunger_Rounded0.3_0.06
+    400028: SquareButtonPlunger_Square0.06
+    2300000: KeyboardKey
+    2300002: KeyboardKey_0.1
+    2300004: KeyboardKeyRounded
+    2300006: KeyboardKeyRounded_0.1
+    2300008: RoundButton
+    2300010: RoundButton_0.1
+    2300012: RoundButton_0.2
+    2300014: SquareButton
+    2300016: SquareButton_0.1
+    2300018: SquareButton_0.2
+    2300020: SquareButtonPlunger
+    2300022: SquareButtonPlunger_Rounded0.3
+    2300024: SquareButtonPlunger_Rounded0.3_0.06
+    2300026: SquareButtonPlunger_Square0.06
+    3300000: KeyboardKey
+    3300002: KeyboardKey_0.1
+    3300004: KeyboardKeyRounded
+    3300006: KeyboardKeyRounded_0.1
+    3300008: RoundButton
+    3300010: RoundButton_0.1
+    3300012: RoundButton_0.2
+    3300014: SquareButton
+    3300016: SquareButton_0.1
+    3300018: SquareButton_0.2
+    3300020: SquareButtonPlunger
+    3300022: SquareButtonPlunger_Rounded0.3
+    3300024: SquareButtonPlunger_Rounded0.3_0.06
+    3300026: SquareButtonPlunger_Square0.06
+    4300000: SquareButtonPlunger_Rounded0.3_0.06
+    4300002: SquareButtonPlunger_Rounded0.3
+    4300004: SquareButtonPlunger_Square0.06
+    4300006: SquareButtonPlunger
+    4300008: RoundButton_0.2
+    4300010: RoundButton_0.1
+    4300012: RoundButton
+    4300014: KeyboardKeyRounded_0.1
+    4300016: KeyboardKeyRounded
+    4300018: KeyboardKey_0.1
+    4300020: KeyboardKey
+    4300022: SquareButton_0.1
+    4300024: SquareButton_0.2
+    4300026: SquareButton
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
