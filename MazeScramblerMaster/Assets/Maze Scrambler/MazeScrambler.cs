@@ -222,14 +222,6 @@ public class MazeScrambler : MonoBehaviour
         BombModule.OnActivate += OnActivate;
         StartX = CurX;
         StartY = CurY;
-        if (GoalY == StartY)
-        {
-            GoalY++;
-        }
-        if (GoalY == 3)
-        {
-            GoalY = 0;
-        }
         int[] IDXS = new int[18] { 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 2, 2, 2, 1, 2, 0, 0, 1 };
         int[] IDYS = new int[18] { 0, 0, 1, 1, 0, 1, 0, 0, 1, 2, 2, 2, 1, 2, 0, 2, 2, 2 };
         IDX1 = IDXS[currentmaze-1];
@@ -317,6 +309,30 @@ public class MazeScrambler : MonoBehaviour
             };
         }
 
+        var blacklist = new List<int[]>();
+        blacklist.Add(new[] { CurY, CurX });
+        blacklist.AddRange(PathChecker(CurY, CurX, blacklist));
+        var newBlacklist = new List<int[]>(blacklist.ToList());
+        var count = new List<int>();
+        foreach (var item in blacklist)
+        {
+            newBlacklist.Concat(PathChecker(item[0], item[1], newBlacklist));
+        }
+        foreach (var item in newBlacklist)
+        {
+            if (blacklist.Any(arg => arg.SequenceEqual(item)))
+            {
+                continue;
+            }
+            count.Add(PathChecker(item[0], item[1], newBlacklist.ToList()).Count());
+        }
+        if (!count.Any(arg => arg > 2)) blacklist = new List<int[]>(newBlacklist);
+        while (blacklist.Any(arg => arg.SequenceEqual(new[] { GoalY, GoalX })))
+        {
+            GoalX = UnityEngine.Random.Range(0, 3);
+            GoalY = UnityEngine.Random.Range(0, 3);
+        }
+
         CurrentP = MazeWalls[CurY, CurX];
         DebugLog("First Yellow LED is in [{0},{1}]", IDX1+1, IDY1+1);
         DebugLog("Second Yellow LED is in [{0},{1}]", IDX2+1, IDY2+1);
@@ -324,6 +340,19 @@ public class MazeScrambler : MonoBehaviour
         DebugLog("Starting Position is [{0},{1}]", StartX + 1, StartY + 1);
         DebugLog("Goal location is [{0},{1}]", GoalX+1, GoalY+1);
         UpdateLEDs();
+    }
+
+    List<int[]> PathChecker(int y, int x, List<int[]> blacklist)
+    {
+        var letters = new[] { 'U', 'D', 'L', 'R' };
+        var path = new[] { new[]{ y - 1, x}, new[]{ y + 1, x }, new[]{ y, x - 1 }, new[]{ y, x + 1 } };
+        foreach (char c in MazeWalls[y, x])
+        {
+            if (c == ' ') continue;
+            var letter = Array.IndexOf(letters, c);
+            if (!blacklist.Any(arg => arg.SequenceEqual(path[letter]))) blacklist.Add(path[letter]);
+        }
+        return blacklist;
     }
 
     protected bool HandlePressRed()
