@@ -20,7 +20,7 @@ public class MazeScrambler : MonoBehaviour
     public MeshRenderer[] LEDS;
     private int currentmaze = -1;
 
-    protected bool SOLVED = false;
+    protected bool SOLVED,strike = false;
     protected int CurX;
     protected int CurY;
     protected int GoalX;
@@ -37,8 +37,13 @@ public class MazeScrambler : MonoBehaviour
     protected int StartY;
     protected string CurrentP;
     protected Color Orange = new Color(1, 0.5f, 0);
+    protected string[] Red = new string[] { "Up", "Left", "Right", "Down", "Down", "Right", "Up", "Up", "Down", "Left", "Red" },
+        Blue = new string[] { "Left", "Right", "Left", "Up", "Right", "Up", "Left", "Right", "Up", "Down", "Blue" },
+        Green = new string[] { "Right", "Up", "Up", "Left", "Left", "Down", "Right", "Left", "Right", "Up", "Green" },
+        Yellow = new string[] { "Down", "Down", "Right", "Right", "Up", "Left", "Down", "Down", "Left", "Right", "Yellow" };
 
     private string TwitchHelpMessage = "Use !{0} rgby to move North West South East.";
+    
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
     {
@@ -92,78 +97,48 @@ public class MazeScrambler : MonoBehaviour
         return Moves.ToArray();
     }
 
-
-
-    private void Up()
+    private void Direction(string dir)
     {
-        if (CurrentP.Contains("U"))
-        { 
-            CurY--;
+        if (CurrentP.Contains(dir.First().ToString()))
+        {
+            switch (dir)
+            {
+                case "Up":
+                    CurY--;
+                    break;
+                case "Left":
+                    CurX--;
+                    break;
+                case "Right":
+                    CurX++;
+                    break;
+                case "Down":
+                    CurY++;
+                    break;
+            }
         }
         else
         {
+            DebugLog("--------------------------------------------------");
+            DebugLog("Wall detected trying to move {0} from [{1},{2}]", dir.ToLowerInvariant(), CurX + 1, CurY + 1);
+            strike = true;
             BombModule.HandleStrike();
             CurX = StartX;
             CurY = StartY;
             CurrentPress = 0;
+            DebugLog("Sequence reset:\n[Maze Scrambler #{0}]: Sel | New Pos | Red | Blue | Yellow | Green", MazeScrambler_moduleId);
         }
-        UpdateLEDs();
+        UpdateLEDs(dir);
     }
 
-    private void Left()
-    {
-        if (CurrentP.Contains("L"))
-        {
-            CurX--;
-        }
-        else
-        {
-            BombModule.HandleStrike();
-            CurX = StartX;
-            CurY = StartY;
-            CurrentPress = 0;
-        }
-        UpdateLEDs();
-    }
-
-    private void Right()
-    {
-        if (CurrentP.Contains("R"))
-        {
-            CurX++;
-        }
-        else
-        {
-            BombModule.HandleStrike();
-            CurX = StartX;
-            CurY = StartY;
-            CurrentPress = 0;
-        }
-        UpdateLEDs();
-    }
-
-    private void Down()
-    {
-        if (CurrentP.Contains("D"))
-        {
-            CurY++;
-        }
-        else
-        {
-            BombModule.HandleStrike();
-            CurX = StartX;
-            CurY = StartY;
-            CurrentPress = 0;
-        }
-        UpdateLEDs();
-    }
-
-    private void UpdateLEDs()
+    private void UpdateLEDs(string dir = null)
     {
         CurrentP = MazeWalls[CurY, CurX];
         if (CurX == GoalX && CurY == GoalY)
         {
-            SOLVED = false;
+            DebugLog("--------------------------------------------------");
+            DebugLog("Moved {0} to [{1},{2}]. Module solved.", dir.ToLowerInvariant(), GoalX + 1, GoalY + 1);
+            SOLVED = true;
             BombModule.HandlePass();
         }
         Xs = new int[9] { 0, 1, 2, 0, 1, 2, 0, 1, 2 };
@@ -171,7 +146,7 @@ public class MazeScrambler : MonoBehaviour
         for (int i = 0; i < 9; i++)
         {
             CurLED = LEDS[i];
-            if (SOLVED)
+            if (!SOLVED)
             {
                 if ((Xs[i] == IDX1 & Ys[i] == IDY1) ||(Xs[i] == IDX2 & Ys[i] == IDY2))
                 {
@@ -229,11 +204,11 @@ public class MazeScrambler : MonoBehaviour
         IDX2 = IDXS[currentmaze+8];
         IDY2 = IDYS[currentmaze+8];
 
-        BRed.OnInteract += HandlePressRed;
-        BBlue.OnInteract += HandlePressBlue;
-        BGreen.OnInteract += HandlePressGreen;
-        BYellow.OnInteract += HandlePressYellow;
-        Reset.OnInteract += HandlePressReset;
+        BRed.OnInteract += delegate () { HandlePress(BRed, Red); return false; };
+        BBlue.OnInteract += delegate () { HandlePress(BBlue, Blue); return false; };
+        BGreen.OnInteract += delegate () { HandlePress(BGreen, Green); return false; };
+        BYellow.OnInteract += delegate () { HandlePress(BYellow, Yellow); return false; };
+        Reset.OnInteract += delegate () { HandlePress(Reset); return false; };
 
 
         if (currentmaze == 1)
@@ -339,6 +314,8 @@ public class MazeScrambler : MonoBehaviour
         DebugLog("Maze is {0} in reading order", currentmaze);
         DebugLog("Starting Position is [{0},{1}]", StartX + 1, StartY + 1);
         DebugLog("Goal location is [{0},{1}]", GoalX+1, GoalY+1);
+        DebugLog("Current sequence is:\n[Maze Scrambler #{0}]: Sel | New Pos | Red | Blue | Yellow | Green", MazeScrambler_moduleId);
+        DebugLog("----- | [-,-] | {0} | {1} | {2} | {3}", Red[0], Blue[0], Yellow[0], Green[0]);
         UpdateLEDs();
     }
 
@@ -355,244 +332,42 @@ public class MazeScrambler : MonoBehaviour
         return blacklist;
     }
 
-    protected bool HandlePressRed()
+    protected bool HandlePress(KMSelectable B, string[] color = null)
     {
         KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
-        BRed.AddInteractionPunch(0.5f);
+        B.AddInteractionPunch(0.5f);
 
-        if (SOLVED)
+        if (!SOLVED)
         {
-            if (CurrentPress % 10 == 1) 
+            if (B == Reset)
             {
-                Up();
-            }
-            else if (CurrentPress % 10 == 2)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 3)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 4)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 5)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 6)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 7)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 8)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 9)
-            {
-                Down();
-            }
-            else
-            {
-                Left();
-            }
+                CurX = StartX;
+                CurY = StartY;
+                CurrentPress = 1;
+                UpdateLEDs();
+                DebugLog("--------------------------------------------------");
+                DebugLog("Sequence reset:\n[Maze Scrambler #{0}]: Sel | New Pos | Red | Blue | Yellow | Green", MazeScrambler_moduleId);
+                DebugLog("Reset | [{4},{5}] | {0} | {1} | {2} | {3}", Red[0], Blue[0], Yellow[0], Green[0], CurX + 1, CurY + 1);
 
+                return false;
+            }
+            Direction(color[(CurrentPress - 1) % 10]);
             CurrentPress++;
+            var c = (CurrentPress - 1) % 10;
+            if (!SOLVED) DebugLog("{0} | [{1},{2}] | {3} | {4} | {5} | {6}", color.Last(), CurX + 1, CurY + 1, Red[c], Blue[c], Yellow[c], Green[c]);
+            strike = false;
         }
-        return false;
-    }
-
-    protected bool HandlePressBlue()
-    {
-        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
-        BBlue.AddInteractionPunch(0.5f);
-
-        if (SOLVED)
-        {
-            if (CurrentPress % 10 == 1)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 2)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 3)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 4)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 5)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 6)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 7)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 8)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 9)
-            {
-                Up();
-            }
-            else
-            {
-                Down();
-            }
-
-            CurrentPress++;
-        }
-
-        return false;
-    }
-
-    protected bool HandlePressGreen()
-    {
-        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
-        BGreen.AddInteractionPunch(0.5f);
-
-        if (SOLVED)
-        {
-            if (CurrentPress % 10 == 1)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 2)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 3)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 4)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 5)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 6)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 7)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 8)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 9)
-            {
-                Right();
-            }
-            else
-            {
-                Up();
-            }
-
-            CurrentPress++;
-        }
-        return false;
-    }
-
-    protected bool HandlePressYellow()
-    {
-        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
-        BYellow.AddInteractionPunch(0.5f);
-
-        if (SOLVED)
-        {
-            if (CurrentPress % 10 == 1)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 2)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 3)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 4)
-            {
-                Right();
-            }
-            else if (CurrentPress % 10 == 5)
-            {
-                Up();
-            }
-            else if (CurrentPress % 10 == 6)
-            {
-                Left();
-            }
-            else if (CurrentPress % 10 == 7)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 8)
-            {
-                Down();
-            }
-            else if (CurrentPress % 10 == 9)
-            {
-                Left();
-            }
-            else
-            {
-                Right();
-            }
-
-            CurrentPress++;
-        }
-        return false;
-    }
-
-    protected bool HandlePressReset()
-    {
-        KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
-        Reset.AddInteractionPunch(0.5f);
-
-        if (SOLVED)
-        {
-            CurX = StartX;
-            CurY = StartY;
-            CurrentPress = 1;
-            UpdateLEDs();
-        }
-
         return false;
     }
 
     protected void OnActivate()
     {
-        SOLVED = true;
         UpdateLEDs();
     }
 
     private void DebugLog(string log, params object[] args)
     {
         var logData = string.Format(log, args);
-        Debug.LogFormat("[Maze Scrambler #{0}]: {1}", MazeScrambler_moduleId, logData);
+        Debug.LogFormat("[Maze Scrambler #{0}] {1}", MazeScrambler_moduleId, logData);
     }
 }
