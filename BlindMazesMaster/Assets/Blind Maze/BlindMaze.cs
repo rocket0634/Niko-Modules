@@ -281,7 +281,7 @@ public class BlindMaze : MonoBehaviour
             startRot = 0;
 			MazeRule = 5;
 		}
-		else if (BombInfo.GetPorts().Distinct().Count() == 1)
+		else if (BombInfo.GetPorts().Distinct().Count() < 2)
 		{
 			MazeRot = 3;
             startRot = 0;
