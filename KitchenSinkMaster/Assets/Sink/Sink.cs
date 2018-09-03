@@ -725,7 +725,7 @@ class ModConfig
     {
         get
         {
-            return Path.Combine(Application.persistentDataPath, "Modsettings\\" + _filename + ".json");
+            return Path.Combine(Path.Combine(Application.persistentDataPath, "Modsettings"), _filename + ".json");
         }
     }
 
