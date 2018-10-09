@@ -26,6 +26,7 @@ public class BlindMaze : MonoBehaviour
 	public KMBombInfo BombInfo;
 	public KMBombModule BombModule;
 	public KMAudio Audio;
+    public KMRuleSeedable RuleSeed;
 	public KMSelectable North;
 	public KMSelectable East;
 	public KMSelectable South;
@@ -35,6 +36,7 @@ public class BlindMaze : MonoBehaviour
 	public MeshRenderer EastMesh;
 	public MeshRenderer SouthMesh;
 	public MeshRenderer WestMesh;
+    private MonoRandom rng;
 	int MazeRot, startRot;
 	int currentMaze = -1;
 
@@ -215,6 +217,8 @@ public class BlindMaze : MonoBehaviour
 
 	void Start()
 	{
+        rng = RuleSeed.GetRNG();
+
 		moduleId = moduleIdCounter++;
 
 		//check what the serial ends with and make an integer for it
@@ -245,8 +249,9 @@ public class BlindMaze : MonoBehaviour
 		SumNS = SumNS % 5;
 		SumEW = SumEW % 5;
 
-		// Look for mazebased modules
-		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler" };
+        // Look for mazebased modules
+        DebugLog(string.Join(", ", BombInfo.GetModuleNames().ToArray()));
+		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze" };
 		int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
 
 		// Determine rotation
@@ -382,6 +387,7 @@ public class BlindMaze : MonoBehaviour
                     UpdatePosition();
                     ButtonRotation(CurX, CurY);
                     DebugLog("Resetted, now at ({0}, {1})", RotX, RotY);
+                    DebugLog(rng.Next(0, 6).ToString());
                 }
                 else if (CurrentP.Contains(buttonInfo.invalidDirection))
                 {

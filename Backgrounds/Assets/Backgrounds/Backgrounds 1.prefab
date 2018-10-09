@@ -216,6 +216,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4327749706062220}
   - component: {fileID: 114368453825603002}
+  - component: {fileID: 114954347536753260}
   - component: {fileID: 114814753448158972}
   - component: {fileID: 114216268186194120}
   - component: {fileID: 114191464517672852}
@@ -905,6 +906,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BombInfo: {fileID: 114216268186194120}
   BombModule: {fileID: 114368453825603002}
+  RuleSeed: {fileID: 114954347536753260}
   KMAudio: {fileID: 114191464517672852}
   Submit: {fileID: 114577826197164984}
   ButtonA: {fileID: 114576806746767492}
@@ -1007,6 +1009,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlightScale: {x: 1, y: 1, z: 1}
   OutlineAmount: 0
+--- !u!114 &114954347536753260
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1987653641768508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adf69c2de51bd3c43bbd9bc22578ee08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _seed: 1
 --- !u!114 &114984093407682240
 MonoBehaviour:
   m_ObjectHideFlags: 1

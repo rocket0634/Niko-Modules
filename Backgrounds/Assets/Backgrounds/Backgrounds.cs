@@ -1,12 +1,14 @@
-﻿using KMBombInfoExtensions;
-using System;
+﻿using System;
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using RuleGenerator;
 
 public class Backgrounds : MonoBehaviour
 {
+    //The code is shared between both Backgrounds and Faulty Backgrounds
+    //Let the code know which module is being used
     public enum Type
     {
         Normal,
@@ -17,6 +19,7 @@ public class Backgrounds : MonoBehaviour
     private int Backgrounds_moduleId;
     public KMBombInfo BombInfo;
     public KMBombModule BombModule;
+    public KMRuleSeedable RuleSeed;
     public KMAudio KMAudio;
     public KMSelectable Submit;
     public KMSelectable ButtonA, ButtonB;
@@ -24,24 +27,17 @@ public class Backgrounds : MonoBehaviour
     public TextMesh CounterText, ButtonATextMesh, ButtonBTextMesh;
     public Type ModuleType;
     private bool activated;
-    private List<bool> check = new List<bool>();
-    Color orange = new Color(1, 0.5f, 0);
-    protected int LetterA, LetterB, RuleA, RuleB, RandomFaultRule;
-    protected int FaultButton, ColBacking, ColButton;
-    private readonly Color[] color = { Color.red, new Color(1, 0.5f, 0), Color.yellow, Color.green, Color.blue, Color.magenta, Color.white, Color.grey, Color.black };
-    private readonly string[] colorList = { "red", "orange", "yellow", "green", "blue", "purple", "white", "gray", "black" };
+    internal List<bool> check;
+    internal MeshRenderer correctMesh;
+    internal TextMesh correctTextMesh;
+    public static Color orange = new Color(1, 0.5f, 0), purple = new Color(0.5f, 0, 0.5f);
+    protected internal int LetterA, LetterB, RuleA, RuleB,
+        RandomFaultRule;
+    internal Color[] color = { Color.red, orange, Color.yellow, Color.green, Color.blue, purple, Color.white, Color.grey, Color.black };
+    internal string[] colorList = { "red", "orange", "yellow", "green", "blue", "purple", "white", "gray", "black" };
 
-    private readonly int[] list1 = { 0, 3, 2, 3, 1, 5, 4, 1, 2, 4 };
-    private readonly int[] list2 = { 2, 1, 4, 3, 5, 4, 1, 2, 3, 0 };
-
-    int[,] BGmanualTable = new int[6, 6]{
-                 { 3, 2, 9, 1, 7, 4 },
-                 { 7, 9, 8, 8, 2, 3 },
-                 { 5, 1, 7, 4, 4, 6 },
-                 { 6, 4, 2, 6, 8, 5 },
-                 { 5, 1, 5, 3, 9, 9 },
-                 { 1, 2, 3, 6, 7, 8 },
-            };
+    internal int[] coordX, coordY;
+    internal int[,] BGManualTable = new int[6,6];
 
     protected bool SOLVED;
     protected int GoalPresses;
@@ -120,139 +116,33 @@ public class Backgrounds : MonoBehaviour
 
     }
 
-    int GetSolvedCount()
-    {
-        return BombInfo.GetSolvedModuleNames().Count;
-    }
-
     protected void Start()
     {
+        BackgroundsRuleGenerator.Module = this;
         Backgrounds_moduleId = Backgrounds_moduleIdCounter++;
-        ColBacking = UnityEngine.Random.Range(0, 8);
-        ColButton = UnityEngine.Random.Range(0, 9);
 
         Submit.OnInteract += HandlePressSubmit;
+        
+        check = BackgroundsRuleGenerator.Rules(RuleSeed.GetRNG());
+        //The colors are now determined in the Rule Generator
+        //This is due to the fact that all boolean values are determined at runtime
+        //So these need to have values before the rules are randomized.
+        var colBacking = BackgroundsRuleGenerator.ColBacking;
+        var colButton = BackgroundsRuleGenerator.ColButton;
 
-        //Add each rule into a boolean list
-        //Same color rule
-        check.Add(ColButton == ColBacking);
-        //Greyscale rule
-        check.Add(ColBacking == 6 || ColButton == 6 || ColButton == 8);
-        //No D Battery rule
-        check.Add(BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D) == 0);
-        //No AA Battery rule
-        check.Add(BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA) == 0);
-        //Primary colors rule
-        check.Add((ColButton == 0 || ColButton == 2 || ColButton == 4) && (ColBacking == 0 || ColBacking == 2 || ColBacking == 4));
-        //Secondary colors rule
-        check.Add(ColButton == 1 || ColButton == 3 || ColButton == 5);
-        //Unlit SND rule
-        check.Add(BombInfo.GetOffIndicators().Contains("SND"));
-        //Serial port rule
-        check.Add(BombInfo.GetPorts().Contains("Serial"));
-        //Mix with blue rule
-        check.Add((ColBacking == 0 && ColButton == 5) || (ColBacking == 2 && ColButton == 3));
-        //Otherwise rule, always true
-        check.Add(true);
-
-        var correctMesh = new MeshRenderer();
-        var correctTextMesh = new TextMesh();
-
-        if (ModuleType.Equals(Type.Normal))
+        if (ModuleType == Type.Faulty) Faulty.Rules();
+        else
         {
             ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
             correctMesh = ButtonAMesh;
             correctTextMesh = ButtonATextMesh;
-            DebugLog("Backing is {0}, Button is {1}", colorList[ColBacking], colorList[ColButton]);
-        }
-        if (ModuleType.Equals(Type.Faulty))
-        {
-            RandomFaultRule = UnityEngine.Random.Range(0, 9);
-            if (RandomFaultRule > 0) RandomFaultRule += 1;
-            if (check[0]) RandomFaultRule = 1;
-            FaultButton = UnityEngine.Random.Range(0, 2);
-            var faultButton = new [] { ButtonATextMesh, ButtonBTextMesh };
-            var faultText = UnityEngine.Random.Range(0, 2);
-            var faultyMesh = new MeshRenderer();
-            var faultyTextMesh = new TextMesh();
-            int colFault = UnityEngine.Random.Range(0, 9);
-            while (colFault == ColBacking || colFault == ColButton)
-            {
-                colFault = UnityEngine.Random.Range(0, 9);
-            }
-            switch (RandomFaultRule)
-            {
-                case 0:
-                    if (FaultButton == 0) ButtonB.OnInteract += delegate () { HandlePressButton(ButtonB); return false; };
-                    else ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
-                    goto broke;
-                case 1:
-                    break;
-                case 2:
-                    FaultButton = 0;
-                    faultButton[faultText].text = "BUSH\nME!";
-                    break;
-                case 3:
-                    FaultButton = 1;
-                    faultButton[faultText].text = "PUSH\nNE!";
-                    break;
-                case 4:
-                    faultText = FaultButton;
-                    faultButton[faultText].text = "PUSH\nHE!";
-                    break;
-                case 5:
-                    if (FaultButton == faultText) faultText = (faultText + 1) % 2;
-                    faultButton[faultText].text = "PUSH\nSHE!";
-                    break;
-                case 6:
-                    FaultButton = 0;
-                    CounterText.color = Color.black;
-                    break;
-                case 7:
-                    FaultButton = 1;
-                    break;
-                case 8:
-                    if (colFault != 8) goto case 9;
-                    break;
-                case 9:
-                    RandomFaultRule = 9;
-                    if (BombInfo.GetSerialNumber().Last() % 2 == 0) FaultButton = 1;
-                    else goto default;
-                    break;
-                default:
-                    RandomFaultRule = 10;
-                    FaultButton = 0;
-                    break;
-            }
-            ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
-            ButtonB.OnInteract += delegate () { HandlePressButton(ButtonB); return false; };
-            broke:
-            if (FaultButton == 0)
-            {
-                faultyTextMesh = ButtonATextMesh;
-                faultyMesh = ButtonAMesh;
-                correctTextMesh = ButtonBTextMesh;
-                correctMesh = ButtonBMesh;
-                DebugLog("Fake Button is on the Left");
-            }
-            else
-            {
-                faultyTextMesh = ButtonBTextMesh;
-                faultyMesh = ButtonBMesh;
-                correctTextMesh = ButtonATextMesh;
-                correctMesh = ButtonAMesh;
-                DebugLog("Fake Button is on the Right");
-            }
-            if (colFault == 4 || colFault == 8) faultyTextMesh.color = Color.white;
-            faultyMesh.material.color = color[colFault];
-            DebugLog("Fake Button was determined by rule {0}", RandomFaultRule + 1);
-            DebugLog("Backing is {0}, Button is {1}, Fake Button is {2}", colorList[ColBacking], colorList[ColButton], colorList[colFault]);
+            DebugLog("Backing is {0}, Button is {1}", colorList[colBacking], colorList[colButton]);
         }
         
-        BackingMesh.material.color = color[ColBacking];
-        correctMesh.material.color = color[ColButton];
+        BackingMesh.material.color = color[colBacking];
+        correctMesh.material.color = color[colButton];
 
-        if (ColButton == 4 || ColButton == 8) correctTextMesh.color = Color.white;
+        Faulty.ReadableText(colButton, correctTextMesh);
 
         //Grab our X value for the table (the first instance of "true")
         RuleA = check.IndexOf(true);
@@ -263,14 +153,14 @@ public class Backgrounds : MonoBehaviour
         //Otherwise, there's still another true value in check
         else RuleB = check.IndexOf(true);
 
-        //list1 contains X values for the first letter,
-        //and list 2 contains Y values for the second letter
-        GoalPresses = BGmanualTable[list1[RuleA], list2[RuleB]];
+        //coordX contains X values for the first letter,
+        //and coordY contains Y values for the second letter
+        GoalPresses = BGManualTable[coordX[RuleA], coordY[RuleB]];
 
         //ToString("X") translates the number into a hexidecimal.
         //As it so happens, the columns use letters A-F, which fits perfectly into hexidecimal values.
-        DebugLog("Row in table is {0} due to rule {1}", (list1[RuleA] + 10).ToString("X"), RuleA + 1);
-        DebugLog("Column in table is {0} due to rule {1}", (list2[RuleB] + 10).ToString("X"), RuleB + 1);
+        DebugLog("Row in table is {0} due to rule {1}", (coordX[RuleA] + 10).ToString("X"), RuleA + 1);
+        DebugLog("Column in table is {0} due to rule {1}", (coordY[RuleB] + 10).ToString("X"), RuleB + 1);
         DebugLog("Number needed is {0}", GoalPresses);
         BombModule.OnActivate += delegate { activated = true; };
     }
@@ -298,7 +188,7 @@ public class Backgrounds : MonoBehaviour
         return false;
     }
 
-    void HandlePressButton(KMSelectable Button)
+    internal void HandlePressButton(KMSelectable Button)
     {
         if (!activated) return;
         KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonPress, transform);
@@ -312,46 +202,23 @@ public class Backgrounds : MonoBehaviour
             };
 
             CounterText.text = Presses.ToString();
+            //Handles rules where the digits on the screen occasionally disappear
             if (ModuleType.Equals(Type.Faulty))
             {
-                switch (RandomFaultRule)
+                var presses = new[] { Presses % 2 == 0, Presses % 2 == 1, Presses == 5 };
+                var hold = new[] { RandomFaultRule == 6, RandomFaultRule == 7, RandomFaultRule == 8 };
+                var index = Array.IndexOf(hold, true);
+                if (index == -1) return;
+                if (presses[index])
                 {
-                    case 6:
-                        if (Presses % 2 == 0)
-                        {
-                            CounterText.color = Color.black;
-                            break;
-                        }
-                        goto default;
-                    case 7:
-                        if (Presses % 2 == 1)
-                        {
-                            CounterText.color = Color.black;
-                            break;
-                        }
-                        goto default;
-                    case 8:
-                        if (Presses == 5)
-                        {
-                            CounterText.color = Color.black;
-                            break;
-                        }
-                        goto default;
-                    default:
-                        CounterText.color = Color.white;
-                        break;
+                    CounterText.color = Color.black;
                 }
+                else CounterText.color = Color.white;
             }
         }
-        return;
     }
 
-    protected bool HandleLightsToggle()
-    {
-        return false;
-    }
-
-    private void DebugLog(string log, params object[] args)
+    public void DebugLog(string log, params object[] args)
     {
         var logData = string.Format(log, args);
         if (ModuleType == Type.Normal) Debug.LogFormat("[Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);

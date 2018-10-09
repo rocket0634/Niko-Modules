@@ -16,8 +16,8 @@ MonoBehaviour:
   description: "Navigate through a Maze You can't see! Not that you couldn't see the
     walls before, so how hard could it be?\n\nModule ID: BlindMaze\r\n\r\nManual Page:
     https://ktane.timwi.de/HTML/Blind%20Maze.html\n\nCurrently supported \"Maze-Type\"
-    modules: Mazes, Hexamaze, 3D Maze, Mouse In The Maze, Morse-A-Maze, Polyhedral
-    Maze, USA Maze, and Maze Scrambler\n\nMod originally created by JoketteWuzHere,
+    modules: Boolean Maze, Mazes, Hexamaze, 3D Maze, Mouse In The Maze, Morse-A-Maze,
+    Polyhedral Maze, USA Maze, and Maze Scrambler\n\nMod originally created by JoketteWuzHere,
     now managed by Riverbui.\n\nSpecial Thanks to Sam, Cait, and Timwi for providing
     assistence with the coding.\n\nAny feedback is welcome- If you have any suggestions
     or fixes, there's a pretty good chance I'll accept pull requests. Source will

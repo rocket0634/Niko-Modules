@@ -231,6 +231,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4021019116283558}
+  - component: {fileID: 114152858082747394}
   - component: {fileID: 114410110360776226}
   - component: {fileID: 114715048997529392}
   - component: {fileID: 114990987783348764}
@@ -1283,6 +1284,7 @@ MonoBehaviour:
   BombInfo: {fileID: 114990987783348764}
   BombModule: {fileID: 114410110360776226}
   Audio: {fileID: 114568558767801396}
+  RuleSeed: {fileID: 114152858082747394}
   North: {fileID: 114903856909655866}
   East: {fileID: 114797931151752114}
   South: {fileID: 114001567017494000}
@@ -1305,6 +1307,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - GUI/KT 3D Text
+--- !u!114 &114152858082747394
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1716421472942828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adf69c2de51bd3c43bbd9bc22578ee08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _seed: 1
 --- !u!114 &114205849886076084
 MonoBehaviour:
   m_ObjectHideFlags: 1
