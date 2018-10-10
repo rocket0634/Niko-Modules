@@ -30,12 +30,11 @@ namespace BackgroundsRuleGenerator
             Possibilities = Generator.Swaps(Generator.Possibilities(this));
             //Rules that check if the submit button contains a digit
             var Submit = Module.Submit.GetComponentInChildren<UnityEngine.TextMesh>();
-            if ((Generator.RuleIndicies.Contains(1298) || Generator.RuleIndicies.Contains(1299)) && Counter == 1) Submit.text = Submit.text + " 0";
+            if ((Generator.RuleIndicies.Contains(2) || Generator.RuleIndicies.Contains(3)) && Counter == 1) Submit.text = Submit.text + " 0";
             foreach (int index in Generator.RuleIndicies)
             {
                 list.Add(Possibilities[index].Compile()());
             }
-            Module.DebugLog(string.Join(", ", Generator.RuleIndicies.Select(x => x.ToString()).ToArray()));
             return list.Concat(new[] { true }).ToList();
         }
     }
@@ -250,15 +249,10 @@ namespace BackgroundsRuleGenerator
             options1[1] = () => Rules.ColButton;
             options1[2] = () => Rules.Counter;
             var list = new List<Expression<Func<bool>>>();
-            var test = new List<string>();
             list.Add(() => options1[0]() == options1[1]());
-            test.Add("ColBacking == ColButton");
             list.Add(() => options1[0]() != options1[1]());
-            test.Add("ColBacking != ColButton");
             list.Add(() => options1[2]() != 0);
-            test.Add("Counter is odd");
             list.Add(() => options1[2]() == 0);
-            test.Add("Counter is even");
             for (int i = 0; i < options2.Count; i++)
             {
                 var option = options2[i].ToList();
@@ -267,29 +261,20 @@ namespace BackgroundsRuleGenerator
                     for (int j = 0; j < 2; j++)
                     {
                         list.Add(() => (options1[j]() == option[1] && options1[(j + 1) % 2]() == option[2]) || (options1[j]() == option[3] && options1[(j + 1) % 2]() == option[4]));
-                        test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] " + options1[j]());
                     }
                     //These enumerables are special, don't do any more checks 
                     continue;
                 }
                 list.Add(() => option.Contains(options1[1]()) || option.Contains(options1[0]()));
-                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains either ");
                 list.Add(() => option.Contains(options1[1]()) && !option.Contains(options1[0]()));
-                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains button but not backing");
                 list.Add(() => !option.Contains(options1[1]()) && option.Contains(options1[0]()));
-                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains backing but not button");
                 list.Add(() => (option.Contains(options1[1]()) && !option.Contains(options1[0]())) || (!option.Contains(options1[1]()) && option.Contains(options1[0]())));
-                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains either the backing or the button, but not both");
                 list.Add(() => option.Contains(options1[1]()) && option.Contains(options1[0]()));
-                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains both");
                 list.Add(() => !option.Contains(options1[1]()) && !option.Contains(options1[0]()));
-                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains neither");
                 for (int j = 0; j < 2; j++)
                 {
                     list.Add(() => option.Contains(options1[j]()));
-                    test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains " + options1[j]());
                     list.Add(() => !option.Contains(options1[j]()));
-                    test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] does not contain " + options1[j]());
                 }
             }
 
@@ -301,45 +286,25 @@ namespace BackgroundsRuleGenerator
             var onIndicators = Rules.BombInfo.GetOnIndicators();
             var offIndicators = Rules.BombInfo.GetOffIndicators();
             list.Add(() => ports.Count() < 1);
-            test.Add("More than one port");
             list.Add(() => plates.Where(x => x.Length < 1).Count() > 0);
-            test.Add("Empty port plate");
             list.Add(() => ports.Count() == 1);
-            test.Add("one port");
             list.Add(() => ports.Count() > 2);
-            test.Add("more than 2 ports");
             list.Add(() => plates.Count() > 1);
-            test.Add("more than one port plate");
             list.Add(() => batteries < 1);
-            test.Add("no batteries");
             list.Add(() => batteries % 2 == 1);
-            test.Add("odd batteries");
             list.Add(() => batteries % 2 == 0);
-            test.Add("even batteries");
             list.Add(() => holders < 1);
-            test.Add("no holders");
             list.Add(() => holders == 1);
-            test.Add("one holder");
             list.Add(() => holders > 1);
-            test.Add("more than one holder");
             list.Add(() => indicators.Count() < 1);
-            test.Add("no indicators");
             list.Add(() => indicators.Count() == 1);
-            test.Add("one indicator");
             list.Add(() => indicators.Count() > 1);
-            test.Add("more than one indicator");
             list.Add(() => onIndicators.Count() < 1);
-            test.Add("no lit indicators");
             list.Add(() => onIndicators.Count() == 1);
-            test.Add("one lit indicator");
             list.Add(() => onIndicators.Count() > 1);
-            test.Add("more than one indicator");
             list.Add(() => offIndicators.Count() < 1);
-            test.Add("no unlit indicators");
             list.Add(() => offIndicators.Count() == 1);
-            test.Add("one unlit indicator");
             list.Add(() => offIndicators.Count() > 1);
-            test.Add("more than one unlit indicator");
 
             foreach (Func<Enum> value in options3)
             {
@@ -351,46 +316,30 @@ namespace BackgroundsRuleGenerator
                     if (value().GetHashCode() != 0)
                     {
                         list.Add(() => batteries < 1);
-                        test.Add("no " + value().ToString() + " batteries");
                         list.Add(() => batteries == 1);
-                        test.Add("1 " + value().ToString() + " batteries");
                         list.Add(() => batteries > 1);
-                        test.Add("more than 1 " + value().ToString() + " batteries");
                     }
                     list.Add(() => holders < 1);
-                    test.Add("no " + value().ToString() + " battery holders");
                     list.Add(() => holders == 1);
-                    test.Add("1 " + value().ToString() + " battery holder");
                     list.Add(() => holders > 1);
-                    test.Add("more than one " + value().ToString() + " battery holder");
                 }
                 if (value() is Port)
                 {
                     var itemName = value().ToString();
                     list.Add(() => ports.Contains(itemName));
-                    test.Add("contains " + itemName);
                     list.Add(() => ports.Where(x => x == itemName).Count() > 1);
-                    test.Add("more than one " + itemName);
                     list.Add(() => ports.Where(x => x == itemName).Count() == 1);
-                    test.Add("one " + itemName);
                     list.Add(() => ports.Where(x => x == itemName).Count() < 1);
-                    test.Add("no " + itemName);
                 }
                 if (value() is Indicator)
                 {
                     var itemName = value().ToString();
                     list.Add(() => indicators.Contains(itemName));
-                    test.Add("contains " + itemName);
                     list.Add(() => !indicators.Contains(itemName));
-                    test.Add("no " + itemName);
                     list.Add(() => onIndicators.Contains(itemName));
-                    test.Add("contains lit " + itemName);
                     list.Add(() => !onIndicators.Contains(itemName));
-                    test.Add("contains no lit " + itemName);
                     list.Add(() => offIndicators.Contains(itemName));
-                    test.Add("contains unlit " + itemName);
                     list.Add(() => !offIndicators.Contains(itemName));
-                    test.Add("contains no unlit " + itemName);
                     foreach (IndicatorColor color in Enum.GetValues(typeof(IndicatorColor)))
                     {
                         if (color.GetHashCode() < 2) continue;
@@ -401,11 +350,9 @@ namespace BackgroundsRuleGenerator
                         if (!check2)
                         {
                             list.Add(() => coloredIndicator.Count() > 0);
-                            test.Add(color.ToString() + " indicator exists");
                         }
                         var coloredIndicators = Rules.BombInfo.GetColoredIndicators(colorName, itemName);
                         list.Add(() => coloredIndicators.Count() > 0);
-                        test.Add(color.ToString() + " " + itemName + " indicator exists");
                     }
                     check2 = true;
                 }
@@ -417,23 +364,6 @@ namespace BackgroundsRuleGenerator
                     RuleIndicies[i] = _rng.Next(0, possibleCount);
             }
             pass = true;
-            for (int i = 0; i < options1.Count; i++)
-            {
-                Rules.Module.DebugLog(i.ToString() + ": " + options1[i]());
-            }
-            foreach (IEnumerable<int> vs in options2)
-            {
-                Rules.Module.DebugLog((options2.IndexOf(vs) + options1.Count - 1) + ": [" + string.Join(", ", vs.Select(x => x.ToString()).ToArray()) + "]");
-            }
-            for (int i = 0; i < options3.Count; i++)
-            {
-                Rules.Module.DebugLog((i + options1.Count + options2.Count - 1) + ": " + options3[i]().ToString());
-            }
-            var hold = string.Join("\n", test.Select(x => test.IndexOf(x) + ": " + x).ToArray());
-            Rules.Module.DebugLog(hold.Substring(0, 15900));
-            Rules.Module.DebugLog(hold.Substring(15900, 15900));
-            Rules.Module.DebugLog(hold.Substring(31800, 15900));
-            Rules.Module.DebugLog(hold.Substring(47700));
             return list;
         }
     }
