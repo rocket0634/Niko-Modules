@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using RuleGenerator;
+using BackgroundsRuleGenerator;
 
 public class Backgrounds : MonoBehaviour
 {
@@ -33,8 +33,8 @@ public class Backgrounds : MonoBehaviour
     public static Color orange = new Color(1, 0.5f, 0), purple = new Color(0.5f, 0, 0.5f);
     protected internal int LetterA, LetterB, RuleA, RuleB,
         RandomFaultRule;
-    internal Color[] color = { Color.red, orange, Color.yellow, Color.green, Color.blue, purple, Color.white, Color.grey, Color.black };
-    internal string[] colorList = { "red", "orange", "yellow", "green", "blue", "purple", "white", "gray", "black" };
+    internal static Color[] color = { Color.red, orange, Color.yellow, Color.green, Color.blue, purple, Color.white, Color.grey, Color.black };
+    internal static string[] colorList = { "red", "orange", "yellow", "green", "blue", "purple", "white", "gray", "black" };
 
     internal int[] coordX, coordY;
     internal int[,] BGManualTable = new int[6,6];
@@ -42,7 +42,9 @@ public class Backgrounds : MonoBehaviour
     protected bool SOLVED;
     protected int GoalPresses;
     protected int Presses;
-    
+    internal int ColBacking, ColButton;
+    internal Rule Rules = new Rule();
+
     public string TwitchHelpMessage = "Use \'!{0} press 5\' to press the \"Push Me\" button 5 times, Use \'!{0} Submit\' to Submit the current answer. Note: Only takes numbers 1-9";
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
@@ -118,31 +120,33 @@ public class Backgrounds : MonoBehaviour
 
     protected void Start()
     {
-        BackgroundsRuleGenerator.Module = this;
+        var faulty = new Faulty();
+        Rules.Module = this;
+        faulty.Module = this;
         Backgrounds_moduleId = Backgrounds_moduleIdCounter++;
 
         Submit.OnInteract += HandlePressSubmit;
         
-        check = BackgroundsRuleGenerator.Rules(RuleSeed.GetRNG());
+        check = Rules.Rules();
         //The colors are now determined in the Rule Generator
         //This is due to the fact that all boolean values are determined at runtime
         //So these need to have values before the rules are randomized.
-        var colBacking = BackgroundsRuleGenerator.ColBacking;
-        var colButton = BackgroundsRuleGenerator.ColButton;
+        ColBacking = Rules.ColBacking;
+        ColButton = Rules.ColButton;
 
-        if (ModuleType == Type.Faulty) Faulty.Rules();
+        if (ModuleType == Type.Faulty) faulty.Rules();
         else
         {
             ButtonA.OnInteract += delegate () { HandlePressButton(ButtonA); return false; };
             correctMesh = ButtonAMesh;
             correctTextMesh = ButtonATextMesh;
-            DebugLog("Backing is {0}, Button is {1}", colorList[colBacking], colorList[colButton]);
+            DebugLog("Backing is {0}, Button is {1}", colorList[ColBacking], colorList[ColButton]);
         }
         
-        BackingMesh.material.color = color[colBacking];
-        correctMesh.material.color = color[colButton];
+        BackingMesh.material.color = color[ColBacking];
+        correctMesh.material.color = color[ColButton];
 
-        Faulty.ReadableText(colButton, correctTextMesh);
+        Faulty.ReadableText(ColButton, correctTextMesh);
 
         //Grab our X value for the table (the first instance of "true")
         RuleA = check.IndexOf(true);

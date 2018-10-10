@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 using System.Linq;
 using KModkit;
-using RuleGenerator;
+using BackgroundsRuleGenerator;
 
 public class Faulty
 {
     //Grab instance of Module for convenience
-    public static Backgrounds Module { get { return BackgroundsRuleGenerator.Module; } }
+    public Backgrounds Module;
     //The color of the faulty button
-    private static int colFault = Random.Range(0, 9);
+    private int colFault = Random.Range(0, 9);
     //Which button is faulty
-    private static int fault;
+    private int fault;
     //This is only in Backgrounds.cs due to the disappearing text rule.
-    private static int RandomFaultRule
+    private int RandomFaultRule
     {
         get
         {
@@ -25,7 +25,7 @@ public class Faulty
     }
     //This is used to change the text of the faulty button.
     //Although it's also used to determine which button is not faulty.
-    private static TextMesh[] FaultyTextMesh
+    private TextMesh[] FaultyTextMesh
     {
         get
         {
@@ -33,7 +33,7 @@ public class Faulty
         }
     }
     //This is used to change the color of the buttons
-    private static MeshRenderer[] FaultyMesh
+    private MeshRenderer[] FaultyMesh
     {
         get
         {
@@ -41,10 +41,10 @@ public class Faulty
         }
     }
     //The color of the button and backing, determined in BackgroundsRuleGenerator
-    private static int ColButton { get { return BackgroundsRuleGenerator.ColButton; } }
-    private static int ColBacking { get { return BackgroundsRuleGenerator.ColBacking; } }
+    private int ColButton { get { return Module.Rules.ColButton; } }
+    private int ColBacking { get { return Module.Rules.ColBacking; } }
 
-    internal static void Rules()
+    internal void Rules()
     {
         RandomFaultRule = Random.Range(0, 9);
         fault = Random.Range(0, 2);
@@ -94,10 +94,10 @@ public class Faulty
         Module.correctMesh = FaultyMesh[(fault + 1) % 2];
         Module.correctTextMesh = FaultyTextMesh[(fault + 1) % 2];
         Module.DebugLog("Fake Button is on the {0}", fault.Equals(0) ? "left" : "right");
-        FaultyMesh[fault].material.color = Module.color[colFault];
+        FaultyMesh[fault].material.color = Backgrounds.color[colFault];
 
         Module.DebugLog("Fake Button was determined by rule {0}", RandomFaultRule + 1);
-        Module.DebugLog("Backing is {0}, Button is {1}, Fake Button is {2}", Module.colorList[ColBacking], Module.colorList[ColButton], Module.colorList[colFault]);
+        Module.DebugLog("Backing is {0}, Button is {1}, Fake Button is {2}", Backgrounds.colorList[ColBacking], Backgrounds.colorList[ColButton], Backgrounds.colorList[colFault]);
         ReadableText(colFault, FaultyTextMesh[fault]);
     }
 
@@ -109,7 +109,7 @@ public class Faulty
         if (a.Equals(4) || a.Equals(8)) mesh.color = Color.white;
     }
 
-    public static bool CheckRules()
+    public bool CheckRules()
     {
         //Here's the problem with using boolean arrays/lists
         //They don't actually save what's being compared
@@ -129,14 +129,14 @@ public class Faulty
                true;
     }
 
-    public static bool IsText(string compare)
+    public bool IsText(string compare)
     {
         //Sets the text for rules that change the button's text
         FaultyTextMesh[fault].text = compare;
         return true;
     }
 
-    public static bool IsText(Color color)
+    public bool IsText(Color color)
     {
         //Change the color of the digit on the screen to be black
         //Only applicable when the module is loaded, the rest is handled in Backgrounds.cs
@@ -144,7 +144,7 @@ public class Faulty
         return true;
     }
 
-    public static bool IsText(bool compare)
+    public bool IsText(bool compare)
     {
         //If colFault isn't already 8, set it to 8 if RandomFaultRule is also 8
         //This should make FaultRule 9 more common

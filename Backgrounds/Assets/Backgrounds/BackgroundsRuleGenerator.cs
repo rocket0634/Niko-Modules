@@ -1,26 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Linq.Expressions;
 using KModkit;
 
-namespace RuleGenerator
+namespace BackgroundsRuleGenerator
 {
-    public static class BackgroundsRuleGenerator
+    public class Rule
     {
-        //Instance of Module
-        public static Backgrounds Module;
+        public Backgrounds Module;
+        public KMBombInfo BombInfo { get { return Module.BombInfo; } }
+        public int ColBacking, ColButton, Counter = 0;
+        internal static int[] coordX { get { return Generator.coordX; } }
+        internal static int[] coordY { get { return Generator.coordY; } }
+        internal static int[,] ManualTable;
+        internal static List<Expression<Func<bool>>> Possibilities;
+        internal MonoRandom rng;
+        public List<bool> Rules()
+        {
+            var list = new List<bool>();
+            rng = Module.RuleSeed.GetRNG();
+            ColBacking = UnityEngine.Random.Range(0, 8);
+            ColButton = UnityEngine.Random.Range(0, 9);
+            if (!Generator.pass) Generator.Rules(this);
+            if (rng.Seed != 1) Counter = UnityEngine.Random.Range(0, 2);
+            Module.coordX = coordX;
+            Module.coordY = coordY;
+            Module.BGManualTable = ManualTable;
+            Possibilities = Generator.Swaps(Generator.Possibilities(this));
+            //Rules that check if the submit button contains a digit
+            var Submit = Module.Submit.GetComponentInChildren<UnityEngine.TextMesh>();
+            if ((Generator.RuleIndicies.Contains(1298) || Generator.RuleIndicies.Contains(1299)) && Counter == 1) Submit.text = Submit.text + " 0";
+            foreach (int index in Generator.RuleIndicies)
+            {
+                list.Add(Possibilities[index].Compile()());
+            }
+            Module.DebugLog(string.Join(", ", Generator.RuleIndicies.Select(x => x.ToString()).ToArray()));
+            return list.Concat(new[] { true }).ToList();
+        }
+    }
+    internal static class Generator
+    {
+        internal static bool pass = false;
         //Instance of RuleSeed
         private static MonoRandom _rng;
         //The number of rules Backgrounds uses
         private const int count = 9;
-        internal static int ColBacking, ColButton, Counter, listCount;
-        //The original idea was to compare the last digit in submit to screen
-        //But since the module always starts with digit 0, this was deemed unnecessary
-        //They're only still here because of the hardcoded randomized values
-        internal static UnityEngine.TextMesh SubmitButton, Screen;
         //Rules to be chosen, primary colors to be chosen
-        private static int[] RuleIndicies = new int[count], additive,
+        public static int[] RuleIndicies = new int[count], additive,
             //Original manual values to be randomized
             //May look into doing the randomization from scratch in the future
             coordX = { 0, 3, 2, 3, 1, 5, 4, 1, 2, 4 },
@@ -34,21 +61,19 @@ namespace RuleGenerator
                 1, 2, 3, 6, 7, 8
             };
         private static bool check, check2;
-        private static List<string> test = new List<string>();
-        internal static KMBombInfo BombInfo
-        {
-            get
-            {
-                return Module.BombInfo;
-            }
-        }
+        private static int possibleCount;
 
-        private static List<object> options1 = new List<object>();
+        //Individual items that will be used for comparisons in Possibilities
+        internal static List<Func<int>> options1 = new List<Func<int>>();
+        internal static List<IEnumerable<int>> options2 = new List<IEnumerable<int>>();
+        internal static List<Func<Enum>> options3 = new List<Func<Enum>>();
+        internal static List<Expression<Func<bool>>> possibilities = new List<Expression<Func<bool>>>();
 
-        private static List<bool> Swaps(List<bool> list)
+        //Swap randomized values for seed 1 to output the original manual
+        internal static List<Expression<Func<bool>>> Swaps(List<Expression<Func<bool>>> list)
         {
             var values = new[] { 323, 1485, 393, 1413, 566, 1174, 940, 1306, 555 };
-            var newValues = new[] { 0, 370, 1320, 1326, 8, 1039, 1400, 1360, 20 };
+            var newValues = new[] { 0, 463, 1320, 1326, 8, 22, 1400, 1360, 28 };
             for (int i = 0; i < values.Count(); i++)
             {
                 var hold = list[values[i]];
@@ -58,118 +83,149 @@ namespace RuleGenerator
             return list;
         }
 
+        //"Backing/Button mixed with color makes Button/Backing's color" rules
         private static void DetermineColorCombinations()
         {
+            //Primary Colors are Red, Yellow, and Blue
             if (additive.Take(3).ToArray().SequenceEqual(new[] { 0, 2, 4 }))
             {
                 //red
-                options1.Add(new[] { -1, 2, 1, 4, 5 });
+                options2.Add(new[] { -1, 2, 1, 4, 5 });
                 //yellow
-                options1.Add(new[] { -1, 0, 1, 4, 3 });
+                options2.Add(new[] { -1, 0, 1, 4, 3 });
                 //blue
-                options1.Add(new[] { -1, 0, 5, 3, 4 });
+                options2.Add(new[] { -1, 0, 5, 3, 4 });
             }
+            //Primary Colors are Red, Green, and Blue
             else
             {
                 //red
-                options1.Add(new[] { -1, 3, 2, 4, 5 });
+                options2.Add(new[] { -1, 3, 2, 4, 5 });
                 //green
-                options1.Add(new[] { -1, 0, 2, 4, 1 });
+                options2.Add(new[] { -1, 0, 2, 4, 1 });
                 //blue
-                options1.Add(new[] { -1, 0, 5, 3, 1 });
+                options2.Add(new[] { -1, 0, 5, 3, 1 });
             }
         }
         
-        private static void AddToOptions()
+        //Add to list possible objects to be compared for the final rules
+        private static void AddToOptions(Rule Rules)
         {
-            options1.Add(ColBacking = UnityEngine.Random.Range(0, 8));
-            options1.Add(ColButton = UnityEngine.Random.Range(0, 9));
-            options1.Add(SubmitButton = Module.Submit.GetComponentInChildren<UnityEngine.TextMesh>());
-            options1.Add(Screen = Module.CounterText);
+            options1.Add(() => Rules.ColBacking);
+            options1.Add(() => Rules.ColButton);
+            options1.Add(() => Rules.Counter);
+            //Determine what the primary colors will be [Either outdated or additive]
+            //Secondaries were also going to be used as primaries, but I forgot to include it
             additive = Primaries().ToArray();
-            options1.Add(additive.Take(3).ToList());
-            options1.Add(additive.Skip(3).ToList());
+            //Primary Colors
+            options2.Add(additive.Take(3).ToList());
+            //Secondary Colors
+            options2.Add(additive.Skip(3).ToList());
+            //Color mixes
             DetermineColorCombinations();
+            //Battery types
             foreach (Battery battery in Enum.GetValues(typeof(Battery)))
             {
-                if (battery.GetHashCode() > 0) options1.Add(battery);
+                if (battery.GetHashCode() > 0) options3.Add(() => battery);
             }
+            //Port types
             foreach(Port port in Enum.GetValues(typeof(Port)))
             {
-                options1.Add(port);
+                options3.Add(() => port);
             }
+            //Indicator types
             var indicatorValues = Enum.GetValues(typeof(Indicator));
             foreach(Indicator indicator in indicatorValues)
             {
-                if (indicator.GetHashCode() < indicatorValues.Length - 1) options1.Add(indicator);
+                if (indicator.GetHashCode() < indicatorValues.Length - 1) options3.Add(() => indicator);
             }
 
+            //All possible color combinations of sequence lengths 1, 2, and 3
+            //Not including values already used in primary or secondary colors
             var listSize = 1;
             while (listSize < 4)
             {
+                //Red, Orange/Cyan, Yellow, Green, Blue, Purple/Magenta, White, Gray, Black
                 var orderedArray = new [] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
                 var intList = new List<List<int>>();
                 foreach (int i in orderedArray)
                 {
                     intList.Add(new List<int>());
+                    //First digit in the sequence
                     intList.Last().Add(i);
                     if (listSize > 1)
                     {
                         var list = orderedArray.Skip(i + 1);
                         foreach (int j in list)
                         {
+                            //Second digit in the sequence
                             intList.Last().Add(j);
                             if (listSize > 2)
                             {
                                 var list2 = orderedArray.Skip(j + 1);
                                 foreach (int k in list2)
                                 {
+                                    //Third digit in the sequence
                                     intList.Last().Add(k);
+                                    //Prepare for next iteration
                                     intList.Add(new List<int>());
+                                    //First digit in next sequence
                                     intList.Last().Add(i);
+                                    //Second digit in next sequence
                                     intList.Last().Add(j);
                                 }
+                                //foreach adds two extra values that are not needed
+                                //remove the sequence
                                 intList.Remove(intList.Last());
                             }
+                            //Prepare for next iteration
                             intList.Add(new List<int>());
+                            //First digit in next sequence
                             intList.Last().Add(i);
                         }
+                        //foreach adds an extra iteration that is not used
+                        //remove the sequence
                         intList.Remove(intList.Last());
                     }
                 }
                 foreach (List<int> item in intList)
                 {
-                    if (!options1.Any(x => (x as List<int>) != null && (x as List<int>).SequenceEqual(item))) options1.Add(item);
+                    if (!options2.Any(x => x.SequenceEqual(item))) options2.Add(item);
                 }
+                //The size of the sequence, max 3
                 listSize++;
             }
         }
 
-        public static List<bool> Rules(MonoRandom rng)
+        public static void Rules(Rule Rules)
         {
-            if (_rng != null && _rng.Seed == rng.Seed) return null;
-            _rng = rng;
-            var list = new List<bool> { true };
-            Counter = 0;
+            //This shouldn't be reached? I saw it in Morse-A-Maze's code
+            if (_rng != null && _rng.Seed == Rules.rng.Seed) return;
+            _rng = Rules.rng;
+            AddToOptions(Rules);
+            //The Counter should not be changed for the original seed.
             if (_rng.Seed != 1)
             {
-                Counter = UnityEngine.Random.Range(0, 2);
                 _rng.ShuffleFisherYates(coordX);
                 _rng.ShuffleFisherYates(coordY);
                 _rng.ShuffleFisherYates(ManualTable);
             }
-            Module.coordX = coordX;
-            Module.coordY = coordY;
+            //ManualTable is a double array, which ShuffleFisherYates does not work on
+            //As such, the ManualTable must be recreated using for statements
+            Rule.ManualTable = new int[6, 6];
             for (int i = 0; i < 6; i++)
             {
                 for (int j = 0; j < 6; j++)
                 {
-                    Module.BGManualTable[i, j] = ManualTable[6 * i + j];
+                    Rule.ManualTable[i, j] = ManualTable[6 * i + j];
                 }
             }
-            return Possibilities().Concat(list).ToList();
         }
 
+        //Determine which primary system is being used
+        //Outdated or Additive
+        //New system replaces orange with cyan and purple with magenta
+        //Primaries will return both primary and secondary colors.
         public static List<int> Primaries()
         {
             var i = _rng.Next(0, 2);
@@ -179,276 +235,206 @@ namespace RuleGenerator
             var list4 = new List<int> { 1, 2, 5 };
             if (i == 1)
             {
-                Module.color[1] = UnityEngine.Color.cyan;
-                Module.colorList[1] = "cyan";
-                Module.color[5] = UnityEngine.Color.magenta;
-                Module.colorList[5] = "magenta";
+                Backgrounds.color[1] = UnityEngine.Color.cyan;
+                Backgrounds.colorList[1] = "cyan";
+                Backgrounds.color[5] = UnityEngine.Color.magenta;
+                Backgrounds.colorList[5] = "magenta";
                 return list2.Concat(list4).ToList();
             }
             return list1.Concat(list3).ToList();
         }
 
-        public static List<bool> DetermineIntMatches(int item, int index)
+        public static List<Expression<Func<bool>>> Possibilities(Rule Rules)
         {
-            var list = new List<bool>();
+            options1[0] = () => Rules.ColBacking;
+            options1[1] = () => Rules.ColButton;
+            options1[2] = () => Rules.Counter;
+            var list = new List<Expression<Func<bool>>>();
+            var test = new List<string>();
+            list.Add(() => options1[0]() == options1[1]());
+            test.Add("ColBacking == ColButton");
+            list.Add(() => options1[0]() != options1[1]());
+            test.Add("ColBacking != ColButton");
+            list.Add(() => options1[2]() != 0);
+            test.Add("Counter is odd");
+            list.Add(() => options1[2]() == 0);
+            test.Add("Counter is even");
+            for (int i = 0; i < options2.Count; i++)
+            {
+                var option = options2[i].ToList();
+                if (option.First() == -1)
+                {
+                    for (int j = 0; j < 2; j++)
+                    {
+                        list.Add(() => (options1[j]() == option[1] && options1[(j + 1) % 2]() == option[2]) || (options1[j]() == option[3] && options1[(j + 1) % 2]() == option[4]));
+                        test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] " + options1[j]());
+                    }
+                    //These enumerables are special, don't do any more checks 
+                    continue;
+                }
+                list.Add(() => option.Contains(options1[1]()) || option.Contains(options1[0]()));
+                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains either ");
+                list.Add(() => option.Contains(options1[1]()) && !option.Contains(options1[0]()));
+                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains button but not backing");
+                list.Add(() => !option.Contains(options1[1]()) && option.Contains(options1[0]()));
+                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains backing but not button");
+                list.Add(() => (option.Contains(options1[1]()) && !option.Contains(options1[0]())) || (!option.Contains(options1[1]()) && option.Contains(options1[0]())));
+                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains either the backing or the button, but not both");
+                list.Add(() => option.Contains(options1[1]()) && option.Contains(options1[0]()));
+                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains both");
+                list.Add(() => !option.Contains(options1[1]()) && !option.Contains(options1[0]()));
+                test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains neither");
+                for (int j = 0; j < 2; j++)
+                {
+                    list.Add(() => option.Contains(options1[j]()));
+                    test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains " + options1[j]());
+                    list.Add(() => !option.Contains(options1[j]()));
+                    test.Add("[" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] does not contain " + options1[j]());
+                }
+            }
+
+            var ports = Rules.BombInfo.GetPorts();
+            var batteries = Rules.BombInfo.GetBatteryCount();
+            var holders = Rules.BombInfo.GetBatteryHolderCount();
+            var plates = Rules.BombInfo.GetPortPlates();
+            var indicators = Rules.BombInfo.GetIndicators();
+            var onIndicators = Rules.BombInfo.GetOnIndicators();
+            var offIndicators = Rules.BombInfo.GetOffIndicators();
+            list.Add(() => ports.Count() < 1);
+            test.Add("More than one port");
+            list.Add(() => plates.Where(x => x.Length < 1).Count() > 0);
+            test.Add("Empty port plate");
+            list.Add(() => ports.Count() == 1);
+            test.Add("one port");
+            list.Add(() => ports.Count() > 2);
+            test.Add("more than 2 ports");
+            list.Add(() => plates.Count() > 1);
+            test.Add("more than one port plate");
+            list.Add(() => batteries < 1);
+            test.Add("no batteries");
+            list.Add(() => batteries % 2 == 1);
+            test.Add("odd batteries");
+            list.Add(() => batteries % 2 == 0);
+            test.Add("even batteries");
+            list.Add(() => holders < 1);
+            test.Add("no holders");
+            list.Add(() => holders == 1);
+            test.Add("one holder");
+            list.Add(() => holders > 1);
+            test.Add("more than one holder");
+            list.Add(() => indicators.Count() < 1);
+            test.Add("no indicators");
+            list.Add(() => indicators.Count() == 1);
+            test.Add("one indicator");
+            list.Add(() => indicators.Count() > 1);
+            test.Add("more than one indicator");
+            list.Add(() => onIndicators.Count() < 1);
+            test.Add("no lit indicators");
+            list.Add(() => onIndicators.Count() == 1);
+            test.Add("one lit indicator");
+            list.Add(() => onIndicators.Count() > 1);
+            test.Add("more than one indicator");
+            list.Add(() => offIndicators.Count() < 1);
+            test.Add("no unlit indicators");
+            list.Add(() => offIndicators.Count() == 1);
+            test.Add("one unlit indicator");
+            list.Add(() => offIndicators.Count() > 1);
+            test.Add("more than one unlit indicator");
+
+            foreach (Func<Enum> value in options3)
+            {
+                if (value() is Battery)
+                {
+                    batteries = Rules.BombInfo.GetBatteryCount((Battery)value());
+                    holders = Rules.BombInfo.GetBatteryHolderCount((Battery)value());
+                    //Always true atm
+                    if (value().GetHashCode() != 0)
+                    {
+                        list.Add(() => batteries < 1);
+                        test.Add("no " + value().ToString() + " batteries");
+                        list.Add(() => batteries == 1);
+                        test.Add("1 " + value().ToString() + " batteries");
+                        list.Add(() => batteries > 1);
+                        test.Add("more than 1 " + value().ToString() + " batteries");
+                    }
+                    list.Add(() => holders < 1);
+                    test.Add("no " + value().ToString() + " battery holders");
+                    list.Add(() => holders == 1);
+                    test.Add("1 " + value().ToString() + " battery holder");
+                    list.Add(() => holders > 1);
+                    test.Add("more than one " + value().ToString() + " battery holder");
+                }
+                if (value() is Port)
+                {
+                    var itemName = value().ToString();
+                    list.Add(() => ports.Contains(itemName));
+                    test.Add("contains " + itemName);
+                    list.Add(() => ports.Where(x => x == itemName).Count() > 1);
+                    test.Add("more than one " + itemName);
+                    list.Add(() => ports.Where(x => x == itemName).Count() == 1);
+                    test.Add("one " + itemName);
+                    list.Add(() => ports.Where(x => x == itemName).Count() < 1);
+                    test.Add("no " + itemName);
+                }
+                if (value() is Indicator)
+                {
+                    var itemName = value().ToString();
+                    list.Add(() => indicators.Contains(itemName));
+                    test.Add("contains " + itemName);
+                    list.Add(() => !indicators.Contains(itemName));
+                    test.Add("no " + itemName);
+                    list.Add(() => onIndicators.Contains(itemName));
+                    test.Add("contains lit " + itemName);
+                    list.Add(() => !onIndicators.Contains(itemName));
+                    test.Add("contains no lit " + itemName);
+                    list.Add(() => offIndicators.Contains(itemName));
+                    test.Add("contains unlit " + itemName);
+                    list.Add(() => !offIndicators.Contains(itemName));
+                    test.Add("contains no unlit " + itemName);
+                    foreach (IndicatorColor color in Enum.GetValues(typeof(IndicatorColor)))
+                    {
+                        if (color.GetHashCode() < 2) continue;
+                        var coloredIndicator = Rules.BombInfo.GetColoredIndicators(color);
+                        var colorName = Enum.GetName(typeof(IndicatorColor), color);
+                        //The colors only need to be checked once
+                        //It's here because I only wanted to iterate the colors in one place
+                        if (!check2)
+                        {
+                            list.Add(() => coloredIndicator.Count() > 0);
+                            test.Add(color.ToString() + " indicator exists");
+                        }
+                        var coloredIndicators = Rules.BombInfo.GetColoredIndicators(colorName, itemName);
+                        list.Add(() => coloredIndicators.Count() > 0);
+                        test.Add(color.ToString() + " " + itemName + " indicator exists");
+                    }
+                    check2 = true;
+                }
+            }
+            possibleCount = list.Count;
+            if (!pass)
+            {
+                for (int i = 0; i < count; i++)
+                    RuleIndicies[i] = _rng.Next(0, possibleCount);
+            }
+            pass = true;
             for (int i = 0; i < options1.Count; i++)
             {
-                if (index == i) continue;
-                if (options1[i] is int && index == 0)
-                {
-                    list.Add(item == (int)options1[i]);
-                    test.Add(listCount + ": " + item + " equals " + (int)options1[i]);
-                    list.Add(item != (int)options1[i]);
-                    listCount++;
-                    test.Add(listCount + ": " + item + " does not equal " + (int)options1[i]);
-                    listCount++;
-                }
-                if (options1[i] is IEnumerable<int>)
-                {
-                    var option = (options1[i] as IEnumerable<int>).ToList();
-                    if (option.First() == -1)
-                    {
-                        var item2 = index == 0 ? (int)options1[0] : (int)options1[1];
-                        list.Add((item == option[1] && item2 == option[2]) || (item == option[3] && item2 == option[4]));
-                        test.Add(string.Format("{6}: {0} equals {1} or {2} while {3} equals {4} or {5}", item, option[1], option[3], item2, option[2], option[4], listCount));
-                        listCount++;
-                        continue;
-                    }
-                    list.Add(option.Contains(item));
-                    test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains " + item);
-                    listCount++;
-                    list.Add(!option.Contains(item));
-                    test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] does not contain " + item);
-                    listCount++;
-                    if (index == 0)
-                    {
-                        list.Add(option.Contains((int)options1[1]) || option.Contains(item));
-                        test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains either " + (int)options1[1] + " or " + item);
-                        listCount++;
-                        list.Add(option.Contains((int)options1[1]) && !option.Contains(item));
-                        test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains " + (int)options1[1] + " but not " + item);
-                        listCount++;
-                        list.Add(!option.Contains((int)options1[1]) && option.Contains(item));
-                        test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains " + item + " but not " + (int)options1[1]);
-                        listCount++;
-                        list.Add((option.Contains((int)options1[1]) && !option.Contains(item)) || (!option.Contains((int)options1[1]) && option.Contains(item)));
-                        test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains either " + (int)options1[1] + " and not " + item + " or vice versa");
-                        listCount++;
-                        list.Add(option.Contains((int)options1[1]) && option.Contains(item));
-                        test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains both " + (int)options1[1] + " and " + item);
-                        listCount++;
-                        list.Add(!option.Contains((int)options1[1]) && !option.Contains(item));
-                        test.Add(listCount + "-" + i + ": [" + string.Join(", ", option.Select(x => x.ToString()).ToArray()) + "] contains neither " + (int)options1[1] + " nor " + item);
-                        listCount++;
-                    }
-                }
+                Rules.Module.DebugLog(i.ToString() + ": " + options1[i]());
             }
+            foreach (IEnumerable<int> vs in options2)
+            {
+                Rules.Module.DebugLog((options2.IndexOf(vs) + options1.Count - 1) + ": [" + string.Join(", ", vs.Select(x => x.ToString()).ToArray()) + "]");
+            }
+            for (int i = 0; i < options3.Count; i++)
+            {
+                Rules.Module.DebugLog((i + options1.Count + options2.Count - 1) + ": " + options3[i]().ToString());
+            }
+            var hold = string.Join("\n", test.Select(x => test.IndexOf(x) + ": " + x).ToArray());
+            Rules.Module.DebugLog(hold.Substring(0, 15900));
+            Rules.Module.DebugLog(hold.Substring(15900, 15900));
+            Rules.Module.DebugLog(hold.Substring(31800, 15900));
+            Rules.Module.DebugLog(hold.Substring(47700));
             return list;
-        }
-
-        public static List<bool> DetermineWidgets(object item, IEnumerable<string> ports, IEnumerable<string> indicators, IEnumerable<string> onIndicators, IEnumerable<string> offIndicators)
-        {
-            var list = new List<bool>();
-            if (!check)
-            {
-                var batteries = BombInfo.GetBatteryCount();
-                var holders = BombInfo.GetBatteryHolderCount();
-                var plates = BombInfo.GetPortPlates();
-                list.Add(ports.Count() < 1);
-                test.Add(listCount + ": There's more than one port");
-                listCount++;
-                list.Add(plates.Where(x => x.Length < 1).Count() > 0);
-                test.Add(listCount + ": There's an empty port plate");
-                listCount++;
-                list.Add(ports.Count() == 1);
-                test.Add(listCount + ": There is exactly one port");
-                listCount++;
-                list.Add(ports.Count() > 2);
-                test.Add(listCount + ": There is more than one port");
-                listCount++;
-                list.Add(plates.Count() > 1);
-                test.Add(listCount + ": There are more than two port plates");
-                listCount++;
-                list.Add(batteries < 1);
-                test.Add(listCount + ": There are no batteries");
-                listCount++;
-                list.Add(batteries % 2 == 1);
-                test.Add(listCount + ": There is more than one battery");
-                listCount++;
-                list.Add(batteries % 2 == 0);
-                test.Add(listCount + ": There are more than two batteries");
-                listCount++;
-                list.Add(holders < 1);
-                test.Add(listCount + ": There are no battery holders (or batteries)");
-                listCount++;
-                list.Add(holders == 1);
-                test.Add(listCount + ": There is one battery holder");
-                listCount++;
-                list.Add(holders > 1);
-                test.Add(listCount + ": There is more than one battery holder");
-                listCount++;
-                list.Add(indicators.Count() < 1);
-                test.Add(listCount + ": There are no indicators");
-                listCount++;
-                list.Add(indicators.Count() == 1);
-                test.Add(listCount + ": There is exactly one indicator");
-                listCount++;
-                list.Add(indicators.Count() > 1);
-                test.Add(listCount + ": There is more than one indicator");
-                listCount++;
-                list.Add(onIndicators.Count() < 1);
-                test.Add(listCount + ": There are no lit indicators");
-                listCount++;
-                list.Add(onIndicators.Count() == 1);
-                test.Add(listCount + ": There is exactly one lit indicator");
-                listCount++;
-                list.Add(onIndicators.Count() > 1);
-                test.Add(listCount + ": There is more than one lit indicator");
-                listCount++;
-                list.Add(offIndicators.Count() < 1);
-                test.Add(listCount + ": There are no unlit indicators");
-                listCount++;
-                list.Add(offIndicators.Count() == 1);
-                test.Add(listCount + ": There is exactly one unlit indicator");
-                listCount++;
-                list.Add(offIndicators.Count() > 1);
-                test.Add(listCount + ": There is more than one unlit indicator");
-                listCount++;
-                check = true;
-            }
-            if (item is Port)
-            {
-                var itemName = ((Port)item).ToString();
-                list.Add(ports.Contains(itemName));
-                test.Add(listCount + ": The bomb contains a " + itemName + " port");
-                listCount++;
-                list.Add(ports.Where(x => x == itemName).Count() > 1);
-                test.Add(listCount + ": There are more than 1 " + itemName + " port");
-                listCount++;
-                list.Add(ports.Where(x => x == itemName).Count() == 1);
-                test.Add(listCount + ": There is exactly 1 " + itemName + " port");
-                listCount++;
-                list.Add(ports.Where(x => x == itemName).Count() < 1);
-                test.Add(listCount + ": There are no " + itemName + " ports on the bomb");
-                listCount++;
-            }
-            if (item is Battery)
-            {
-                var batteries = BombInfo.GetBatteryCount((Battery)item);
-                var holders = BombInfo.GetBatteryHolderCount((Battery)item);
-                var batteryName = Enum.GetName(typeof(Battery), item);
-                //Always true atm
-                if (item.GetHashCode() != 0)
-                {
-                    list.Add(batteries < 1);
-                    test.Add(listCount + ": There are no " + batteryName + " batteries on the bomb");
-                    listCount++;
-                    list.Add(batteries == 1);
-                    test.Add(listCount + ": There is exactly 1 " + batteryName + " battery on the bomb");
-                    listCount++;
-                    list.Add(batteries > 1);
-                    test.Add(listCount + ": There is more than 1 " + batteryName + " battery on the bomb");
-                    listCount++;
-                }
-                list.Add(holders < 1);
-                test.Add(listCount + ": There are no battery holders of type " + batteryName + " on the bomb");
-                listCount++;
-                list.Add(holders == 1);
-                test.Add(listCount + ": There is exactly one battery holder of type " + batteryName + " on the bomb");
-                listCount++;
-                list.Add(holders > 1);
-                test.Add(listCount + ": There is more than one battery holder of type " + batteryName + " on the bomb");
-                listCount++;
-            }
-            if (item is Indicator)
-            {
-                var itemName = ((Indicator)item).ToString();
-                list.Add(indicators.Contains(itemName));
-                test.Add(listCount + ": There is an " + itemName + " indicator present");
-                listCount++;
-                list.Add(!indicators.Contains(itemName));
-                test.Add(listCount + ": There is not an " + itemName + " indicator present");
-                listCount++;
-                list.Add(onIndicators.Contains(itemName));
-                test.Add(listCount + ": There is a lit " + itemName + " present");
-                listCount++;
-                list.Add(!onIndicators.Contains(itemName));
-                test.Add(listCount + ": There is not a lit " + itemName + " present");
-                listCount++;
-                list.Add(offIndicators.Contains(itemName));
-                test.Add(listCount + ": There is an unlit " + itemName + " present");
-                listCount++;
-                list.Add(!offIndicators.Contains(itemName));
-                test.Add(listCount + ": There is not an unlit " + itemName + " present");
-                listCount++;
-                foreach (IndicatorColor color in Enum.GetValues(typeof(IndicatorColor)))
-                {
-                    if (color.GetHashCode() < 2) continue;
-                    var coloredIndicator = BombInfo.GetColoredIndicators(color);
-                    var colorName = Enum.GetName(typeof(IndicatorColor), color);
-                    if (!check2)
-                    {
-                        list.Add(coloredIndicator.Count() > 0);
-                        test.Add(listCount + ": There is an indicator of color " + colorName + " present");
-                        listCount++;
-                    }
-                    var coloredIndicators = BombInfo.GetColoredIndicators(colorName, itemName);
-                    list.Add(coloredIndicators.Count() > 0);
-                    test.Add(listCount + ": There is a " + colorName + " " + itemName + " indicator present");
-                    listCount++;
-                }
-                check2 = true;
-            }
-            return list;
-        }
-
-        public static List<bool> Possibilities()
-        {
-            var list = new List<bool>();
-            AddToOptions();
-            var ports = BombInfo.GetPorts();
-            var indicators = BombInfo.GetIndicators();
-            var onIndicators = BombInfo.GetOnIndicators();
-            var offIndicators = BombInfo.GetOffIndicators();
-
-            for (int i = 0; i < options1.Count; i++)
-            {
-                object item = options1[i];
-                var type = new[] { item is int, item is UnityEngine.TextMesh,
-                item is Port || item is Indicator || item is Battery};
-                switch (Array.IndexOf(type, true))
-                {
-                    case 0:
-                        list = list.Concat(DetermineIntMatches((int)item, i)).ToList();
-                        break;
-                    case 1:
-                        list.Add(Counter != i % 2);
-                        test.Add("Counter is " + Counter);
-                        listCount++;
-                        break;
-                    case 2:
-                        list = list.Concat(DetermineWidgets(item, ports, indicators, onIndicators, offIndicators)).ToList();
-                        break;
-                }
-            }
-            int y = 0;
-            Module.DebugLog(string.Join("\n", list.Take(1494).Select(x => y++.ToString() + ": " + x.ToString()).ToArray()));
-            Module.DebugLog(string.Join("\n", list.Skip(1494).Select(x => y++.ToString() + ": " + x.ToString()).ToArray()));
-            Module.DebugLog(string.Join("\n", test.Take(390).ToArray()));
-            Module.DebugLog(string.Join("\n", test.Skip(390).Take(350).ToArray()));
-            Module.DebugLog(string.Join("\n", test.Skip(740).Take(350).ToArray()));
-            Module.DebugLog(string.Join("\n", test.Skip(1090).Take(400).ToArray()));
-            Module.DebugLog(string.Join("\n", test.Skip(1490).ToArray()));
-            var newList = new List<bool>();
-            list = Swaps(list);
-            for (int i = 0; i < count; i++)
-            {
-                RuleIndicies[i] = _rng.Next(0, list.Count);
-                newList.Add(list[RuleIndicies[i]]);
-            }
-            if ((RuleIndicies.Contains(1298) || RuleIndicies.Contains(1299)) && Counter == 1) SubmitButton.text = SubmitButton.text + " 0";
-            Module.DebugLog(string.Join(", ", RuleIndicies.Select(x => x.ToString()).ToArray()));
-            return newList;
         }
     }
 }
