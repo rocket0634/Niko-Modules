@@ -22,7 +22,9 @@
         }
     </style>
     <script>
-        var options = [];
+        var options1 = [];
+        var options2 = [];
+        var options3 = [];
         var possibilities = [];
         var chosen = [];
         var batteries =
@@ -63,9 +65,9 @@
         {
             if (rnd.seed != 1)
             {
-                rnd.ShuffleFisherYates(coordX);
-                rnd.ShuffleFisherYates(coordY);
-                rnd.ShuffleFisherYates(ManualTable);
+                rnd.shuffleFisherYates(coordX);
+                rnd.shuffleFisherYates(coordY);
+                rnd.shuffleFisherYates(ManualTable);
                 //Slight manual change that makes more sense for just ruleseed.
                 document.getElementById('background-foot-2').innerHTML.replace("Mixing Blue and White will <b>not</b> make Blue.", "Mixing any color with White will <b>not</b> make the original color");
             }
@@ -102,12 +104,16 @@
                 else hold = "Otherwise, " + chosen[j];
                 document.getElementById('background-rule-' + j).innerHTML = hold;
             }
+            console.log(options1);
+            console.log(options2);
+            console.log(options3);
+            console.log(possibilities);
             console.log(chosen);
         }
         function Swap()
         {
             var values = [323, 1485, 393, 1413, 566, 1174, 940, 1306, 555 ];
-            var newValues = [0, 370, 1320, 1326, 8, 1039, 1400, 1360, 20];
+            var newValues = [0, 463, 1320, 1326, 8, 22, 1400, 1360, 28];
             for (var i = 0; i < values.length; i++)
             {
                 var hold = possibilities[values[i]];
@@ -121,17 +127,17 @@
         }
         function AddToOptions(i)
         {
-            options.push("backing");
-            options.push("button");
-            options.push("submit button");
-            options.push("screen");
+            options1.push("backing");
+            options1.push("button");
+            options1.push("submit button");
+            options1.push("screen");
             DetermineColors(i);
             for (var j = 0; j < batteries.length; j++)
-                options.push(batteries[j]);
+                options3.push(batteries[j]);
             for (var j = 0; j < ports.length; j++)
-                options.push(ports[j]);
+                options3.push(ports[j]);
             for (var j = 0; j < indicators.length; j++)
-                options.push(indicators[j]);
+                options3.push(indicators[j]);
             var listSize = 1;
             while (listSize < 4)
             {
@@ -181,13 +187,13 @@
                     //Check if options already has the sequences created
                     var check = [false, false, false];
                     var check2 = [false, false, false];
-                    for (var k = 0; k < options[4].length; k++)
+                    for (var k = 0; k < options2[0].length; k++)
                     {
-                        check[k] = options[4][k] == intList[j][k];
-                        check2[k] = options[5][k] == intList[j][k];
+                        check[k] = options2[0][k] == intList[j][k];
+                        check2[k] = options2[1][k] == intList[j][k];
                     }
                     if (check.every(x => x == true) || check2.every(x => x == true)) continue;
-                    options.push(intList[j]);
+                    options2.push(intList[j]);
                 }
                 listSize++;
             }
@@ -196,136 +202,114 @@
         function DetermineColors(i) {
             if (i == 0)
             {
-                options.push(["red", " yellow", " or blue"]);
-                options.push(["orange", " green", " or purple"]);
-                options.push(" mixed with red ");
-                options.push(" mixed with yellow ");
+                options2.push(["red", " yellow", " or blue"]);
+                options2.push(["orange", " green", " or purple"]);
+                options2.push(" mixed with red ");
+                options2.push(" mixed with yellow ");
             }
             else
             {
-                options.push(["red", " green", " or blue"]);
-                options.push(["cyan", " yellow", " or magenta"]);
-                options.push(" mixed with red ");
-                options.push(" mixed with green ");
+                options2.push(["red", " green", " or blue"]);
+                options2.push(["cyan", " yellow", " or magenta"]);
+                options2.push(" mixed with red ");
+                options2.push(" mixed with green ");
                 document.getElementById('background-foot-0').innerHTML.replace("Yellow", "Green");
                 document.getElementById('background-foot-1').innerHTML.replace("Orange, Green, and Purple", "Cyan, Yellow, and Magenta");
                 document.getElementById('background-foot-2').innerHTML = "Mixing Red and Green will make Yellow, Blue and Green will make Cyan, and Red and Blue will make Magenta. Mixing any color with White will < b > not</b > make the original color."
             }
-            options.push(" mixed with blue ");
+            options2.push(" mixed with blue ");
         }
-        function Possibilities()
-        {
+        function Possibilities() {
             var check = false;
-            for (var i = 0; i < options.length; i++)
-            {
-                if (i < 2)
-                {
-                    for (var j = 0; j < options.length; j++)
-                    {
-                        if (options[j].length == 2)
-                            options[j] = ("" + options[j]).replace(",", "");
-                        if (j == i) continue;
-                        if (i < 1 && j < 2) {
-                            possibilities.push("the color of the " + options[i] + " matches the color of the " + options[j]);
-                            possibilities.push("the color of the " + options[i] + " does not match the color of the " + options[j]);
-                        }
-                        if (j < 4) continue;
-                        if (j < 6)
-                        {
-                            var word = j == 4 ? "primary color*" : "secondary color**";
-                            possibilities.push("the color of the " + options[i] + " is a " + word);
-                            possibilities.push("the color of the " + options[i] + " is not a " + word);
-                            if (i == 0)
-                            {
-                                possibilities.push("the button or the backing are a " + word);
-                                possibilities.push("only the button is a " + word);
-                                possibilities.push("only the backing is a " + word);
-                                possibilities.push("the button <b>OR</b> the backing is a " + word);
-                                word = j == 4 ? "primary colors*" : "secondary colors**";
-                                possibilities.push("the button <b>AND</b> the backing are " + word);
-                                possibilities.push("neither the button nor the backing are " + word);
-                            }
-                            continue;
-                        }
-                        if (j < 9)
-                        {
-                            possibilities.push("the " + options[i] + "'s color" + options[j] + "creates the " + (i == 0 ? "button's" : "backing's") + " color***");
-                            continue;
-                        }
-                        if (j < 37)
-                            continue;
-                        var word = j < 46 ? "is " : "is either ";
-                        possibilities.push("the color of the " + options[i] + " " + word + options[j]);
-                        possibilities.push("the color of the " + options[i] + " " + word.replace("is", "is not") + options[j]);
-                        if (i == 0)
-                        {
-                            var word2 = "are ";
-                            possibilities.push("the button or the backing " + word2 + options[j]);
-                            possibilities.push("only the button " + word + options[j]);
-                            possibilities.push("only the backing " + word + options[j]);
-                            possibilities.push("the button <b>OR</b> the backing " + word2 + options[j]);
-                            possibilities.push("the button <b>AND</b> the backing " + word + options[j]);
-                            possibilities.push("neither the button nor the backing " + word + options[j]);
-                        }
+
+            possibilities.push("the color of the " + options1[0] + " matches the color of the " + options1[1]);
+            possibilities.push("the color of the " + options1[0] + " does not match the color of the " + options1[1]);
+            possibilities.push("the submit button contains a digit");
+            possibilities.push("the submit button does not contain a digit");
+            for (var i = 0; i < options2.length; i++) {
+                if (options2[i].length == 2)
+                    options2[i] = ("" + options2[i]).replace(",", "");
+                if (i < 2) {
+                    var word = i == 0 ? "primary color*" : "secondary color**";
+                    possibilities.push("the button or the backing are a " + word);
+                    possibilities.push("only the button is a " + word);
+                    possibilities.push("only the backing is a " + word);
+                    possibilities.push("the button <b>OR</b> the backing is a " + word);
+                    var word2 = i == 0 ? "primary colors*" : "secondary colors**";
+                    possibilities.push("the button <b>AND</b> the backing are " + word2);
+                    possibilities.push("neither the button nor the backing are " + word2);
+                    for (var j = 0; j < 2; j++) {
+                        possibilities.push("the color of the " + options1[j] + " is a " + word);
+                        possibilities.push("the color of the " + options1[j] + " is not a " + word);
                     }
                 }
-                if (i < 9) continue;
-                if (i == 9)
-                {
-                    possibilities.push("the submit button contains a digit");
-                    possibilities.push("the submit button does not contain a digit");
-                    possibilities.push("there are no ports present on the bomb");
-                    possibilities.push("there is an empty port plate present on the bomb");
-                    possibilities.push("there is one port present on the bomb");
-                    possibilities.push("there are more than two ports present on the bomb");
-                    possibilities.push("there is more than one port plate present on the bomb");
-                    possibilities.push("there are no batteries present on the bomb");
-                    possibilities.push("there are an odd amount of batteries present on the bomb");
-                    possibilities.push("there are an even amount of batteries present on the bomb");
-                    possibilities.push("there are no battery holders present on the bomb");
-                    possibilities.push("there is one battery holder present on the bomb");
-                    possibilities.push("there is more than one battery holder present on the bomb");
-                    possibilities.push("there are no indicators present on the bomb");
-                    possibilities.push("there is one indicator present on the bomb");
-                    possibilities.push("there is more than one indicator present on the bomb");
-                    possibilities.push("there are no lit indicators present on the bomb");
-                    possibilities.push("there is one lit indicator present on the bomb");
-                    possibilities.push("there is more than one lit indicator present on the bomb");
-                    possibilities.push("there are no unlit indicators present on the bomb");
-                    possibilities.push("there is one unlit indicator present on the bomb");
-                    possibilities.push("there is more than one unlit indicator present on the bomb");
+                else if (i < 5) {
+                    for (var j = 0; j < 2; j++)
+                        possibilities.push("the " + options1[j] + "'s color" + options2[i] + "creates the " + (j == 0 ? "button's" : "backing's") + " color***");
                 }
-                if (i < 13)
-                {
-                    possibilities.push("there are no " + options[i] + " batteries present on the bomb");
-                    possibilities.push("there is one " + options[i] + " battery present on the bomb");
-                    possibilities.push("there is more than one " + options[i] + " battery present on the bomb");
-                    possibilities.push("there are no battery holders of type " + options[i] + " present on the bomb");
-                    possibilities.push("there is one battery holder of type " + options[i] + " present on the bomb");
-                    possibilities.push("there is more than one battery holder of type " + options[i] + " present on the bomb");
+                else {
+                    var word = i < 16 ? "is " : "is either ";
+                    var word2 = "are ";
+                    possibilities.push("the button or the backing " + word2 + options2[i]);
+                    possibilities.push("only the button " + word + options2[i]);
+                    possibilities.push("only the backing " + word + options2[i]);
+                    possibilities.push("the button <b>OR</b> the backing " + word2 + options2[i]);
+                    possibilities.push("the button <b>AND</b> the backing " + word + options2[i]);
+                    possibilities.push("neither the button nor the backing " + word + options2[i]);
+                    for (var j = 0; j < 2; j++) {
+                        possibilities.push("the color of the " + options1[j] + " " + word + options2[i]);
+                        possibilities.push("the color of the " + options1[j] + " " + word.replace("is", "is not") + options2[i]);
+                    }
+                }
+            }
+            possibilities.push("there are no ports present on the bomb");
+            possibilities.push("there is an empty port plate present on the bomb");
+            possibilities.push("there is one port present on the bomb");
+            possibilities.push("there are more than two ports present on the bomb");
+            possibilities.push("there is more than one port plate present on the bomb");
+            possibilities.push("there are no batteries present on the bomb");
+            possibilities.push("there are an odd amount of batteries present on the bomb");
+            possibilities.push("there are an even amount of batteries present on the bomb");
+            possibilities.push("there are no battery holders present on the bomb");
+            possibilities.push("there is one battery holder present on the bomb");
+            possibilities.push("there is more than one battery holder present on the bomb");
+            possibilities.push("there are no indicators present on the bomb");
+            possibilities.push("there is one indicator present on the bomb");
+            possibilities.push("there is more than one indicator present on the bomb");
+            possibilities.push("there are no lit indicators present on the bomb");
+            possibilities.push("there is one lit indicator present on the bomb");
+            possibilities.push("there is more than one lit indicator present on the bomb");
+            possibilities.push("there are no unlit indicators present on the bomb");
+            possibilities.push("there is one unlit indicator present on the bomb");
+            possibilities.push("there is more than one unlit indicator present on the bomb");
+            for (var i = 0; i < options3.length; i++) {
+                if (i < 4) {
+                    possibilities.push("there are no " + options3[i] + " batteries present on the bomb");
+                    possibilities.push("there is one " + options3[i] + " battery present on the bomb");
+                    possibilities.push("there is more than one " + options3[i] + " battery present on the bomb");
+                    possibilities.push("there are no battery holders of type " + options3[i] + " present on the bomb");
+                    possibilities.push("there is one battery holder of type " + options3[i] + " present on the bomb");
+                    possibilities.push("there is more than one battery holder of type " + options3[i] + " present on the bomb");
                     continue;
                 }
-                if (i < 26)
-                {
-                    possibilities.push("the bomb contains a " + options[i] + " port");
-                    possibilities.push("the bomb contains more than one " + options[i] + " port");
-                    possibilities.push("the bomb contains exactly one " + options[i] + " port");
-                    possibilities.push("the bomb does not contain a " + options[i] + " port");
+                else if (i < 17) {
+                    possibilities.push("the bomb contains a " + options3[i] + " port");
+                    possibilities.push("the bomb contains more than one " + options3[i] + " port");
+                    possibilities.push("the bomb contains exactly one " + options3[i] + " port");
+                    possibilities.push("the bomb does not contain a " + options3[i] + " port");
                     continue;
                 }
-                if (i < 37)
-                {
-                    possibilities.push("there is a " + options[i] + " indicator present on the bomb");
-                    possibilities.push("there is not a " + options[i] + " indicator present on the bomb");
-                    possibilities.push("there is a lit " + options[i] + " indicator present on the bomb");
-                    possibilities.push("there is not a lit " + options[i] + " indicator present on the bomb");
-                    possibilities.push("there is an unlit " + options[i] + " indicator present on the bomb");
-                    possibilities.push("there is not an unlit " + options[i] + " indicator present on the bomb");
-                    for (var j = 0; j < indicatorColors.length; j++)
-                    {
+                else {
+                    possibilities.push("there is a " + options3[i] + " indicator present on the bomb");
+                    possibilities.push("there is not a " + options3[i] + " indicator present on the bomb");
+                    possibilities.push("there is a lit " + options3[i] + " indicator present on the bomb");
+                    possibilities.push("there is not a lit " + options3[i] + " indicator present on the bomb");
+                    possibilities.push("there is an unlit " + options3[i] + " indicator present on the bomb");
+                    possibilities.push("there is not an unlit " + options3[i] + " indicator present on the bomb");
+                    for (var j = 0; j < indicatorColors.length; j++) {
                         if (!check)
                             possibilities.push("there is a " + indicatorColors[j] + " indicator present");
-                        possibilities.push("there is a " + indicatorColors[j] + " " + options[i] + " indicator present");
+                        possibilities.push("there is a " + indicatorColors[j] + " " + options3[i] + " indicator present");
                     }
                     check = true;
                 }
