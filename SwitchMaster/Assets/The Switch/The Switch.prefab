@@ -751,7 +751,7 @@ MonoBehaviour:
   Parent: {fileID: 0}
   Children:
   - {fileID: 114368012262432062}
-  IsPassThrough: 1
+  IsPassThrough: 0
   ChildRowLength: 0
   Highlight: {fileID: 114702582751223642}
   SelectableColliders: []
