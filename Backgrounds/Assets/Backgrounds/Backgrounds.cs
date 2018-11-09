@@ -228,4 +228,11 @@ public class Backgrounds : MonoBehaviour
         if (ModuleType == Type.Normal) Debug.LogFormat("[Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);
         else Debug.LogFormat("[Faulty Backgrounds #{0}] {1}", Backgrounds_moduleId, logData);
     }
+
+    public void DebugLog(int e, string log, params object[] args)
+    {
+        var logData = string.Format(log, args);
+        if (ModuleType == Type.Normal) Debug.LogFormat("<Backgrounds #{0}> {1}", Backgrounds_moduleId, logData);
+        else Debug.LogFormat("<Faulty Backgrounds #{0}> {1}", Backgrounds_moduleId, logData);
+    }
 }
