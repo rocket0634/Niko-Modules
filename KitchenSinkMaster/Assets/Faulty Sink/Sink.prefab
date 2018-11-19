@@ -1116,13 +1116,13 @@ MonoBehaviour:
   Parent: {fileID: 0}
   Children:
   - {fileID: 114946427731734710}
-  - {fileID: 114238378155682722}
-  - {fileID: 114197291312268232}
-  - {fileID: 114468715893642006}
-  - {fileID: 114468715893642006}
-  - {fileID: 114468715893642006}
   - {fileID: 0}
-  - {fileID: 114599907760796506}
+  - {fileID: 114197291312268232}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   IsPassThrough: 0
   ChildRowLength: 3
@@ -1154,14 +1154,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1758913223124706}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6d1e4194c347ee4f9a91b7d29cdc507, type: 3}
+  m_Script: {fileID: 11500000, guid: 572e429e71c4eb6459560b326ad486e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BombInfo: {fileID: 114449345875360990}
-  BombModule: {fileID: 114205924845117974}
-  KMAudio: {fileID: 114459180913947216}
+  Info: {fileID: 114449345875360990}
+  Module: {fileID: 114205924845117974}
+  Audio: {fileID: 114459180913947216}
   Cold: {fileID: 114946427731734710}
   Hot: {fileID: 114197291312268232}
+  Faucet: {fileID: 114238378155682722}
+  Pipe: {fileID: 114599907760796506}
+  Basin: {fileID: 114468715893642006}
   ColdMesh: {fileID: 23427463965698870}
   HotMesh: {fileID: 23126591847625174}
   FaucetMesh: {fileID: 23155431621735268}
@@ -1172,7 +1175,9 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 817676c5cf9da1947927c5c661c7a6e4, type: 3}
   - {fileID: 2800000, guid: 4700e2fda51eafd418b416fa8171bf79, type: 3}
   - {fileID: 2800000, guid: 15fe469a69f51a24f93e3eeb857e326e, type: 3}
-  moduleType: 0
+  ModuleType: 0
+  forceSpin: 0
+  seconds: 0.001
 --- !u!114 &114449345875360990
 MonoBehaviour:
   m_ObjectHideFlags: 1

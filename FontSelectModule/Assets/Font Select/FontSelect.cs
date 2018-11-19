@@ -226,7 +226,7 @@ public class FontSelect : MonoBehaviour
     private void DebugLog(string log, params object[] args)
     {
         var logData = string.Format(log, args);
-        Debug.LogFormat("[Font Select #{0}]: {1}", FontSelect_moduleId, logData);
+        Debug.LogFormat("[Font Select #{0}] {1}", FontSelect_moduleId, logData);
     }
 }
 class FontSettings

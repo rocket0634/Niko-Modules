@@ -250,9 +250,9 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-        DebugLog(string.Join(", ", BombInfo.GetModuleNames().ToArray()));
-		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze" };
+		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze" };
 		int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
+        DebugLog("There are {0} compatible maze-type modules on the bomb, including Blind Maze.", MazeBased);
 
 		// Determine rotation
 		int MazeRule;

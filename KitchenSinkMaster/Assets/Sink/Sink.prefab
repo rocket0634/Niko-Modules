@@ -1115,14 +1115,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1389932886835184}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6d1e4194c347ee4f9a91b7d29cdc507, type: 3}
+  m_Script: {fileID: 11500000, guid: 572e429e71c4eb6459560b326ad486e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BombInfo: {fileID: 114680897225280980}
-  BombModule: {fileID: 114196587237324814}
-  KMAudio: {fileID: 114113694287418162}
+  Info: {fileID: 114680897225280980}
+  Module: {fileID: 114196587237324814}
+  Audio: {fileID: 114113694287418162}
   Cold: {fileID: 114472001647392948}
   Hot: {fileID: 114208640007988304}
+  Faucet: {fileID: 0}
+  Pipe: {fileID: 0}
+  Basin: {fileID: 0}
   ColdMesh: {fileID: 23458471262977674}
   HotMesh: {fileID: 23204482860539284}
   FaucetMesh: {fileID: 23142616581859884}
@@ -1133,7 +1136,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 817676c5cf9da1947927c5c661c7a6e4, type: 3}
   - {fileID: 2800000, guid: 4700e2fda51eafd418b416fa8171bf79, type: 3}
   - {fileID: 2800000, guid: 15fe469a69f51a24f93e3eeb857e326e, type: 3}
-  moduleType: 0
+  ModuleType: 0
 --- !u!114 &114812802092715926
 MonoBehaviour:
   m_ObjectHideFlags: 1
