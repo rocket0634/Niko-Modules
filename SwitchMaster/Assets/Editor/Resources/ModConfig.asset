@@ -13,8 +13,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: TheSwitch
   title: The Switch
-  description: "It's like the button, but its not, because it's a switch, not a button.\n\nModule
-    ID: BigSwitch\n\r\nManual Page: https://docs.google.com/document/d/1ApZAFLjkMInICnN1OjQ3hZ_xayE_9UgkLaz1vBQJJHk/edit?usp=sharing"
+  description: "[This is a reupload of The Switch module, by McNiko67.]\n\nIt's like
+    the button, but its not, because it's a switch, not a button.\n\nModule ID: BigSwitch\n\r\nManual
+    Page: https://ktane.timwi.de/HTML/The%20Switch.html"
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: a061bcca9fbbce44fbba93c7dede42c3, type: 3}

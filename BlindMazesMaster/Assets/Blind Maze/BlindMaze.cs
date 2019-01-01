@@ -217,7 +217,7 @@ public class BlindMaze : MonoBehaviour
 
 	void Start()
 	{
-        rng = RuleSeed.GetRNG();
+        //rng = RuleSeed.GetRNG();
 
 		moduleId = moduleIdCounter++;
 
@@ -250,7 +250,7 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze" };
+		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze", "Factory Maze" };
 		int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
         DebugLog("There are {0} compatible maze-type modules on the bomb, including Blind Maze.", MazeBased);
 
@@ -387,7 +387,6 @@ public class BlindMaze : MonoBehaviour
                     UpdatePosition();
                     ButtonRotation(CurX, CurY);
                     DebugLog("Resetted, now at ({0}, {1})", RotX, RotY);
-                    DebugLog(rng.Next(0, 6).ToString());
                 }
                 else if (CurrentP.Contains(buttonInfo.invalidDirection))
                 {
