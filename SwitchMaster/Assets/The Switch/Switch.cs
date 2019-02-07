@@ -217,14 +217,7 @@ public class Switch : MonoBehaviour
         }
         else
         {
-            if (FlipperUp)
-            {
-                DebugLog("Switch is up. Top LED is {0}, bottom LED is {1},", TopName, 0);
-            }
-            else
-            {
-                DebugLog("Switch is down. Top LED is {0}, bottom LED is {1},", TopName, 0);
-            }
+            DebugLog("Switch is {0}. Top LED is {1}, bottom LED is {2}", FlipperUp ? "up" : "down", TopName, BottomName);
             DebugLog("Rule is {0}, number needed is {1}", RuleNumber.ToString(), NeededNumber.ToString());
         }
         StartCoroutine(MoveSwitch());
