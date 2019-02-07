@@ -19,7 +19,7 @@ public class Switch : MonoBehaviour
     public MeshRenderer BottomLED;
 
     protected bool SOLVED = false;
-    protected bool FlipperUp = false;
+    protected bool FlipperDown = false;
     protected bool FirstSuccess = false;
     protected bool InitMove = true;
     protected bool FlipperMoving = false;
@@ -64,7 +64,7 @@ public class Switch : MonoBehaviour
         }
         while (moves <= 1.1f)
         {
-            if (FlipperUp)
+            if (FlipperDown)
             {
                 newZ = Mathf.Lerp(0.035f, -0.035f, moves);
             }
@@ -90,7 +90,7 @@ public class Switch : MonoBehaviour
         Color Orange = new Color(1f, 0.5f, 0f);
         Color Purple = new Color(0.75f, 0f, 0.75f);
         int RuleNumber;
-        if (FlipperUp)
+        if (FlipperDown)
         {
             if (TopColor == 1 || BottomColor == 5)
             {
@@ -217,7 +217,7 @@ public class Switch : MonoBehaviour
         }
         else
         {
-            DebugLog("Switch is {0}. Top LED is {1}, bottom LED is {2}", FlipperUp ? "up" : "down", TopName, BottomName);
+            DebugLog("Switch is {0}. Top LED is {1}, bottom LED is {2}", FlipperDown ? "down" : "up", TopName, BottomName);
             DebugLog("Rule is {0}, number needed is {1}", RuleNumber.ToString(), NeededNumber.ToString());
         }
         StartCoroutine(MoveSwitch());
@@ -228,7 +228,7 @@ public class Switch : MonoBehaviour
         int FlipInt = UnityEngine.Random.Range(0, 2);
         if (FlipInt == 1)
         {
-            FlipperUp = (!FlipperUp);
+            FlipperDown = !FlipperDown;
         }
         Switch_moduleId = Switch_moduleIdCounter++;
         FlipperSelectable.OnInteract += HandlePress;
@@ -239,9 +239,9 @@ public class Switch : MonoBehaviour
     {
         if (!SOLVED && !FlipperMoving)
         {
-            KMAudio.HandlePlayGameSoundAtTransform(KMSoundOverride.SoundEffect.Switch, transform);
+            KMAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.Switch, transform);
             FlipperSelectable.AddInteractionPunch(0.5f);
-            FlipperUp = !FlipperUp;
+            FlipperDown = !FlipperDown;
             if (TimerSeconds1 == NeededNumber || TimerSeconds2 == NeededNumber)
             {
                 if (FirstSuccess)
