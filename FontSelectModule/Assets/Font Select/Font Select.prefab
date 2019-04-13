@@ -1086,7 +1086,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ModuleType: FontSelect
   ModuleDisplayName: Font Select
-  RequiresTimerVisibility: 1
+  RequiresTimerVisibility: 0
 --- !u!114 &114403580079697072
 MonoBehaviour:
   m_ObjectHideFlags: 1

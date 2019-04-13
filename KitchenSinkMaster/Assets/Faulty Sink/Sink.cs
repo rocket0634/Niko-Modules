@@ -31,7 +31,7 @@ public class Sink : MonoBehaviour
     public float seconds;
 
     private readonly string[] textureList = { "Copper", "Stainless Steel", "Gold-Plated" },
-        colorList = { "Copper", "Iron", "PVC" };
+        colorList = { "Copper", "Stainless Steel", "PVC" };
     /* canPress - used for Twitch Plays and most button interactions with Vanilla Sink and Vanilla Sink functions within Faulty Sink
      * SOLVED - used for Vanilla button pressing. Buttons can no longer be pressed after the module is solved. Also used to let TP know not to spit out errors in chat
      * o - only used in ChooseTexture, so that it isn't accessed when using the main Vanilla functions
