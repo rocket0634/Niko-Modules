@@ -174,7 +174,7 @@ public class Sink : MonoBehaviour
     {
         ModConfig<SinkSettings> modConfig = new ModConfig<SinkSettings>("SinkSettings");
         Settings = modConfig.Settings;
-        if (Settings.fault == "1")
+        if (Settings.fault == "17")
         {
             ModuleType = UnityEngine.Random.Range(0, 2).Equals(0) ? Type.Normal : Type.Faulty;
         }
@@ -648,6 +648,25 @@ public class Sink : MonoBehaviour
             else knob2Turn[2] = false;
         }
     }
+
+    static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
+    {
+        new Dictionary<string,object> {
+            { "Filename", "SinkSettings.json" },
+            { "Name", "Sink" },
+            { "Listings", new List<Dictionary<string, object>>
+            {
+                new Dictionary<string, object>
+                {
+                    { "Key", "fault" },
+                    { "Text", "Secret Value" },
+                    { "Type", "Dropdown" },
+                    { "DropdownItems", new List<object> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"} },
+                    { "Description", "Only change this value if you know what you're doing, or are curious." }
+                }
+            } }
+        }
+    };
 
     public void UpdateChildren()
     {
