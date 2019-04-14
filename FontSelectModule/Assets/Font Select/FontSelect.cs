@@ -70,8 +70,9 @@ public class FontSelect : MonoBehaviour
     {
         ModConfig modConfig = new ModConfig("FontSettings", typeof(FontSettings));
         Settings = (FontSettings)modConfig.Settings;
+        modConfig.Settings = Settings;
         FontSelect_moduleId = FontSelect_moduleIdCounter++;
-        banned = Settings.disableKarmaMerriweather == "1";
+        banned = Settings.disableKarmaMerriweather;
         int[] ListNumbers = { 1, 4, 4, 2, 3, 3, 1, 2, 3, 1, 3, 4, 4, 1, 2, 2 };
         string[] ListPhrases = { "Eight Ate 8", "Jokes on you!\nI'm the male.", "Jokes on you!\nI'm male.", "Testing,\ntesting,\n1 to 3.", "Yew R. Wonn", "Jokes on you!\nI'm the mail.", "Ewe Arr Won", "888", "U.R. 1", "You are one", "Ate, Ate, Ate", "8 ate eight", "Testing,\ntesting,\n123", "Testing,\ntesting,\n1-3", "Jokes on you!\nI'm female.", "Testing,\ntesting,\n1 two 3." };
 
@@ -223,6 +224,22 @@ public class FontSelect : MonoBehaviour
         }
     }
 
+    static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
+    {
+        new Dictionary<string, object>
+        {
+            { "Filename", "FontSettings.json" },
+            { "Name", "Font Select" },
+            { "Listing", new List<Dictionary<string,object>> {
+                new Dictionary<string, object>
+                {
+                    { "Key", "disableKarmaMerriweather" },
+                    { "Text", "Disable Karma and Merriweather" },
+                }
+            } }
+        }
+    };
+
     private void DebugLog(string log, params object[] args)
     {
         var logData = string.Format(log, args);
@@ -231,7 +248,7 @@ public class FontSelect : MonoBehaviour
 }
 class FontSettings
 {
-    public string disableKarmaMerriweather = "0";
+    public bool disableKarmaMerriweather = false;
 }
 
 class ModConfig
