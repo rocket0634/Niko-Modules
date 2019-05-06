@@ -1137,6 +1137,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 4700e2fda51eafd418b416fa8171bf79, type: 3}
   - {fileID: 2800000, guid: 15fe469a69f51a24f93e3eeb857e326e, type: 3}
   ModuleType: 0
+  forceSpin: 0
+  seconds: 0
+  TwitchHelpMessage: Interact with the module by using !{0} Hot or !{0} Cold. You
+    may chain commands by using !{0} cch or !{0} cold cold hot.
 --- !u!114 &114812802092715926
 MonoBehaviour:
   m_ObjectHideFlags: 1

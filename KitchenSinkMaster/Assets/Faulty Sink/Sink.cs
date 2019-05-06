@@ -14,7 +14,6 @@ public class Sink : MonoBehaviour
         Normal,
         Faulty
     }
-    private SinkSettings Settings = new SinkSettings();
     private static int sink_moduleIDCounter = 1, fSink_moduleIDCounter = 1;
     private int moduleID;
 
@@ -41,11 +40,12 @@ public class Sink : MonoBehaviour
      */
     protected bool canPress, SOLVED, o, rotate, rotating, wait, h, processingInput, isFaulty;
     //c - Determine which faulty spin function to use
-    private int curKnob, ColKnobs, ColFaucet, ColPipe, spin, c;
+    private int curKnob, ColKnobs, ColFaucet, ColPipe, c, faulty, spin;
     protected bool[] Rules, knob2Turn = new bool[3];
     private int[] selectedRules;
     //ChooseTexture variable
     private Texture hold;
+    private Material buttonMasher;
     //1 - Spinning or KnobTurn / 2 - KnobTurn or Timer / 3 - Updating spin [was previously in Update]
     private IEnumerator coroutine, coroutine2, coroutine3;
     //Handles rotation position of the Hot and Cold knobs. dT - used only for Timer
@@ -59,10 +59,7 @@ public class Sink : MonoBehaviour
     #endregion
 
     #region Twitch Plays
-    /*Sink and Faulty sink would need to be two separate mods to apply a help message to both
-    * At the moment, they are not, as Faulty Sink hasn't truly been announced.
-    * As such, the default help message is for Sink*/
-    private string TwitchHelpMessage = "Use \"!{0} Hot\" or \"!{0} H\" to turn the Hot knob, \"!{0} Cold\" or \"!{0} C\" to turn the Cold knob, \"!{0} Hot Cold Hot\" or \"!{0} H C H\" to turn the knobs in the sequence hot cold hot";
+    public string TwitchHelpMessage = "";
 
     private List<KMSelectable> DetermineCharMatch(string input)
     {
@@ -106,10 +103,17 @@ public class Sink : MonoBehaviour
         //When stuck in a while loop...
         if (processingInput && !SOLVED)
         {
-            yield return "sendtochat Still processing previous input, command dropped";
+            yield return "sendtochaterror Still processing previous input, command dropped";
             yield break;
         }
         string Input = tpInput.ToLowerInvariant();
+
+        if (Input == "sinkcommands")
+        {
+            yield return "sendtochat Sink: Interact with the module by using !{1} Hot or !{1} Cold. You may chain commands by using !{1} cch or !{1} cold cold hot.";
+            yield break;
+        }
+
         List<KMSelectable> tapList = new List<KMSelectable>();
 
         tapList = DetermineCharMatch(Input) ?? tapList;
@@ -159,7 +163,7 @@ public class Sink : MonoBehaviour
             }
             if (isRotating != rotating && tapList.Count > 0)
             {
-                yield return "sendtochat Due to sudden change, not all inputs were processed.";
+                yield return "sendtochaterror Due to a sudden change, not all inputs were processed.";
                 processingInput = false;
                 yield break;
             }
@@ -172,12 +176,6 @@ public class Sink : MonoBehaviour
     #region Init
     protected void Start()
     {
-        ModConfig<SinkSettings> modConfig = new ModConfig<SinkSettings>("SinkSettings");
-        Settings = modConfig.Settings;
-        if (Settings.fault == "17")
-        {
-            ModuleType = UnityEngine.Random.Range(0, 2).Equals(0) ? Type.Normal : Type.Faulty;
-        }
         isFaulty = ModuleType == Type.Faulty;
         ColKnobs = UnityEngine.Random.Range(0, 3);
         ColFaucet = UnityEngine.Random.Range(0, 3);
@@ -200,9 +198,9 @@ public class Sink : MonoBehaviour
             StartCoroutine(coroutine3);
             spin = forceSpin + UnityEngine.Random.Range(0, 20);
             forceSpin = spin;
-            if (spin > 15)
+            if (spin > 10)
                 rotate = true;
-            var faulty = UnityEngine.Random.Range(0, 5);
+            faulty = UnityEngine.Random.Range(0, 5);
             switch (faulty)
             {
                 case 0:
@@ -214,12 +212,14 @@ public class Sink : MonoBehaviour
                     Hot.OnInteract = delegate () { FaultyPVC(0); return false; };
                     Cold.OnInteract = delegate () { FaultyPVC(2); return false; };
                     UpdateChildren();
+                    DebugLog("Module status is unknown. Please submit [Hot] [Basin] to automatically disable the module.");
                     goto start;
                 case 1:
                     ColPipe = 2;
                     PipeMesh.material.color = new Color(0, 157 / 255f, 1);
                     Rules[4] = false;
                     Rules = Rules.Select(x => !x).ToArray();
+                    DebugLog("Debug: PVC reported as blue.");
                     break;
                 case 2:
                     var r = UnityEngine.Random.Range(0, 2);
@@ -281,7 +281,9 @@ public class Sink : MonoBehaviour
         Apply(new[] { 0, 1, 2, 3 });
         Steps(false);
 
-        start: canPress = true;
+        start: Module.OnActivate += delegate {
+            canPress = true;
+        };
     }
 
     private void Apply(int[] nums)
@@ -329,7 +331,9 @@ public class Sink : MonoBehaviour
         foreach (Func<bool> func in reverse)
             func();
         //Necessary for ChooseTexture case
-        canPress = true;
+        Module.OnActivate += delegate {
+            canPress = true;
+        };
         UpdateChildren();
     }
 
@@ -493,12 +497,15 @@ public class Sink : MonoBehaviour
         StartCoroutine(coroutine);
         if (c == 1)
         {
+            DebugLog("Debug: Rotation error, reverse the inputs to disable.");
             curKnob = 0;
             Hot.OnInteract = delegate () { Required(true); return false; };
             Cold.OnInteract = delegate () { Required(false); return false; };
         }
         if (c == 2)
         {
+            if (!processingInput) DebugLog("Button not responding, please hold the button still to reorientate the button.");
+            else Debug.LogFormat("<Faulty Sink #{0}> Rotation Rule 2 applied, but ignored by Twitch Plays.", moduleID);
             wait = true;
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
@@ -508,9 +515,10 @@ public class Sink : MonoBehaviour
         }
         if (c == 3)
         {
+            DebugLog("Invalid button selected, please select a valid button.");
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
-            k[r].OnInteract = delegate () { Module.HandleStrike(); return false; };
+            k[r].OnInteract = delegate () { Module.HandleStrike(); processingInput = false; return false; };
             k[(r + 1) % 2].OnInteract = delegate () { Fix(k[r]); return false; };
         }
     }
@@ -533,16 +541,12 @@ public class Sink : MonoBehaviour
     {
         var apply = new Func<bool>[] { () => { if (knob2Turn[2] == r) curKnob++; return false; },
         () => { if (knob2Turn[1] == r) curKnob++; else curKnob--; return false; },
-        () => {
-            if (knob2Turn[0] == r)
-            {
-                Solve();
-            }
-            else
-                curKnob = 0;
-            return false;
-        } };
+        () => { if (knob2Turn[0] == r) Solve(); else curKnob = 0; return false; }
+        };
+        DebugLog("Debug: Pressing {0}", r ? "Hot" : "Cold");
         apply[curKnob]();
+        if (curKnob == 0)
+            DebugLog("Incorrect sequence, resetting.");
     }
 
     private Action WaitForSelect()
@@ -579,6 +583,8 @@ public class Sink : MonoBehaviour
         Cold.OnInteractEnded = null;
         curKnob++;
         c = 0;
+        if (!processingInput) DebugLog("Button reorientated.");
+        else Debug.LogFormat("<Faulty Sink #{0}> Button reorientated.", moduleID);
     }
 
     private void FaultyPVC(int num)
@@ -618,6 +624,7 @@ public class Sink : MonoBehaviour
         else if (!knob2Turn[0])
         {
             hold = ren[s].material.mainTexture;
+            buttonMasher = ren[s].material;
             processingInput = false;
             DebugLog("Texture [{0}] chosen.", s == 2 ? "FaucetMesh" : "PipeMesh");
             knob2Turn[0] = true;
@@ -639,6 +646,7 @@ public class Sink : MonoBehaviour
         {
             if (ColdMesh.material.mainTexture == HotMesh.material.mainTexture)
             {
+                ren[s].material = buttonMasher;
                 o = true;
                 Module.GetComponent<KMSelectable>().Children[1] = null;
                 Module.GetComponent<KMSelectable>().Children[7] = null;
@@ -648,25 +656,6 @@ public class Sink : MonoBehaviour
             else knob2Turn[2] = false;
         }
     }
-
-    static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
-    {
-        new Dictionary<string,object> {
-            { "Filename", "SinkSettings.json" },
-            { "Name", "Sink" },
-            { "Listings", new List<Dictionary<string, object>>
-            {
-                new Dictionary<string, object>
-                {
-                    { "Key", "fault" },
-                    { "Text", "Secret Value" },
-                    { "Type", "Dropdown" },
-                    { "DropdownItems", new List<object> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"} },
-                    { "Description", "Only change this value if you know what you're doing, or are curious." }
-                }
-            } }
-        }
-    };
 
     public void UpdateChildren()
     {
@@ -698,7 +687,7 @@ public class Sink : MonoBehaviour
         rotate = false;
         rotating = false;
         Module.HandlePass();
-        DebugLog("The module has been defused.");
+        DebugLog("The module has been disarmed.");
     }
 
     private void DebugLog(string log, params object[] args)
@@ -706,9 +695,4 @@ public class Sink : MonoBehaviour
         var logData = string.Format(log, args);
         Debug.LogFormat("[{0}Sink #{1}] {2}", isFaulty ? "Faulty " : "", moduleID, logData);
     }
-}
-
-class SinkSettings
-{
-    public string fault = "0";
 }
