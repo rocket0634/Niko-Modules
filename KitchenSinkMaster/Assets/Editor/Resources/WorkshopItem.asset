@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Name: WorkshopItem
   m_EditorClassIdentifier: 
   WorkshopPublishedFileID: 1406731234
-  Title: Sink
+  Title: Sink & Faulty Sink
   Tags:
   - Regular Module

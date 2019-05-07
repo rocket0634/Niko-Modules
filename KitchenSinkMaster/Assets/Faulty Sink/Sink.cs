@@ -110,7 +110,7 @@ public class Sink : MonoBehaviour
 
         if (Input == "sinkcommands")
         {
-            yield return "sendtochat Sink: Interact with the module by using !{1} Hot or !{1} Cold. You may chain commands by using !{1} cch or !{1} cold cold hot.";
+            yield return "sendtochat Sink: Interact with the module by using !{1} Hot or !{1} Cold. You may chain commands by using !{1} cch or !{1} cold cold hot. Manual: https://ktane.timwi.de/HTML/Sink.html";
             yield break;
         }
 
