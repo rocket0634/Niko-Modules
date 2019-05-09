@@ -29,7 +29,7 @@ public class Switch : MonoBehaviour
     protected int TimerSeconds2;
     protected int NeededNumber;
     
-    public string TwitchHelpMessage = "Use !{0} flip 5 to flip when the seconds digits of the timer contains 5";
+    private string TwitchHelpMessage = "Use !{0} flip 5 to flip when the seconds digits of the timer contains 5";
 
     System.Collections.IEnumerator ProcessTwitchCommand(string command)
     {
