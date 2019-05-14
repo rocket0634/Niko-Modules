@@ -62,6 +62,41 @@ namespace KModkit
         Yellow
     }
 
+    public enum DayColor
+    {
+        Yellow,
+        Brown,
+        Blue,
+        White,
+        Magenta,
+        Green,
+        Orange,
+        None
+    }
+
+    public enum Month
+    {
+        JAN,
+        FEB,
+        MAR,
+        APR,
+        MAY,
+        JUNE,
+        JULY,
+        AUG,
+        SEPT,
+        OCT,
+        NOV,
+        DEC
+    }
+
+    public enum TimeFormat
+    {
+        American,
+        International,
+        None
+    }
+
     /// <summary>
     /// Some helper extensions methods for the KMBombInfo class.
     /// </summary>
@@ -70,7 +105,9 @@ namespace KModkit
         #region JSON Types
 
         public static string WidgetQueryTwofactor = "twofactor";
-        public static string WidgetTwofactorKey = "twofactor_key";
+        public static string WidgetQueryManufacture = "manufacture";
+        public static string WidgetQueryDay = "day";
+        public static string WidgetQueryTime = "time";
 
         private class IndicatorJSON
         {
@@ -109,6 +146,29 @@ namespace KModkit
         private class SerialNumberJSON
         {
             public string serial = null;
+        }
+
+        private class ManufactureJSON
+        {
+            public string month;
+            public int year;
+        }
+
+        private class DayJSON
+        {
+            public string day;
+            public string daycolor;
+            public int date;
+            public int month;
+            public bool colorenabled;
+            public int monthColor;
+        }
+
+        private class TimeJSON
+        {
+            public string time;
+            public bool am;
+            public bool pm;
         }
 
         #endregion
@@ -152,6 +212,21 @@ namespace KModkit
         private static IEnumerable<TwoFactorJSON> GetTwoFactorEntries(KMBombInfo bombInfo)
         {
             return GetJSONEntries<TwoFactorJSON>(bombInfo, WidgetQueryTwofactor, null);
+        }
+
+        private static IEnumerable<ManufactureJSON> GetManufactureEntries(KMBombInfo bombInfo)
+        {
+            return GetJSONEntries<ManufactureJSON>(bombInfo, WidgetQueryManufacture, null);
+        }
+
+        private static IEnumerable<DayJSON> GetDayEntries(KMBombInfo bombInfo)
+        {
+            return GetJSONEntries<DayJSON>(bombInfo, WidgetQueryDay, null);
+        }
+
+        private static IEnumerable<TimeJSON> GetTimeEntries(KMBombInfo bombInfo)
+        {
+            return GetJSONEntries<TimeJSON>(bombInfo, WidgetQueryTime, null);
         }
 
         #endregion
@@ -418,6 +493,308 @@ namespace KModkit
         public static IEnumerable<int> GetTwoFactorCodes(this KMBombInfo bombInfo)
         {
             return GetTwoFactorEntries(bombInfo).Select((x) => x.twofactor_key);
+        }
+        #endregion
+
+        #region DayTime Widget Extensions
+        /// <summary>
+        /// Checks to see if a Date of Manufacture widget is present
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool IsManufacturePresent(this KMBombInfo bombInfo)
+        {
+            return bombInfo.IsDateOfManufacturePresent();
+        }
+
+        /// <summary>
+        /// Checks to see if a Date of Manufacture widget is present
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool IsDateOfManufacturePresent(this KMBombInfo bombInfo)
+        {
+            return GetManufactureEntries(bombInfo).Any();
+        }
+
+        /// <summary>
+        /// If a Date of Manufacture widget is present, returns the name of the labeled month as an enum
+        /// Otherwise, returns the current month as an enum
+        /// This is meant to represent a past or publishing date. Please use Day of Week's month if you wish to emulate the current day
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static Month GetManufactureMonth(this KMBombInfo bombInfo)
+        {
+            if (!IsDateOfManufacturePresent(bombInfo)) return (Month)DateTime.Now.Month;
+            return (Month)Enum.Parse(typeof(Month), GetManufactureEntries(bombInfo).First().month);
+        }
+
+        /// <summary>
+        /// If a Date of Manufacture widget is present, returns the labeled month as an integer
+        /// Otherwise, returns the current month as an integer
+        /// This is meant to represent a past of publishing date. Please use Day of Week's month if you wish to emulate the current day
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int GetManufactureMonthInt(this KMBombInfo bombInfo)
+        {
+            return (int)GetManufactureMonth(bombInfo);
+        }
+
+        /// <summary>
+        /// If a Date of Manufacture widget is present, returns the labeled year
+        /// Otherwise, returns the current year
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int GetManufactureYear (this KMBombInfo bombInfo)
+        {
+            if (!IsDateOfManufacturePresent(bombInfo)) return DateTime.Now.Year;
+            return GetManufactureEntries(bombInfo).First().year;
+        }
+
+        /// <summary>
+        /// Checks to see if a Day of the Week widget is present
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool IsDayOfWeekPresent(this KMBombInfo bombInfo)
+        {
+            return GetDayEntries(bombInfo).Any();
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns the name of the labeled day as a DayOfWeek enum
+        /// Otherwise, returns the name of the current day as a DayOfWeek enum
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static DayOfWeek GetDateOfWeek(this KMBombInfo bombInfo)
+        {
+            if (!IsDayOfWeekPresent(bombInfo)) return DateTime.Now.DayOfWeek;
+            return (DayOfWeek)Enum.Parse(typeof(DayOfWeek), GetDayEntries(bombInfo).First().day);
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns the labeled day of the week as an integer, starting at 0
+        /// Otherwise, returns the current day of the week as an integer, starting at 0
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int GetDateOfWeekInt(this KMBombInfo bombInfo)
+        {
+            return (int)GetDateOfWeek(bombInfo);
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns either Green or as the shown color for the day of week, as an enum
+        /// Otherwise, returns none
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static DayColor GetDayColor(this KMBombInfo bombInfo)
+        {
+            if (!IsDayOfWeekPresent(bombInfo)) return DayColor.None;
+            if (!GetDayEntries(bombInfo).First().colorenabled) return DayColor.Green;
+            return (DayColor)Enum.Parse(typeof(DayColor), GetDayEntries(bombInfo).First().daycolor);
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns either Green or as the shown color for the day of week
+        /// Otherwise, returns none
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static string GetDayColorString(this KMBombInfo bombInfo)
+        {
+            return GetDayColor(bombInfo).ToString();
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns the number that represents the day of the month
+        /// Otherwise, returns the day based on the current date
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int GetDayDateNum(this KMBombInfo bombInfo)
+        {
+            if (!IsDayOfWeekPresent(bombInfo)) return DateTime.Now.Day;
+            return GetDayEntries(bombInfo).First().date;
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns the labeled month as an enum
+        /// Otherwise, returns the current month as an enum
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static Month GetDayMonth(this KMBombInfo bombInfo)
+        {
+            return (Month)GetDayMonthInt(bombInfo);
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns the number that represents the labeled month
+        /// Otherwise, returns the current month
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int GetDayMonthInt(this KMBombInfo bombInfo)
+        {
+            if (!IsDayOfWeekPresent(bombInfo)) return DateTime.Now.Month;
+            return GetDayEntries(bombInfo).First().month;
+        }
+
+        /// <summary>
+        /// If a Day of the Week widget is present, returns the format the widget is showing in
+        /// Otherwise, returns none
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static TimeFormat GetDayFormat(this KMBombInfo bombInfo)
+        {
+            if (!IsDayOfWeekPresent(bombInfo)) return TimeFormat.None;
+            return (TimeFormat)GetDayEntries(bombInfo).First().monthColor;
+        }
+
+        /// <summary>
+        /// Checks to see if a Randomized Time widget is present
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool IsRandomTimePresent(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Any();
+        }
+
+        /// <summary>
+        /// Returns Randomized Time widgets as TimeSpans HH:mm:ss
+        /// AM/PM are not considered in this method
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static TimeSpan[] GetRandomTimes(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Select(x => DateTime.ParseExact(x.time, "HHmm", System.Globalization.CultureInfo.InvariantCulture).TimeOfDay).ToArray();
+        }
+
+        /// <summary>
+        /// Returns Randomized Time widgets as TimeSpans hh:mm:ss
+        /// AM/PM are translated to military time in this method
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static TimeSpan[] GetExactRandomTimes(this KMBombInfo bombInfo)
+        {
+            var a = GetTimeEntries(bombInfo);
+            var b = new List<TimeSpan>();
+            foreach (TimeJSON time in a)
+            {
+                if (time.am || time.pm)
+                    b.Add(DateTime.ParseExact(time.time + (time.am ? "AM" : "PM"), "hhmmtt", System.Globalization.CultureInfo.InvariantCulture).TimeOfDay);
+                else
+                    b.Add(DateTime.ParseExact(time.time, "HHmm", System.Globalization.CultureInfo.InvariantCulture).TimeOfDay);
+            }
+            return b.ToArray();
+        }
+
+        /// <summary>
+        /// Returns the number of Randomized Time widgets (Starting Time widget is not included)
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int GetRandomTimeCount(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Count();
+        }
+
+        /// <summary>
+        /// Checks to see if a number is present in any Randomized Time widget
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static bool RandomTimeIsNumberPresent(this KMBombInfo bombInfo, string num)
+        {
+            if (!IsRandomTimePresent(bombInfo)) return false;
+            var a = GetRandomTimes(bombInfo);
+            return a.Any(x => x.Hours.ToString().Contains(num) || x.Minutes.ToString().Contains(num));
+        }
+
+        /// <summary>
+        /// Checks to see if a number is present in any Randomized Time widget
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static bool RandomTimeIsNumberPresent(this KMBombInfo bombInfo, int num)
+        {
+            return RandomTimeIsNumberPresent(bombInfo, num.ToString());
+        }
+
+        /// <summary>
+        /// Checks to see if any Randomized Time widget with AM is present.
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool RandomTimeIsAMPresent(this KMBombInfo bombInfo)
+        {
+            if (!IsRandomTimePresent(bombInfo)) return false;
+            return GetTimeEntries(bombInfo).Any(x => x.am);
+        }
+
+        /// <summary>
+        /// Checks to see if any Randomized Time widget with PM is present.
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool RandomTimeIsPMPresent(this KMBombInfo bombInfo)
+        {
+            if (!IsRandomTimePresent(bombInfo)) return false;
+            return GetTimeEntries(bombInfo).Any(x => x.pm);
+        }
+
+        /// <summary>
+        /// Checks to see if any Randomized Time widget showing military time is present.
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static bool RandomTimeIsMilPresent(this KMBombInfo bombInfo)
+        {
+            if (!IsRandomTimePresent(bombInfo)) return false;
+            return GetTimeEntries(bombInfo).Any(x => !x.am && !x.pm);
+        }
+
+
+        /// <summary>
+        /// Returns the number of Randomized Time widgets where AM is present
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int RandomTimeAMCount(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Select(x => x.am).Count();
+        }
+
+        /// <summary>
+        /// Returns the number of Randomized Time widgets where PM is present
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int RandomTimePMCount(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Select(x => x.pm).Count();
+        }
+
+        /// <summary>
+        /// Returns the number of Randomized Time widgets that are shown in military time
+        /// </summary>
+        /// <param name="bombInfo"></param>
+        /// <returns></returns>
+        public static int RandomTimeMilCount(this KMBombInfo bombInfo)
+        {
+            return GetTimeEntries(bombInfo).Select(x => !x.am && !x.pm).Count();
         }
         #endregion
     }

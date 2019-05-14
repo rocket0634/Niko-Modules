@@ -22,11 +22,10 @@
         }
     </style>
     <script>
-        var options1 = [];
-        var options2 = [];
-        var options3 = [];
-        var possibilities = [];
-        var chosen = [];
+        var options1;
+        var options2;
+        var options3;
+        var possibilities;
         var batteries =
             [
                 "D", "AA", "holders with 3 batteries", "holders with 4 batteries"
@@ -48,10 +47,12 @@
             [
                 "A", "D", "C", "D", "B", "F", "E", "B", "C", "E"
             ];
+		var coordXCopy;
         var coordY =
             [
                 "C", "B", "E", "D", "F", "E", "B", "C", "D", "A"
             ];
+		var coordYCopy;
         var ManualTable =
             [
                 3, 2, 9, 1, 7, 4,
@@ -61,24 +62,39 @@
                 5, 1, 5, 3, 9, 9,
                 1, 2, 3, 6, 7, 8
             ];
+		var ManualTableCopy;
         function setRules(rnd)
         {
+			//Make clones of the lists to avoid randomization issues when changing seeds
+			coordXCopy = coordX.slice();
+			coordYCopy = coordY.slice();
+			ManualTableCopy = ManualTable.slice();
             if (rnd.seed != 1)
             {
-                rnd.shuffleFisherYates(coordX);
-                rnd.shuffleFisherYates(coordY);
-                rnd.shuffleFisherYates(ManualTable);
+                rnd.shuffleFisherYates(coordXCopy);
+                rnd.shuffleFisherYates(coordYCopy);
+                rnd.shuffleFisherYates(ManualTableCopy);
                 //Slight manual change that makes more sense for just ruleseed.
-                document.getElementById('background-foot-2').innerHTML.replace("Mixing Blue and White will <b>not</b> make Blue.", "Mixing any color with White will <b>not</b> make the original color");
+                document.getElementById('background-foot-2').innerHTML = "***: Mixing Red and Yellow will make Orange, Blue and Yellow will make Green, and Red and Blue will make Purple. Mixing any color with White will <strong>not</strong> make the original color";
             }
-            for (var j = 0; j < coordX.length; j++)
-                document.getElementById('background-l-' + j).innerHTML = coordX[j];
-            for (var j = 0; j < coordY.length; j++)
-                document.getElementById('background-r-' + j).innerHTML = coordY[j];
-            for (var j = 0; j < ManualTable.length; j++)
-                document.getElementById('background-tbl-' + j).innerHTML = ManualTable[j];
+			else
+			{
+				document.getElementById('background-foot-2').innerHTML = "***: Mixing Red and Yellow will make Orange, Blue and Yellow will make Green, and Red and Blue will make Purple. Mixing Blue and White will <strong>not</strong> make Blue.";
+			}
+            for (var j = 0; j < coordXCopy.length; j++)
+                document.getElementById('background-l-' + j).innerHTML = coordXCopy[j];
+            for (var j = 0; j < coordYCopy.length; j++)
+                document.getElementById('background-r-' + j).innerHTML = coordYCopy[j];
+            for (var j = 0; j < ManualTableCopy.length; j++)
+                document.getElementById('background-tbl-' + j).innerHTML = ManualTableCopy[j];
             //Primaries randomization
             var i = rnd.next(0, 2);
+			//Initialize lists for current randomization
+			options1 = [];
+			options2 = [];
+			options3 = [];
+			possibilities = [];
+			chosen = [];
             //Create possible options for Possibilities
             AddToOptions(i);
             //Generate all possible rules
@@ -112,7 +128,7 @@
         }
         function Swap()
         {
-            var values = [323, 1485, 393, 1413, 566, 1174, 940, 1306, 555 ];
+            var values = [326, 1496, 396, 1424, 570, 1183, 947, 1316, 559 ];
             var newValues = [0, 463, 1320, 1326, 8, 22, 1400, 1360, 28];
             for (var i = 0; i < values.length; i++)
             {
@@ -215,7 +231,7 @@
                 options2.push(" mixed with green ");
                 document.getElementById('background-foot-0').innerHTML.replace("Yellow", "Green");
                 document.getElementById('background-foot-1').innerHTML.replace("Orange, Green, and Purple", "Cyan, Yellow, and Magenta");
-                document.getElementById('background-foot-2').innerHTML = "Mixing Red and Green will make Yellow, Blue and Green will make Cyan, and Red and Blue will make Magenta. Mixing any color with White will <b>not</b> make the original color."
+                document.getElementById('background-foot-2').innerHTML = "Mixing Red and Green will make Yellow, Blue and Green will make Cyan, and Red and Blue will make Magenta. Mixing any color with White will <strong>not</strong> make the original color."
             }
             options2.push(" mixed with blue ");
         }
@@ -234,9 +250,9 @@
                     possibilities.push("the button or the backing are a " + word);
                     possibilities.push("only the button is a " + word);
                     possibilities.push("only the backing is a " + word);
-                    possibilities.push("the button <b>OR</b> the backing is a " + word);
+                    possibilities.push("the button <strong>OR</strong> the backing is a " + word);
                     var word2 = i == 0 ? "primary colors*" : "secondary colors**";
-                    possibilities.push("the button <b>AND</b> the backing are " + word2);
+                    possibilities.push("the button <strong>AND</strong> the backing are " + word2);
                     possibilities.push("neither the button nor the backing are " + word2);
                     for (var j = 0; j < 2; j++) {
                         possibilities.push("the color of the " + options1[j] + " is a " + word);
@@ -253,8 +269,8 @@
                     possibilities.push("the button or the backing " + word2 + options2[i]);
                     possibilities.push("only the button " + word + options2[i]);
                     possibilities.push("only the backing " + word + options2[i]);
-                    possibilities.push("the button <b>OR</b> the backing " + word2 + options2[i]);
-                    possibilities.push("the button <b>AND</b> the backing " + word + options2[i]);
+                    possibilities.push("the button <strong>OR</strong> the backing " + word2 + options2[i]);
+                    possibilities.push("the button <strong>AND</strong> the backing " + word + options2[i]);
                     possibilities.push("neither the button nor the backing " + word + options2[i]);
                     for (var j = 0; j < 2; j++) {
                         possibilities.push("the color of the " + options1[j] + " " + word + options2[i]);
@@ -314,6 +330,18 @@
                     check = true;
                 }
             }
+			possibilities.push("there are no two factors present on the bomb");
+            possibilities.push("there is a two factor present on the bomb");
+            possibilities.push("there is more than one two factor present on the bomb");
+            possibilities.push("there is not a Date of Manufacture widget present on the bomb");
+            possibilities.push("there is a Date of Manufacture widget present on the bomb");
+            possibilities.push("there is not a Day of Week widget present on the bomb");
+            possibilities.push("there is a Day of Week widget present on the bomb");
+            possibilities.push("there is a Day of Week and Date of Manufacture widget present on the bomb");
+            possibilities.push("there is not a Random Time widget present on the bomb");
+            possibilities.push("there are less than two Random Time widgets present on the bomb");
+            possibilities.push("there are exactly two Random Time widgets present on the bomb");
+            possibilities.push("there are more than two Random Time widgets present on the bomb");
         }
     </script>
 </head>
@@ -339,15 +367,15 @@
                     <tbody>
                         <tr>
                             <td style="border:none"></td>
-                            <td><b>A</b></td>
-                            <td><b>B</b></td>
-                            <td><b>C</b></td>
-                            <td><b>D</b></td>
-                            <td><b>E</b></td>
-                            <td><b>F</b></td>
+                            <td><strong>A</strong></td>
+                            <td><strong>B</strong></td>
+                            <td><strong>C</strong></td>
+                            <td><strong>D</strong></td>
+                            <td><strong>E</strong></td>
+                            <td><strong>F</strong></td>
                         </tr>
                         <tr>
-                            <td><b>A</b></td>
+                            <td><strong>A</strong></td>
                             <td><div id="background-tbl-0"></div></td>
                             <td><div id="background-tbl-1"></div></td>
                             <td><div id="background-tbl-2"></div></td>
@@ -356,7 +384,7 @@
                             <td><div id="background-tbl-5"></div></td>
                         </tr>
                         <tr>
-                            <td><b>B</b></td>
+                            <td><strong>B</strong></td>
                             <td><div id="background-tbl-6"></div></td>
                             <td><div id="background-tbl-7"></div></td>
                             <td><div id="background-tbl-8"></div></td>
@@ -365,7 +393,7 @@
                             <td><div id="background-tbl-11"></div></td>
                         </tr>
                         <tr>
-                            <td><b>C</b></td>
+                            <td><strong>C</strong></td>
                             <td><div id="background-tbl-12"></div></td>
                             <td><div id="background-tbl-13"></div></td>
                             <td><div id="background-tbl-14"></div></td>
@@ -374,7 +402,7 @@
                             <td><div id="background-tbl-17"></div></td>
                         </tr>
                         <tr>
-                            <td><b>D</b></td>
+                            <td><strong>D</strong></td>
                             <td><div id="background-tbl-18"></div></td>
                             <td><div id="background-tbl-19"></div></td>
                             <td><div id="background-tbl-20"></div></td>
@@ -383,7 +411,7 @@
                             <td><div id="background-tbl-23"></div></td>
                         </tr>
                         <tr>
-                            <td><b>E</b></td>
+                            <td><strong>E</strong></td>
                             <td><div id="background-tbl-24"></div></td>
                             <td><div id="background-tbl-25"></div></td>
                             <td><div id="background-tbl-26"></div></td>
@@ -392,7 +420,7 @@
                             <td><div id="background-tbl-29"></div></td>
                         </tr>
                         <tr>
-                            <td><b>F</b></td>
+                            <td><strong>F</strong></td>
                             <td><div id="background-tbl-30"></div></td>
                             <td><div id="background-tbl-31"></div></td>
                             <td><div id="background-tbl-32"></div></td>
@@ -416,9 +444,9 @@
                     <caption class="translatable">TABLE B: Priority rules</caption>
                     <tbody>
                         <tr>
-                            <td class="translatable" style="width:50%"><b>RULE</b></td>
-                            <td class="translatable"><b>FIRST LETTER</b></td>
-                            <td class="translatable"><b>SECOND LETTER</b></td>
+                            <td class="translatable" style="width:50%"><strong>RULE</strong></td>
+                            <td class="translatable"><strong>FIRST LETTER</strong></td>
+                            <td class="translatable"><strong>SECOND LETTER</strong></td>
                         </tr>
                         <tr>
                             <td id="background-rule-0" class="translatable">If the color of the backing matches the color of the button</td>
@@ -426,7 +454,7 @@
                             <td><div id="background-r-0"></div></td>
                         </tr>
                         <tr>
-                            <td id="background-rule-1" class="translatable">Otherwise, if the button <b>OR</b> the backing are black or white</td>
+                            <td id="background-rule-1" class="translatable">Otherwise, if the button <strong>OR</strong> the backing are black or white</td>
                             <td><div id="background-l-1"></div></td>
                             <td><div id="background-r-1"></div></td>
                         </tr>
@@ -441,7 +469,7 @@
                             <td><div id="background-r-3"></div></td>
                         </tr>
                         <tr>
-                            <td id="background-rule-4" class="translatable">Otherwise, if the button <b>AND</b> the backing are primary colors*</td>
+                            <td id="background-rule-4" class="translatable">Otherwise, if the button <strong>AND</strong> the backing are primary colors*</td>
                             <td><div id="background-l-4"></div></td>
                             <td><div id="background-r-4"></div></td>
                         </tr>
@@ -475,7 +503,7 @@
                 <p>
                     <div id="background-foot-0" class="footnotes translatable">*: Primary colors are Red, Yellow, and Blue</div>
                     <div id="background-foot-1" class="footnotes translatable">**: Secondary colors are Orange, Green, and Purple</div>
-                    <div id="background-foot-2" class="footnotes translatable">***: Mixing Red and Yellow will make Orange, Blue and Yellow will make Green, and Red and Blue will make Purple. Mixing Blue and White will <b>not</b> make Blue.</div>
+                    <div id="background-foot-2" class="footnotes translatable">***: Mixing Red and Yellow will make Orange, Blue and Yellow will make Green, and Red and Blue will make Purple. Mixing Blue and White will <strong>not</strong> make Blue.</div>
                 </p>
             </div>
             <div class="page-footer relative-footer translatable">Page 2 of 2</div>

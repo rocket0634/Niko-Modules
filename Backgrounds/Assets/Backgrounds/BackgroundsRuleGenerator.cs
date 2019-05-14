@@ -27,7 +27,7 @@ namespace BackgroundsRuleGenerator
             if (!one)
             {
                 Counter = UnityEngine.Random.Range(0, 2);
-                Module.DebugLog("Chosen rules:");
+                Module.DebugLog(0, "Chosen rules:");
             }
             Module.coordX = coordX;
             Module.coordY = coordY;
@@ -35,13 +35,13 @@ namespace BackgroundsRuleGenerator
             Possibilities = Generator.Swaps(Generator.Possibilities(this));
             //Rules that check if the submit button contains a digit
             var Submit = Module.Submit.GetComponentInChildren<UnityEngine.TextMesh>();
-            if ((Generator.RuleIndicies.Contains(1298) || Generator.RuleIndicies.Contains(1299)) && Counter == 1) Submit.text = Submit.text + " 0";
+            if ((Generator.RuleIndicies.Contains(2) || Generator.RuleIndicies.Contains(3)) && Counter == 1) Submit.text = Submit.text + " 0";
             foreach (int index in Generator.RuleIndicies)
             {
                 list.Add(Possibilities[index].Func());
                 //log.Add(Possibilities[index].Descrip);
                 if (!one)
-                    Module.DebugLog(Possibilities[index].Descrip);
+                    Module.DebugLog(0, Possibilities[index].Descrip);
             }
             //Module.DebugLog(string.Join("\n", log.Select(x => Generator.RuleIndicies[log.IndexOf(x)] + ": " + x + " - " + list[log.IndexOf(x)]).ToArray()));
             return list.Concat(new[] { true }).ToList();
@@ -86,7 +86,7 @@ namespace BackgroundsRuleGenerator
         //Swap randomized values for seed 1 to output the original manual
         internal static List<Logger> Swaps(List<Logger> list)
         {
-            var values = new[] { 323, 1485, 393, 1413, 566, 1174, 940, 1306, 555 };
+            var values = new[] { 326, 1496, 396, 1424, 570, 1183, 947, 1316, 559 };
             var newValues = new[] { 0, 463, 1320, 1326, 8, 22, 1400, 1360, 28 };
             for (int i = 0; i < values.Count(); i++)
             {
@@ -378,6 +378,18 @@ namespace BackgroundsRuleGenerator
                     check2 = true;
                 }
             }
+            list.Add(new Logger(() => !Rules.BombInfo.IsTwoFactorPresent(), "There is not a Two Factor widget present"));
+            list.Add(new Logger(() => Rules.BombInfo.GetTwoFactorCounts() == 1, "There is exactly one Two Factor widget present"));
+            list.Add(new Logger(() => Rules.BombInfo.GetTwoFactorCounts() > 1, "There is more than one Two Factor widget present"));
+            list.Add(new Logger(() => !Rules.BombInfo.IsManufacturePresent(), "There is not a Date of Manufacture widget present"));
+            list.Add(new Logger(() => Rules.BombInfo.IsManufacturePresent(), "There is a Date of Manufacture widget present"));
+            list.Add(new Logger(() => !Rules.BombInfo.IsDayOfWeekPresent(), "There is not a Day of Week widget present"));
+            list.Add(new Logger(() => Rules.BombInfo.IsDayOfWeekPresent(), "There is a Day of Week widget present"));
+            list.Add(new Logger(() => Rules.BombInfo.IsManufacturePresent() && Rules.BombInfo.IsDayOfWeekPresent(), "Thereis both a Date of Manufacture and Day of Week widget present"));
+            list.Add(new Logger(() => !Rules.BombInfo.IsRandomTimePresent(), "There is not a Randomized Time widget present"));
+            list.Add(new Logger(() => Rules.BombInfo.GetRandomTimeCount() < 2, "There are less than two Randomized Time widgets present"));
+            list.Add(new Logger(() => Rules.BombInfo.GetRandomTimeCount() == 2, "There are exactly two Randomized Time widgets present"));
+            list.Add(new Logger(() => Rules.BombInfo.GetRandomTimeCount() > 2, "There are more than two Randomized Time widgets present"));
             possibleCount = list.Count;
             if (!pass)
             {
@@ -402,13 +414,15 @@ namespace BackgroundsRuleGenerator
                 hold1.Add(k + ": " + options3[i]().ToString());
                 k++;
             }
-            Rules.Module.DebugLog(0, string.Join("\n", hold1.ToArray()));
-            //var hold = string.Join("\n", listValues.Select(x => listValues.IndexOf(x) + ": " + x).ToArray());
-            var hold = string.Join("\n", list.Select(x => x.Descrip).ToArray());
-            Rules.Module.DebugLog(0, hold.Substring(0, 15900));
+            Rules.Module.DebugLog(0, string.Join("\n", hold1.ToArray()));*/
+            //var hold = string.Join("\n", list.Select(x => list.IndexOf(x) + ": " + x.Descrip).ToArray());
+            //var hold = string.Join("\n", list.Select(x => x.Descrip).ToArray());
+            /*Rules.Module.DebugLog(0, hold.Substring(0, 15900));
             Rules.Module.DebugLog(0, hold.Substring(15900, 15900));
             Rules.Module.DebugLog(0, hold.Substring(31800, 15900));
-            Rules.Module.DebugLog(0, hold.Substring(47700));*/
+            Rules.Module.DebugLog(0, hold.Substring(47700, 15900));
+            Rules.Module.DebugLog(0, hold.Substring(63600, 15900));
+            Rules.Module.DebugLog(0, hold.Substring(79500));*/
             return list;
         }
     }

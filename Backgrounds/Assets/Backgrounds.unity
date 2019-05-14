@@ -325,42 +325,38 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4327749706062220, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+    - target: {fileID: 4114532218737386, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 1987653641768508, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
-      propertyPath: m_Name
-      value: Backgrounds
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: c50cd4d25513a7a45bd1a4b728df48e1, type: 2}
+  m_ParentPrefab: {fileID: 100100000, guid: f92e91a53c7db2c49b381431b04cadfe, type: 2}
   m_IsPrefabParent: 0
