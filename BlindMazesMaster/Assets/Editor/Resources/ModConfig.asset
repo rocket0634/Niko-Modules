@@ -17,11 +17,12 @@ MonoBehaviour:
     walls before, so how hard could it be?\n\nModule ID: BlindMaze\r\n\r\nManual Page:
     https://ktane.timwi.de/HTML/Blind%20Maze.html\n\nCurrently supported \"Maze-Type\"
     modules: 3D Maze, Boolean Maze, The Crystal Maze, Factory Maze, Hexamaze, Maze
-    Scrambler, Mazes, Module Maze, Morse-A-Maze, Mouse In The Maze, Polyhedral Maze,
-    and USA Maze.\n\nMod originally created by JoketteWuzHere, now managed by Riverbui.\n\nSpecial
-    Thanks to Sam, Cait, and Timwi for providing assistence with the coding.\n\nAny
-    feedback is welcome- If you have any suggestions or fixes, there's a pretty good
-    chance I'll accept pull requests. Source will be available on request."
+    Scrambler, Mazes, Maze\xB3\r, Module Maze, Morse-A-Maze, Mouse In The Maze, Polyhedral
+    Maze, and USA Maze.\n\nMod originally created by JoketteWuzHere, now managed by
+    Riverbui.\n\nSpecial Thanks to Sam, Cait, and Timwi for providing assistence with
+    the coding.\n\nAny feedback is welcome- If you have any suggestions or fixes,
+    there's a pretty good chance I'll accept pull requests. Source will be available
+    on request."
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 2090177e0e043ca4286b11e9813be37a, type: 3}
