@@ -1,5 +1,6 @@
 ﻿using KMBombInfoExtensions;
 using UnityEngine;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -36,7 +37,7 @@ public class BlindMaze : MonoBehaviour
 	public MeshRenderer EastMesh;
 	public MeshRenderer SouthMesh;
 	public MeshRenderer WestMesh;
-    private MonoRandom rng;
+    public static MonoRandom rng;
 	int MazeRot, startRot;
 	int currentMaze = -1;
 
@@ -53,78 +54,7 @@ public class BlindMaze : MonoBehaviour
 	int StartX;
 	int StartY;
 
-	private List<string[,]> Mazes = new List<string[,]> {
-		new string[5, 5] {
-			{ "U L", "U", "N D R", "L U", "U R" },
-			{ "L R", "D L ", "U", "D R", "L R" },
-			{ "L D", "U R", "L D", "U R", "L D R" },
-			{ "L U", "R", "L U R", "D L", "U R" },
-			{ "D L R", "L D", "D R", "D U L", "R D" }
-		},
-		new string[5, 5] {
-			{ "U D L", "U R", "N R L", "U L", "U R" },
-			{ "U L", "D", "R D", "R L", "R D L" },
-			{ "L", "U", "U D", "D", "U R" },
-			{ "R L", "R D L", "U R L", "U D L", "R" },
-			{ "D L", "U D", "R D", "U D L", "R D" }
-		},
-		new string[5, 5] {
-			{ "U L", "U R D", "N L", "U R D", "L U R" },
-			{ "L D", "U D", "D", "U D", "R" },
-			{ "L U D", "U", "U", "U", "D R" },
-			{ "L U R", "R L", "R L", "L D", "U R" },
-			{ "D L", "D R", "L D", "U D R", "L R D" }
-		},
-		new string[5, 5] {
-			{ "U L D", "U R", "L N D", "U", "U R" },
-			{ "L U", "D", "D U", "D R", "L R" },
-			{ "L", "U R", "U L", "U", "R D" },
-			{ "L D R", "L R D", "R L", "L", "U R" },
-			{ "D L U", "D U", " D R", "L D R", " L D R" }
-		},
-		new string[5, 5] {
-			{ "U L",   "U",     "N D",   "U R", "L U R" },
-			{ "L D R", "L R",   "L U R", "L D", "R" },
-			{ "L U",   "D",     "D R",   "L U", "D R" },
-			{ "L R",   "U D L", "R U",   "D L", "R U" },
-			{ "D L",   "U D R",     "D L",     "U D", "R D" }
-		},
-		new string[5, 5] {
-			{ "U L",   "U R", "L D N", "U D",   "U R"   },
-			{ "L R",   "L",   "U R D", "U L",   "D R"   },
-			{ "L R",   "L",   "U D",   "",      "U R"   },
-			{ "L R D", "L R", "U L",   "R D",   "L R"   },
-			{ "D L U", "R D", "D L",   "D U R", "L R D" }
-		},
-		new string[5, 5] {
-			{ "U L", "U", "N D", "U D", "U R"},
-			{ "L R", "L D R", "L U", "U R", "L R"},
-			{ "L R", "U D L", "D R", "L", "R"},
-			{ "L D", "U R", "U D L", "R D", "L R"},
-			{ "D L U", "D", "D R U", "D L U", "R D"}
-		},
-		new string[5, 5] {
-			{ "U L D", "U R",   "R N L", "U L R", "L U R" },
-			{ "L U",   "R",     "R L",   "L",     "D R" },
-			{ "L R",   "L D",   "R",     "L D",   "U R" },
-			{ "L R",   "L R U", "L D",   "U R",   "L R" },
-			{ "D L R", "L D",   "U D",   "D",     "R D" }
-		},
-		new string[5, 5] {
-			{ "U L",   "U D",   "N R",   "U L",   "U R D" },
-			{ "L R",   "U L",   "D",     "D",     "U R" },
-			{ "L R",   "L D",   "U R D", "U L D", "R" },
-			{ "L D",   "U R D", "U L",   "U R",   "L R" },
-			{ "D L U", "U D",   "D R",   "L D",   "R D" }
-		},
-		new string[5, 5] {
-			{ "U L R", "L U D", "N R", "L U", "U R"   },
-			{ "L D",   "U R",   "L R", "L R", "L R D" },
-			{ "L U R", "D L",   "D",   "",    "D R"     },
-			{ "L",     "U R",   "U L", "",    "U D R"     },
-			{ "D L R", "D L",   "D R", "D",   "U R D"   }
-		}
-	};
+    private List<string[,]> Mazes;
 
 	private string TwitchHelpMessage = "Use !{0} nwse or !{0} uldr to move North West South East. Use !{0} reset to reset back to the start.";
 
@@ -215,20 +145,112 @@ public class BlindMaze : MonoBehaviour
 	string[] colorNames = { "red", "green", "white", "gray", "yellow" };
 	Color[] colors = { Color.red, Color.green, Color.white, Color.gray, Color.yellow };
 
+    void GenerateMazes() {
+        if (rng.Seed == 1) {
+            Mazes = new List<string[,]> {
+                new string[5, 5] {
+                    { "U L", "U", "N D R", "L U", "U R" },
+                    { "L R", "D L ", "U", "D R", "L R" },
+                    { "L D", "U R", "L D", "U R", "L D R" },
+                    { "L U", "R", "L U R", "D L", "U R" },
+                    { "D L R", "L D", "D R", "D U L", "R D" }
+                },
+                new string[5, 5] {
+                    { "U D L", "U R", "N R L", "U L", "U R" },
+                    { "U L", "D", "R D", "R L", "R D L" },
+                    { "L", "U", "U D", "D", "U R" },
+                    { "R L", "R D L", "U R L", "U D L", "R" },
+                    { "D L", "U D", "R D", "U D L", "R D" }
+                },
+                new string[5, 5] {
+                    { "U L", "U R D", "N L", "U R D", "L U R" },
+                    { "L D", "U D", "D", "U D", "R" },
+                    { "L U D", "U", "U", "U", "D R" },
+                    { "L U R", "R L", "R L", "L D", "U R" },
+                    { "D L", "D R", "L D", "U D R", "L R D" }
+                },
+                new string[5, 5] {
+                    { "U L D", "U R", "L N D", "U", "U R" },
+                    { "L U", "D", "D U", "D R", "L R" },
+                    { "L", "U R", "U L", "U", "R D" },
+                    { "L D R", "L R D", "R L", "L", "U R" },
+                    { "D L U", "D U", " D R", "L D R", " L D R" }
+                },
+                new string[5, 5] {
+                    { "U L",   "U",     "N D",   "U R", "L U R" },
+                    { "L D R", "L R",   "L U R", "L D", "R" },
+                    { "L U",   "D",     "D R",   "L U", "D R" },
+                    { "L R",   "U D L", "R U",   "D L", "R U" },
+                    { "D L",   "U D R",     "D L",     "U D", "R D" }
+                },
+                new string[5, 5] {
+                    { "U L",   "U R", "L D N", "U D",   "U R"   },
+                    { "L R",   "L",   "U R D", "U L",   "D R"   },
+                    { "L R",   "L",   "U D",   "",      "U R"   },
+                    { "L R D", "L R", "U L",   "R D",   "L R"   },
+                    { "D L U", "R D", "D L",   "D U R", "L R D" }
+                },
+                new string[5, 5] {
+                    { "U L", "U", "N D", "U D", "U R"},
+                    { "L R", "L D R", "L U", "U R", "L R"},
+                    { "L R", "U D L", "D R", "L", "R"},
+                    { "L D", "U R", "U D L", "R D", "L R"},
+                    { "D L U", "D", "D R U", "D L U", "R D"}
+                },
+                new string[5, 5] {
+                    { "U L D", "U R",   "R N L", "U L R", "L U R" },
+                    { "L U",   "R",     "R L",   "L",     "D R" },
+                    { "L R",   "L D",   "R",     "L D",   "U R" },
+                    { "L R",   "L R U", "L D",   "U R",   "L R" },
+                    { "D L R", "L D",   "U D",   "D",     "R D" }
+                },
+                new string[5, 5] {
+                    { "U L",   "U D",   "N R",   "U L",   "U R D" },
+                    { "L R",   "U L",   "D",     "D",     "U R" },
+                    { "L R",   "L D",   "U R D", "U L D", "R" },
+                    { "L D",   "U R D", "U L",   "U R",   "L R" },
+                    { "D L U", "U D",   "D R",   "L D",   "R D" }
+                },
+                new string[5, 5] {
+                    { "U L R", "L U D", "N R", "L U", "U R"   },
+                    { "L D",   "U R",   "L R", "L R", "L R D" },
+                    { "L U R", "D L",   "D",   "",    "D R"     },
+                    { "L",     "U R",   "U L", "",    "U D R"     },
+                    { "D L R", "D L",   "D R", "D",   "U R D"   }
+                }
+            };
+        } else {
+            Mazes = new List<string[,]>();
+            MazeGeneration.InitializeGeneration();
+            var cardinal = new[] { "N", "E", "W", "S" };
+            var direction = new[] { "U", "R", "L", "D" };
+
+            for (var i = 0; i < 10; i++)
+                Mazes.Add(Enumerable.Range(0, 5).SelectMany(r => Enumerable.Range(0, 5).Select(c => Enumerable.Range(0, 4).Select(d => (!MazeGeneration.Cells[i, r, c][cardinal[d]]) ? direction[d] : "").Join(" "))).ToArray().ToArray2D(5, 5));
+        }
+    }
+
+
 	void Start()
 	{
-        //rng = RuleSeed.GetRNG();
-
 		moduleId = moduleIdCounter++;
+
+        rng = RuleSeed.GetRNG();
+        DebugLog("Using rule seed: {0}", rng.Seed);
+        GenerateMazes();
 
 		//check what the serial ends with and make an integer for it
 		LastDigit = BombInfo.GetSerialNumberNumbers().Last();
 
+        if (rng.Seed != 1) {
+            for (var i = 0; i < 20; i++) {
+                colorTable[i / 5, i % 5] = rng.Next(1, 5);
+            }
+        }
+
 		int SumNS = 4;
 		int SumEW = 4;
-
-		int REDKEY = 0;
-		bool NOYELLOW = true;
+        int[] COLORKEYS = new int[5];
 
 		MeshRenderer[] buttonRenderers = { NorthMesh, EastMesh, SouthMesh, WestMesh };
 		for (int i = 0; i < 4; i++)
@@ -239,8 +261,7 @@ public class BlindMaze : MonoBehaviour
 			int value = colorTable[i, colorNum];
 			DebugLog("{0} Key is {1}, making it's value {2}", buttonNames[i], colorNames[colorNum], value);
 
-			if (colorNum == 0) REDKEY++; // Red is index 0.
-			else if (colorNum == 4) NOYELLOW = false; // Yellow is index 4.
+            COLORKEYS[colorNum]++; // Adds the current color
 
 			if (i % 2 == 0) SumNS += value; // North and South are both on even indexes
 			else SumEW += value; // East and West are both on odd indexes
@@ -250,56 +271,63 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-		string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Blind Maze", "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze", "Factory Maze", "Module Maze" };
-		int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
-        DebugLog("There are {0} compatible maze-type modules on the bomb, including Blind Maze.", MazeBased);
+        string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", /*"Blind Maze",*/ "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze", "Factory Maze", "Module Maze" };
+        int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
+        DebugLog("There are {0} compatible maze-type modules on the bomb, not including Blind Maze.", MazeBased);
 
-		// Determine rotation
-		int MazeRule;
-		if (REDKEY > 1)
-		{
-			MazeRot = 1;
-            startRot = 1;
-			MazeRule = 1;
-		}
-		else if (BombInfo.GetBatteryCount() > 4)
-		{
-			MazeRot = 1;
-            startRot = 0;
-			MazeRule = 2;
-		}
-		else if (BombInfo.GetIndicators().Contains("IND"))
-		{
-			MazeRot = 2;
-            startRot = 2;
-			MazeRule = 3;
-		}
-		else if (REDKEY > 0 && NOYELLOW == true)
-		{
-			MazeRot = 3;
-            startRot = 3;
-			MazeRule = 4;
-		}
-		else if (MazeBased > 1)
-		{
-			MazeRot = 2;
-            startRot = 0;
-			MazeRule = 5;
-		}
-		else if (BombInfo.GetPorts().Distinct().Count() < 2)
-		{
-			MazeRot = 3;
-            startRot = 0;
-			MazeRule = 6;
-		}
-		else
-		{
-			MazeRot = 0;
-            startRot = 0;
-			MazeRule = 7;
-		}
+        int MazeRule = 7;
+        int[] rulesCount = { COLORKEYS[0], BombInfo.GetBatteryCount(), COLORKEYS[4], COLORKEYS[0], MazeBased, BombInfo.GetPorts().Distinct().Count(), COLORKEYS[1], COLORKEYS[2], COLORKEYS[3], BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA), BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetPortCount(), BombInfo.GetPortPlateCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count() };
+        int[] conditionCount = { 2, 5, 1, 1, 1 };
+        int conditionIndicator = 3;
+        int[] mazeRotation = { 1, 1, 2, 1, 2, 1 };
+        bool[] clockwise = { true, true, true, false, true, false };
+        bool[] calculate = { false, true, false, false, true, true };
 
-		DebugLog("Maze Rotation is {0} degrees clockwise because of rule {1}", MazeRot * 90, MazeRule);
+        Action<int> rules = (x) => {
+            if (clockwise[x]) startRot = MazeRot = mazeRotation[x];
+            else startRot = MazeRot = 4 - mazeRotation[x];
+
+            if (calculate[x]) startRot = 0;
+
+            MazeRule = x + 1;
+        };
+
+        if (rng.Seed != 1) {
+            rulesCount = rng.ShuffleFisherYates(rulesCount).Take(6).ToArray();
+            conditionIndicator = rng.Next(11);
+
+            for (var i = 0; i < 6; i++) {
+                if (i < 5) conditionCount[i] = rng.Next(1, 5);
+
+                mazeRotation[i] = rng.Next(1, 4);
+                clockwise[i] = (rng.Next(2) == 1) ? true : false;
+                calculate[i] = (rng.Next(2) == 1) ? true : false;
+            }
+        }
+
+        //Determine rotation
+        if (rulesCount[0] >= conditionCount[0]) {
+            rules(0);
+        } else if (rulesCount[1] >= conditionCount[1]) {
+            rules(1);
+        } else if (BombInfo.GetIndicators().Contains(((KMBI.KnownIndicatorLabel)conditionIndicator).ToString())) {
+            rules(2);
+        } else if (rulesCount[2] == 0 && rulesCount[3] >= conditionCount[2]) {
+            rules(3);
+        } else if (rulesCount[4] >= conditionCount[3]) {
+            rules(4);
+        } else if (rulesCount[5] <= conditionCount[4]) {
+            rules(5);
+        } else {
+            startRot = MazeRot = 0;
+            MazeRule = 7;
+        }
+
+        var ruleClockwise = "clockwise";
+
+        if (MazeRule != 7) ruleClockwise = (clockwise[MazeRule - 1]) ? "clockwise" : "counter-clockwise";
+
+        DebugLog("Maze Rotation is {0} degrees {1} because of rule {2}", MazeRot * 90, ruleClockwise, MazeRule);
 
 		KMSelectable[] directions = new[] { North, East, South, West };
 		ButtonInfo[] buttonInfo = new[]
@@ -343,6 +371,7 @@ public class BlindMaze : MonoBehaviour
 		StartY = CurY;
 
         DebugLog("Starting location is: ({0}, {1}).", SumNS + 1, SumEW + 1);
+
         if (MazeRot != startRot) DebugLog("Location is determined before rotation. Starting location on rotated maze is ({0}, {1}).", RotX, RotY);
         else if (MazeRule != 7) DebugLog("Location is determined after rotation.");
 	}
