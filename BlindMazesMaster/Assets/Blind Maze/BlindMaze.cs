@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 
 class ButtonInfo
@@ -117,8 +118,9 @@ public class BlindMaze : MonoBehaviour
 		if (CurX == 2 && CurY == -1) // They just moved out of the maze.
 		{
 			BombModule.HandlePass();
-			Solved = true;
-			DebugLog("Moving {0}: The module has been defused.", Direction);
+            StartCoroutine(ShowColor(curColor, prevColor));
+            Solved = true;
+			DebugLog("Moving {0}: The module has been disarmed.", Direction);
 		}
 		else
 		{
@@ -142,8 +144,16 @@ public class BlindMaze : MonoBehaviour
 	};
 
 	string[] buttonNames = { "North", "East", "South", "West" };
-	string[] colorNames = { "red", "green", "white", "gray", "yellow" };
-	Color[] colors = { Color.red, Color.green, Color.white, Color.gray, Color.yellow };
+	string[] colorNames = { "red", "green", "blue", "gray", "yellow" };
+	Color[] colors = { Color.red, Color.green, new Color(0, 100 / 255f, 1), Color.gray, Color.yellow }, prevColor;
+    Color[] curColor
+    {
+        get
+        {
+            return new[] { NorthMesh.material.color, EastMesh.material.color, SouthMesh.material.color, WestMesh.material.color };
+        }
+    }
+    int[] buttonColors = new int[4];
 
     void GenerateMazes() {
         if (rng.Seed == 1) {
@@ -252,11 +262,10 @@ public class BlindMaze : MonoBehaviour
 		int SumEW = 4;
         int[] COLORKEYS = new int[5];
 
-		MeshRenderer[] buttonRenderers = { NorthMesh, EastMesh, SouthMesh, WestMesh };
 		for (int i = 0; i < 4; i++)
 		{
-			int colorNum = UnityEngine.Random.Range(0, 5);
-			buttonRenderers[i].material.color = colors[colorNum];
+			buttonColors[i] = UnityEngine.Random.Range(0, 5);
+			var colorNum = buttonColors[i];
 
 			int value = colorTable[i, colorNum];
 			DebugLog("{0} Key is {1}, making it's value {2}", buttonNames[i], colorNames[colorNum], value);
@@ -374,7 +383,25 @@ public class BlindMaze : MonoBehaviour
 
         if (MazeRot != startRot) DebugLog("Location is determined before rotation. Starting location on rotated maze is ({0}, {1}).", RotX, RotY);
         else if (MazeRule != 7) DebugLog("Location is determined after rotation.");
-	}
+        prevColor = curColor.ToArray();
+        var nextColor = buttonColors.Select(x => colors[x]).ToArray();
+        BombModule.OnActivate += delegate () { StartCoroutine(ShowColor(prevColor, nextColor)); };
+    }
+
+    IEnumerator ShowColor(Color[] start, Color[] end)
+    {
+        MeshRenderer[] buttonRenderers = { NorthMesh, EastMesh, SouthMesh, WestMesh };
+        var t = 0f;
+        while (buttonRenderers.All(x => x.material.color != end[Array.IndexOf(buttonRenderers, x)]))
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                buttonRenderers[i].material.color = Color.Lerp(start[i], end[i], t);
+            }
+            t += 0.015f;
+            yield return new WaitForSeconds(0.01f);
+        }
+    }
 
     void ButtonRotation(int x, int y)
     {
