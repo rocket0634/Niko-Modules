@@ -177,29 +177,40 @@
             var countRule = 0;
             var countCondition = 0;
 
+            var ruleTemplates = [
+                "If there are at least {c} {r}, {m}.",
+                "Otherwise, if there are at least {c} {r}, {m}.",
+                "Otherwise, if there is an {i} indicator, {m}.",
+                "Otherwise, if there are no {r1} and at least {c} {r2}, {m}.",
+                "Otherwise, if there is at least {c} {r}, {m}.",
+                "Otherwise, if there is at most {c} {r}, {m}.",
+                "Otherwise, keep the maze as it is."];
+
             for (var i = 0; i < rules.length; i++) {
+                var ruleText = ruleTemplates[i];
                 if (i != 2) {
                     if (conditionCount[countCondition] == 1) {
                         if (countCondition != 2) {
-                            rules[i].innerHTML = rules[i].innerHTML.replace("there are", "there is");
+                            ruleText = ruleText.replace("there are", "there is");
                             rulesCount[countRule] = makeSingular(rulesCount[countRule]);
                         } else {
                             rulesCount[countRule + 1] = makeSingular(rulesCount[countRule + 1]);
                         }
                     } else {
-                        rules[i].innerHTML = rules[i].innerHTML.replace("there is", "there are");
+                        ruleText = ruleText.replace("there is", "there are");
                     }
-                    
-                    if (i == 3) rules[i].innerHTML = rules[i].innerHTML.replace("{r1}", rulesCount[countRule++]).replace("{c}", conditionCount[countCondition++]).replace("{r2}", rulesCount[countRule++]);
-                    else rules[i].innerHTML = rules[i].innerHTML.replace("{c}", conditionCount[countCondition++]).replace("{r}", rulesCount[countRule++]);
-                } else {
-                    if (conditionIndicator != 3) rules[i].innerHTML = rules[i].innerHTML.replace("an", "a");
 
-                    rules[i].innerHTML = rules[i].innerHTML.replace("{i}", indicatorNames[conditionIndicator]);
+                    if (i == 3) ruleText = ruleText.replace("{r1}", rulesCount[countRule++]).replace("{c}", conditionCount[countCondition++]).replace("{r2}", rulesCount[countRule++]);
+                    else ruleText = ruleText.replace("{c}", conditionCount[countCondition++]).replace("{r}", rulesCount[countRule++]);
+                } else {
+                    if (conditionIndicator != 3) ruleText = ruleText.replace("an", "a");
+
+                    ruleText = ruleText.replace("{i}", indicatorNames[conditionIndicator]);
                 }
 
-                if (calculate[i]) rules[i].innerHTML = rules[i].innerHTML.replace("{m}", `calculate the starting position, then rotate the maze ${mazeRotation[i] * 90} degrees ${clockwise[i] ? "clockwise": "counter-clockwise"}`);
-                else rules[i].innerHTML = rules[i].innerHTML.replace("{m}", `rotate the maze ${mazeRotation[i] * 90} degrees ${clockwise[i] ? "clockwise": "counter-clockwise"}, then calculate the starting position`);
+                if (calculate[i]) ruleText = ruleText.replace("{m}", `calculate the starting position, then rotate the maze ${mazeRotation[i] * 90} degrees ${clockwise[i] ? "clockwise": "counter-clockwise"}`);
+                else ruleText = ruleText.replace("{m}", `rotate the maze ${mazeRotation[i] * 90} degrees ${clockwise[i] ? "clockwise": "counter-clockwise"}, then calculate the starting position`);
+                rules[i].innerHTML = ruleText;
             }
         }
 
