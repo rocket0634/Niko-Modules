@@ -336,7 +336,7 @@ public class BlindMaze : MonoBehaviour
 
         if (MazeRule != 7) ruleClockwise = (clockwise[MazeRule - 1]) ? "clockwise" : "counter-clockwise";
 
-        DebugLog("Maze Rotation is {0} degrees {1} because of rule {2}", MazeRot * 90, ruleClockwise, MazeRule);
+        DebugLog("Maze Rotation is {0} degrees {1} because of rule {2}", MazeRule == 7 ? 0 : mazeRotation[MazeRule - 1] * 90, ruleClockwise, MazeRule);
 
 		KMSelectable[] directions = new[] { North, East, South, West };
 		ButtonInfo[] buttonInfo = new[]

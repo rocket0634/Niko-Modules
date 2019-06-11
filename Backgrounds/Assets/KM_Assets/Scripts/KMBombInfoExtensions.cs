@@ -361,6 +361,11 @@ namespace KModkit
                 .Sum((x) => x.numbatteries);
         }
 
+        public static int GetBatteryAACount(this KMBombInfo bombInfo)
+        {
+            return GetBatteryEntries(bombInfo).Where((x) => x.numbatteries > 1).Sum((x) => x.numbatteries);
+        }
+
         public static int GetBatteryHolderCount(this KMBombInfo bombInfo)
         {
             return GetBatteryEntries(bombInfo).Count();

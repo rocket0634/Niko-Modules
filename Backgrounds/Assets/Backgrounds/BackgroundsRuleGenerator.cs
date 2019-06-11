@@ -86,8 +86,8 @@ namespace BackgroundsRuleGenerator
         //Swap randomized values for seed 1 to output the original manual
         internal static List<Logger> Swaps(List<Logger> list)
         {
-            var values = new[] { 326, 1496, 396, 1424, 570, 1183, 947, 1316, 559 };
-            var newValues = new[] { 0, 463, 1320, 1326, 8, 22, 1400, 1360, 28 };
+            var values = new[] { 324, 1487, 393, 1415, 566, 1176, 941, 1308, 556 };
+            var newValues = new[] { 0, 463, 1308, 1311, 8, 22, 1390, 1350, 28 };
             for (int i = 0; i < values.Count(); i++)
             {
                 var hold = list[values[i]];
@@ -137,11 +137,6 @@ namespace BackgroundsRuleGenerator
             options2.Add(additive.Skip(3).ToList());
             //Color mixes
             DetermineColorCombinations();
-            //Battery types
-            foreach (Battery battery in Enum.GetValues(typeof(Battery)))
-            {
-                if (battery.GetHashCode() > 0) options3.Add(() => battery);
-            }
             //Port types
             foreach(Port port in Enum.GetValues(typeof(Port)))
             {
@@ -300,7 +295,14 @@ namespace BackgroundsRuleGenerator
 
             var ports = Rules.BombInfo.GetPorts();
             var batteries = Rules.BombInfo.GetBatteryCount();
+            var dV9Batteries = Rules.BombInfo.GetBatteryCount(1);
+            var AABatteries = Rules.BombInfo.GetBatteryAACount();
             var holders = Rules.BombInfo.GetBatteryHolderCount();
+            var empty = Rules.BombInfo.GetBatteryHolderCount(0);
+            var dV9Holder = Rules.BombInfo.GetBatteryHolderCount(1);
+            var AAHolder = Rules.BombInfo.GetBatteryHolderCount(2);
+            var AAx3Holder = Rules.BombInfo.GetBatteryHolderCount(3);
+            var AAx4Holder = Rules.BombInfo.GetBatteryHolderCount(4);
             var plates = Rules.BombInfo.GetPortPlates();
             var indicators = Rules.BombInfo.GetIndicators();
             var onIndicators = Rules.BombInfo.GetOnIndicators();
@@ -313,9 +315,23 @@ namespace BackgroundsRuleGenerator
             list.Add(new Logger(() => batteries < 1, "There are no batteries on the bomb"));
             list.Add(new Logger(() => batteries % 2 == 1, "There are an odd number of batteries on the bomb"));
             list.Add(new Logger(() => batteries % 2 == 0, "There are an even number of batteries on the bomb"));
+            list.Add(new Logger(() => dV9Batteries < 1, "There are no D batteries present on the bomb"));
+            list.Add(new Logger(() => dV9Batteries == 1, "There is one D battery present on the bomb"));
+            list.Add(new Logger(() => dV9Batteries > 1, "There is more than one D battery present on the bomb"));
+            list.Add(new Logger(() => AABatteries < 1, "There are no AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries == 2, "There are two AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries == 3, "There are three AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries == 4, "There are four AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries > 4, "There are more than four AA batteries present on the bomb"));
             list.Add(new Logger(() => holders < 1, "There are no battery holders on the bomb"));
             list.Add(new Logger(() => holders == 1, "There is exactly one battery holder on the bomb"));
             list.Add(new Logger(() => holders > 1, "There is more than one battery holder on the bomb"));
+            list.Add(new Logger(() => empty > 0, "There is an empty battery holder on the bomb"));
+            list.Add(new Logger(() => AAHolder > 0, "There is a battery holder with exactly two batteries on the bomb"));
+            list.Add(new Logger(() => AAx3Holder > 0, "There is a battery holder with exactly three batteries on the bomb"));
+            list.Add(new Logger(() => dV9Holder + AAx3Holder > 1, "There are multiple battery holders with an odd number of batteries on the bomb"));
+            list.Add(new Logger(() => AAx4Holder > 0, "There is a battery holder with exactly four batteries on the bomb"));
+            list.Add(new Logger(() => AAHolder + AAx4Holder > 1, "There are multiple battery holders with an even number of batteries on the bomb"));
             list.Add(new Logger(() => indicators.Count() < 1, "There are no indicators on the bomb"));
             list.Add(new Logger(() => indicators.Count() == 1, "There is exactly one indicator on the bomb"));
             list.Add(new Logger(() => indicators.Count() > 1, "There is more than one indicator on the bomb"));
@@ -328,21 +344,6 @@ namespace BackgroundsRuleGenerator
 
             foreach (Func<Enum> value in options3)
             {
-                if (value() is Battery)
-                {
-                    var battery = Rules.BombInfo.GetBatteryCount((Battery)value());
-                    var holder = Rules.BombInfo.GetBatteryHolderCount((Battery)value());
-                    //Always true atm
-                    if (value().GetHashCode() != 0)
-                    {
-                        list.Add(new Logger(() => battery < 1, string.Format("There are no {0} batteries on the bomb", value().ToString())));
-                        list.Add(new Logger(() => battery == 1, string.Format("There is exactly 1 {0} battery on the bomb", value().ToString())));
-                        list.Add(new Logger(() => battery > 1, string.Format("There is more than 1 {0} battery on the bomb", value().ToString())));
-                    }
-                    list.Add(new Logger(() => holder < 1, string.Format("There are no {0} battery holders on the bomb", value().ToString())));
-                    list.Add(new Logger(() => holder == 1, string.Format("There is exactly 1 {0} battery holder on the bomb", value().ToString())));
-                    list.Add(new Logger(() => holder > 1, string.Format("There is more than 1 {0} battery holder on the bomb", value().ToString())));
-                }
                 if (value() is Port)
                 {
                     var itemName = value().ToString();
@@ -415,9 +416,9 @@ namespace BackgroundsRuleGenerator
                 k++;
             }
             Rules.Module.DebugLog(0, string.Join("\n", hold1.ToArray()));*/
-            //var hold = string.Join("\n", list.Select(x => list.IndexOf(x) + ": " + x.Descrip).ToArray());
+            /*var hold = string.Join("\n", list.Select(x => list.IndexOf(x) + ": " + x.Descrip).ToArray());
             //var hold = string.Join("\n", list.Select(x => x.Descrip).ToArray());
-            /*Rules.Module.DebugLog(0, hold.Substring(0, 15900));
+            Rules.Module.DebugLog(0, hold.Substring(0, 15900));
             Rules.Module.DebugLog(0, hold.Substring(15900, 15900));
             Rules.Module.DebugLog(0, hold.Substring(31800, 15900));
             Rules.Module.DebugLog(0, hold.Substring(47700, 15900));

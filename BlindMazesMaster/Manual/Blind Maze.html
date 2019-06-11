@@ -20,11 +20,18 @@
         var colorNames = [ "red", "green", "blue", "gray", "yellow" ];
         var indicatorNames = [ "SND", "CLR", "CAR", "IND", "FRQ", "SIG", "NSA", "MSA", "TRN", "BOB", "FRK" ];
         var rulesCount = [ "red buttons", "batteries", "yellow buttons", "red buttons", "modules with “Maze” in its name other than “Blind Maze”", "port types", "green buttons", "blue buttons", "gray buttons", "AA batteries", "D batteries", "battery holders", "ports", "port plates", "indicators", "lit indicators", "unlit indicators" ];
+		var rulesCountCopy;
         var conditionCount = [ 2, 5, 1, 1, 1 ];
+		var conditionCountCopy;
         var conditionIndicator = 3;
         var mazeRotation = [ 1, 1, 2, 1, 2, 1 ];
+		var mazeRotationCopy;
         var clockwise = [ true, true, true, false, true, false ];
+		var clockwiseCopy;
         var calculate = [ false, true, false, false, true, true ];
+		var calculateCopy;
+		var generated;
+		var pass;
 
         var rng;
 
@@ -35,19 +42,22 @@
         }
 
         //Initializing maze cells
-        for (var i = 0; i < 10; i++) {
-            cells[i] = [];
+        function InitializeCells() {
+            for (var i = 0; i < 10; i++) {
+                cells[i] = [];
 
-            for (var j = 0; j < 5; j++) {
-                cells[i][j] = [];
+                for (var j = 0; j < 5; j++) {
+                    cells[i][j] = [];
 
-                for (var k = 0; k < 5; k++)
-                    cells[i][j][k] = new Cell();
+                    for (var k = 0; k < 5; k++)
+                        cells[i][j][k] = new Cell();
+                }
             }
         }
 
         //Default rules
         function setDefaultRules() {
+            InitializeCells();
             var mazes = [
                 [ "UL", "U", "NDR", "LU", "UR",
                   "LR", "DL", "U", "DR", "LR",
@@ -122,13 +132,21 @@
             }
 
             var colorTable = [ 1, 5, 2, 2, 3, 3, 1, 5, 5, 2, 3, 2, 4, 3, 2, 2, 5, 3, 1, 4 ];
-            Array.from(document.getElementsByClassName("colorTable")).forEach((x, y) => x.innerHTML = colorTable[y]);
-            handleRules();
+            for (var i = 0; i < 4; i++) {
+                Array.from(document.getElementsByClassName("colorTable" + (i + 1))).forEach((x, y) => x.innerHTML = colorTable[y + (5 * i)]);
+            }
+            handleRules(true);
+			if (!pass)
+				generateSVG();
         }
 
         //Rule Seed rules
         function setRules(rnd) {
             rng = rnd;
+
+			pass = true;
+            setDefaultRules();
+			pass = false;
 
             for (var i = 0; i < 10; i++)
                 checkCell(i, rng.nextMax(4), rng.nextMax(4));
@@ -138,19 +156,22 @@
             for (var i = 0; i < 20; i++)
                 colorTable.push(rng.next(1, 5));
 
-            Array.from(document.getElementsByClassName("colorTable")).forEach((x, y) => x.innerHTML = colorTable[y]);
-            rulesCount = rng.shuffleFisherYates(rulesCount).slice(0, 7);
+            for (var i = 0; i < 5; i++) {
+                Array.from(document.getElementsByClassName("colorTable" + (i + 1))).forEach((x, y) => x.innerHTML = colorTable[y + (5 * i)]);
+            }
+            rulesCountCopy = rng.shuffleFisherYates(rulesCountCopy).slice(0, 7);
             conditionIndicator = rng.nextMax(11);
 
             for (var i = 0; i < 6; i++) {
-                if (i < 5) conditionCount[i] = rng.next(1, 5);
+                if (i < 5) conditionCountCopy[i] = rng.next(1, 5);
 
-                mazeRotation[i] = rng.next(1, 4);
-                clockwise[i] = (rng.nextMax(2) == 1) ? true : false;
-                calculate[i] = (rng.nextMax(2) == 1) ? true : false;
+                mazeRotationCopy[i] = rng.next(1, 4);
+                clockwiseCopy[i] = (rng.nextMax(2) == 1) ? true : false;
+                calculateCopy[i] = (rng.nextMax(2) == 1) ? true : false;
             }
 
-            handleRules();
+            handleRules(rng.seed == 1);
+			generateSVG();
         }
 
         //Recursive algorithm for the maze generation
@@ -173,9 +194,16 @@
         function inRange(value, min, max) { return (value >= min && value <= max); }
 
         //Handle for the text of the rules and actions
-        function handleRules() {
+        function handleRules(original) {
             var countRule = 0;
             var countCondition = 0;
+			if (!rulesCountCopy || original){
+				rulesCountCopy = rulesCount.slice();
+				conditionCountCopy = conditionCount.slice();
+				clockwiseCopy = clockwise.slice();
+				mazeRotationCopy = mazeRotation.slice();
+				calculateCopy = calculate.slice();
+			}
 
             var ruleTemplates = [
                 "If there are at least {c} {r}, {m}.",
@@ -186,34 +214,35 @@
                 "Otherwise, if there is at most {c} {r}, {m}.",
                 "Otherwise, keep the maze as it is."];
 
+
             for (var i = 0; i < rules.length; i++) {
                 var ruleText = ruleTemplates[i];
                 if (i != 2) {
                     if (conditionCount[countCondition] == 1) {
                         if (countCondition != 2) {
                             ruleText = ruleText.replace("there are", "there is");
-                            rulesCount[countRule] = makeSingular(rulesCount[countRule]);
+                            rulesCountCopy[countRule] = makeSingular(rulesCountCopy[countRule]);
                         } else {
-                            rulesCount[countRule + 1] = makeSingular(rulesCount[countRule + 1]);
+                            rulesCountCopy[countRule + 1] = makeSingular(rulesCountCopy[countRule + 1]);
                         }
                     } else {
                         ruleText = ruleText.replace("there is", "there are");
                     }
-
-                    if (i == 3) ruleText = ruleText.replace("{r1}", rulesCount[countRule++]).replace("{c}", conditionCount[countCondition++]).replace("{r2}", rulesCount[countRule++]);
-                    else ruleText = ruleText.replace("{c}", conditionCount[countCondition++]).replace("{r}", rulesCount[countRule++]);
+                    
+                    if (i == 3) ruleText = ruleText.replace("{r1}", rulesCountCopy[countRule++]).replace("{c}", conditionCountCopy[countCondition++]).replace("{r2}", rulesCountCopy[countRule++]);
+                    else ruleText = ruleText.replace("{c}", conditionCountCopy[countCondition++]).replace("{r}", rulesCountCopy[countRule++]);
                 } else {
                     if (conditionIndicator != 3) ruleText = ruleText.replace("an", "a");
 
                     ruleText = ruleText.replace("{i}", indicatorNames[conditionIndicator]);
                 }
 
-                if (calculate[i]) ruleText = ruleText.replace("{m}", `calculate the starting position, then rotate the maze ${mazeRotation[i] * 90} degrees ${clockwise[i] ? "clockwise": "counter-clockwise"}`);
-                else ruleText = ruleText.replace("{m}", `rotate the maze ${mazeRotation[i] * 90} degrees ${clockwise[i] ? "clockwise": "counter-clockwise"}, then calculate the starting position`);
+                if (calculateCopy[i]) ruleText = ruleText.replace("{m}", `calculate the starting position, then rotate the maze ${mazeRotationCopy[i] * 90} degrees ${clockwiseCopy[i] ? "clockwise": "counter-clockwise"}`);
+                else ruleText = ruleText.replace("{m}", `rotate the maze ${mazeRotationCopy[i] * 90} degrees ${clockwiseCopy[i] ? "clockwise": "counter-clockwise"}, then calculate the starting position`);
                 rules[i].innerHTML = ruleText;
             }
         }
-
+		
         function makeSingular(text) {
             if (text.includes("batteries")) text = text.replace("batteries", "battery");
             else if (text.includes("Blind Maze")) text = text.replace("modules", "module");
@@ -221,33 +250,41 @@
 
             return text;
         }
-
-        //SVG Maze handling
-        window.onload = function() {
-            var mazes = document.getElementsByClassName("mazes")[0].getElementsByTagName("svg")[0];
+		
+		function generateSVG() {
+			
+			var svg = document.getElementsByClassName("mazes")[0].getElementsByTagName("svg")[0];
+			if (!generated)
+			{
+				var mazes = document.createElementNS("http://www.w3.org/2000/svg", "g");
+				svg.appendChild(mazes);
+			}
+			generated = true;
+			mazes = svg.firstChild;
+			mazes.innerHTML = '';
 
             for (var i = 0; i < 10; i++) {
-                var text = document.createTextNode(i.toString());
-                var textElement = setElement(document.createElementNS("http://www.w3.org/2000/svg", "text"),
-                [ "x",                     "y" ],
-                [ `${59 + 145 * (i % 5)}`, `${15 + 150 * Math.floor(i / 5)}` ]);
-                textElement.appendChild(text);
-                mazes.appendChild(textElement);
+				var text = document.createTextNode(i.toString());
+				var textElement = setElement(document.createElementNS("http://www.w3.org/2000/svg", "text"),
+				[ "x",                     "y" ],
+				[ `${59 + 145 * (i % 5)}`, `${15 + 150 * Math.floor(i / 5)}` ]);
+				textElement.appendChild(text);
+				mazes.appendChild(textElement);
 
-                var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-                [ "class",         "x",                     "y",                                "width", "height", "fill" ],
-                [ "highlightable", `${-9 + 145 * (i % 5)}`, `${1.5 + 150 * Math.floor(i / 5)}`, "145",   "18",     "transparent" ]);
-                mazes.appendChild(highlight);
+				var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+				[ "class",         "x",                     "y",                                "width", "height", "fill" ],
+				[ "highlightable", `${-9 + 145 * (i % 5)}`, `${1.5 + 150 * Math.floor(i / 5)}`, "145",   "18",     "transparent" ]);
+				mazes.appendChild(highlight);
 
-                var square = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-                [ "x",                    "y",                               "width", "height", "fill",        "stroke", "stroke-width" ],
-                [ `${2 + 145 * (i % 5)}`, `${21 + 150 * Math.floor(i / 5)}`, "125",   "125",    "transparent", "black",  "2" ]);
-                mazes.appendChild(square);
+				var square = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+				[ "x",                    "y",                               "width", "height", "fill",        "stroke", "stroke-width" ],
+				[ `${2 + 145 * (i % 5)}`, `${21 + 150 * Math.floor(i / 5)}`, "125",   "125",    "transparent", "black",  "2" ]);
+				mazes.appendChild(square);
 
-                var exit = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-                [ "x",                     "y",                               "width", "height", "fill" ],
-                [ `${52 + 145 * (i % 5)}`, `${18 + 150 * Math.floor(i / 5)}`, "25",    "6",      "white" ]);
-                mazes.appendChild(exit);
+				var exit = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+				[ "x",                     "y",                               "width", "height", "fill" ],
+				[ `${52 + 145 * (i % 5)}`, `${18 + 150 * Math.floor(i / 5)}`, "25",    "6",      "white" ]);
+				mazes.appendChild(exit);
             }
 
             for (var i = 0; i < 10; i++) {
@@ -255,10 +292,10 @@
                     for (var k = 0; k < 5; k++) {
                         var x = 2 + 25 * k + 145 * (i % 5);
                         var y = 21 + 25 * j + 150 * Math.floor(i / 5);
-                        var small = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-                        [ "x",          "y",          "width", "height", "fill" ],
-                        [ `${x + 9.5}`, `${y + 9.5}`, "5",     "5",      "black" ]);
-                        mazes.appendChild(small);
+						var small = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+						[ "x",          "y",          "width", "height", "fill" ],
+						[ `${x + 9.5}`, `${y + 9.5}`, "5",     "5",      "black" ]);
+						mazes.appendChild(small);
 
                         if (k < 4 && !cells[i][j][k].directions.E) {
                             var e = setElement(document.createElementNS("http://www.w3.org/2000/svg", "line"),
@@ -268,20 +305,19 @@
                         }
 
                         if (j < 4 && !cells[i][j][k].directions.S) {
-                            var s = setElement(document.createElementNS("http://www.w3.org/2000/svg", "line"),
-                            [ "x1",   "y1",        "x2",        "y2",        "stroke", "stroke-width" ],
-                            [ `${x}`, `${y + 25}`, `${x + 25}`, `${y + 25}`, "black", "2" ]);
-                            mazes.appendChild(s);
+							var s = setElement(document.createElementNS("http://www.w3.org/2000/svg", "line"),
+							[ "x1",   "y1",        "x2",        "y2",        "stroke", "stroke-width" ],
+							[ `${x}`, `${y + 25}`, `${x + 25}`, `${y + 25}`, "black", "2" ]);
+							mazes.appendChild(s);
                         }
-
-                        var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-                        [ "class",         "x",        "y",    "width", "height", "fill" ],
-                        [ "highlightable", `${x - 1}`, `${y}`, "25",    "25",     "transparent" ]);
-                        mazes.appendChild(highlight);
+						var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+						[ "class",         "x",        "y",    "width", "height", "fill" ],
+						[ "highlightable", `${x - 1}`, `${y}`, "25",    "25",     "transparent" ]);
+						mazes.appendChild(highlight);
                     }
                 }
             }
-        }
+		}
 
         function setElement(element, names, values) {
             if (names.length <= 0 || values.length <= 0) return null;
@@ -384,35 +420,35 @@
                         </tr>
                         <tr>
                             <th>North</th>
-                            <td class="colorTable">1</td>
-                            <td class="colorTable">5</td>
-                            <td class="colorTable">2</td>
-                            <td class="colorTable">2</td>
-                            <td class="colorTable">3</td>
+                            <td class="colorTable1">1</td>
+                            <td class="colorTable1">5</td>
+                            <td class="colorTable1">2</td>
+                            <td class="colorTable1">2</td>
+                            <td class="colorTable1">3</td>
                         </tr>
                         <tr>
                             <th>East</th>
-                            <td class="colorTable">3</td>
-                            <td class="colorTable">1</td>
-                            <td class="colorTable">5</td>
-                            <td class="colorTable">5</td>
-                            <td class="colorTable">2</td>
-                        </tr>
-                        <tr>
-                            <th>South</th>
-                            <td class="colorTable">3</td>
-                            <td class="colorTable">2</td>
-                            <td class="colorTable">4</td>
-                            <td class="colorTable">3</td>
-                            <td class="colorTable">2</td>
+                            <td class="colorTable2">3</td>
+                            <td class="colorTable2">1</td>
+                            <td class="colorTable2">5</td>
+                            <td class="colorTable2">5</td>
+                            <td class="colorTable2">2</td>
                         </tr>
                         <tr>
                             <th>West</th>
-                            <td class="colorTable">2</td>
-                            <td class="colorTable">5</td>
-                            <td class="colorTable">3</td>
-                            <td class="colorTable">1</td>
-                            <td class="colorTable">4</td>
+                            <td class="colorTable4">2</td>
+                            <td class="colorTable4">5</td>
+                            <td class="colorTable4">3</td>
+                            <td class="colorTable4">1</td>
+                            <td class="colorTable4">4</td>
+                        </tr>
+                        <tr>
+                            <th>South</th>
+                            <td class="colorTable3">3</td>
+                            <td class="colorTable3">2</td>
+                            <td class="colorTable3">4</td>
+                            <td class="colorTable3">3</td>
+                            <td class="colorTable3">2</td>
                         </tr>
                     </table>
                 </div>

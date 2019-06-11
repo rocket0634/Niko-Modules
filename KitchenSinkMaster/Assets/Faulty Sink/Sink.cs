@@ -241,6 +241,10 @@ public class Sink : MonoBehaviour
                     Hot.OnInteract = ButtonHandler(Hot, 1, r);
                     Rules[3] = ColFaucet.Equals(1);
                     Rules[4] = ColPipe.Equals(0);
+                    DebugLog("Debug: Cannot determine status of Button{0}. Please select one of the following textures:", r);
+                    DebugLog("Knobs: {0}", knobColors[ColKnobs].name);
+                    DebugLog("Faucet: {0}", FaucetMesh.material.mainTexture.name);
+                    DebugLog("Drain Pipe: {0}", PipeMesh.material.mainTexture.name);
                     goto start;
                 case 3:
                     rotate = false;
@@ -619,14 +623,15 @@ public class Sink : MonoBehaviour
         {
             Module.HandleStrike();
             processingInput = false;
-            DebugLog("Warning: Invalid button [{0}] selected.", r == 0 ? "ColdMesh" : "HotMesh");
+            DebugLog("Warning: Invalid button [{0}] selected.", ren[(r + 1) % 2].material.mainTexture);
+            if (!knob2Turn[1]) ren[s].material = null;
         }
         else if (!knob2Turn[0])
         {
             hold = ren[s].material.mainTexture;
             buttonMasher = ren[s].material;
             processingInput = false;
-            DebugLog("Texture [{0}] chosen.", s == 2 ? "FaucetMesh" : "PipeMesh");
+            DebugLog("Texture [{0}] chosen.", hold.name);
             knob2Turn[0] = true;
         }
         else if (r == s)
