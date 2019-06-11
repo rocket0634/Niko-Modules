@@ -316,12 +316,12 @@ namespace BackgroundsRuleGenerator
             list.Add(new Logger(() => batteries % 2 == 1, "There are an odd number of batteries on the bomb"));
             list.Add(new Logger(() => batteries % 2 == 0, "There are an even number of batteries on the bomb"));
             list.Add(new Logger(() => dV9Batteries < 1, "There are no D batteries present on the bomb"));
-            list.Add(new Logger(() => dV9Batteries == 1, "There is one D battery present on the bomb"));
+            list.Add(new Logger(() => dV9Batteries > 0, "There is one D battery present on the bomb"));
             list.Add(new Logger(() => dV9Batteries > 1, "There is more than one D battery present on the bomb"));
             list.Add(new Logger(() => AABatteries < 1, "There are no AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries == 2, "There are two AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries == 3, "There are three AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries == 4, "There are four AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries > 1, "There are two AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries == 3, "There are exactly three AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries > 3, "There are four AA batteries present on the bomb"));
             list.Add(new Logger(() => AABatteries > 4, "There are more than four AA batteries present on the bomb"));
             list.Add(new Logger(() => holders < 1, "There are no battery holders on the bomb"));
             list.Add(new Logger(() => holders == 1, "There is exactly one battery holder on the bomb"));
@@ -331,7 +331,7 @@ namespace BackgroundsRuleGenerator
             list.Add(new Logger(() => AAx3Holder > 0, "There is a battery holder with exactly three batteries on the bomb"));
             list.Add(new Logger(() => dV9Holder + AAx3Holder > 1, "There are multiple battery holders with an odd number of batteries on the bomb"));
             list.Add(new Logger(() => AAx4Holder > 0, "There is a battery holder with exactly four batteries on the bomb"));
-            list.Add(new Logger(() => AAHolder + AAx4Holder > 1, "There are multiple battery holders with an even number of batteries on the bomb"));
+            list.Add(new Logger(() => empty + AAHolder + AAx4Holder > 1, "There are multiple battery holders with an even number of batteries on the bomb"));
             list.Add(new Logger(() => indicators.Count() < 1, "There are no indicators on the bomb"));
             list.Add(new Logger(() => indicators.Count() == 1, "There is exactly one indicator on the bomb"));
             list.Add(new Logger(() => indicators.Count() > 1, "There is more than one indicator on the bomb"));

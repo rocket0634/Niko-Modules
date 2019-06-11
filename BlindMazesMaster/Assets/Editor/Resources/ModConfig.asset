@@ -18,9 +18,9 @@ MonoBehaviour:
     https://ktane.timwi.de/HTML/Blind%20Maze.html\n\nCurrently supported \"Maze-Type\"
     modules: 3D Maze, Boolean Maze, The Crystal Maze, Factory Maze, Hexamaze, Maze
     Scrambler, Mazes, Maze\xB3\r, Module Maze, Morse-A-Maze, Mouse In The Maze, Polyhedral
-    Maze, and USA Maze.\n\nMod originally created by JoketteWuzHere, now managed by
-    Riverbui.\n\nSpecial Thanks to Sam, Cait, and Timwi for providing assistence with
-    the coding.\n\nAny feedback is welcome- If you have any suggestions or fixes,
+    Maze, and USA Maze.\n\nMod originally created by JoketteWuzHere/McNiko67, now
+    managed by Riverbui.\n\nSpecial Thanks to Sam, Cait, and Timwi for providing assistence
+    with the coding.\n\nAny feedback is welcome- If you have any suggestions or fixes,
     there's a pretty good chance I'll accept pull requests. Source will be available
     on request."
   version: 1.0
