@@ -34,13 +34,8 @@ namespace BackgroundsRuleGenerator
             Module.coordX = coordX;
             Module.coordY = coordY;
             Module.BGManualTable = ManualTable;
+            DetermineCurrentValues();
             if (!Generator.pass) Possibilities = Generator.Swaps(Generator.Possibilities(this));
-            else
-            {
-                Generator.options1[0] = () => ColBacking;
-                Generator.options1[1] = () => ColButton;
-                Generator.options1[2] = () => Counter;
-            }
             //Rules that check if the submit button contains a digit
             var Submit = Module.Submit.GetComponentInChildren<UnityEngine.TextMesh>();
             if ((Generator.RuleIndicies.Contains(2) || Generator.RuleIndicies.Contains(3)) && Counter == 1) Submit.text = Submit.text + " 0";
@@ -53,6 +48,59 @@ namespace BackgroundsRuleGenerator
             }
             //Module.DebugLog(string.Join("\n", log.Select(x => Generator.RuleIndicies[log.IndexOf(x)] + ": " + x + " - " + list[log.IndexOf(x)]).ToArray()));
             return list.Concat(new[] { true }).ToList();
+        }
+
+        //To avoid regenerating possibilities, set the values of delegated possibilities to the rules of this instance.
+        void DetermineCurrentValues()
+        {
+            IEnumerable<string> portsHold, indicatorsHold, onIndicatorsHold, offIndicatorsHold;
+            IEnumerable<string[]> platesHold;
+            bool manufactureHold, dayHold;
+            int batteryHold, dHold, aaHold, holdersHold, emptyHold, dholdersHold, aaholdersHold, aa3holdersHold, aa4holdersHold, twoFactorHold, timeHold;
+            Generator.options1[0] = () => ColBacking;
+            Generator.options1[1] = () => ColButton;
+            Generator.options1[2] = () => Counter;
+            //BombInfo needs to be carried over for detecting colored indicators
+            Generator.BombInfo = () => BombInfo;
+
+            //Limit bombInfo calls by assigning variables before preforming checks on them
+            portsHold = BombInfo.GetPorts();
+            platesHold = BombInfo.GetPortPlates();
+            indicatorsHold = BombInfo.GetIndicators();
+            onIndicatorsHold = BombInfo.GetOnIndicators();
+            offIndicatorsHold = BombInfo.GetOffIndicators();
+            batteryHold = BombInfo.GetBatteryCount();
+            dHold = BombInfo.GetBatteryCount(1);
+            aaHold = BombInfo.GetBatteryAACount();
+            holdersHold = BombInfo.GetBatteryHolderCount();
+            emptyHold = BombInfo.GetBatteryHolderCount(0);
+            dholdersHold = BombInfo.GetBatteryHolderCount(1);
+            aaholdersHold = BombInfo.GetBatteryHolderCount(2);
+            aa3holdersHold = BombInfo.GetBatteryHolderCount(3);
+            aa4holdersHold = BombInfo.GetBatteryHolderCount(4);
+            twoFactorHold = BombInfo.GetTwoFactorCounts();
+            manufactureHold = BombInfo.IsManufacturePresent();
+            dayHold = BombInfo.IsDayOfWeekPresent();
+            timeHold = BombInfo.GetRandomTimeCount();
+
+            Generator.ports = () => portsHold;
+            Generator.plates = () => platesHold;
+            Generator.indicators = () => indicatorsHold;
+            Generator.onIndicators = () => onIndicatorsHold;
+            Generator.offIndicators = () => offIndicatorsHold;
+            Generator.batteries = () => batteryHold;
+            Generator.dV9Batteries = () => dHold;
+            Generator.AABatteries = () => aaHold;
+            Generator.holders = () => holdersHold;
+            Generator.empty = () => emptyHold;
+            Generator.dV9Holder = () => dholdersHold;
+            Generator.AAHolder = () => aaholdersHold;
+            Generator.AAx3Holder = () => aa3holdersHold;
+            Generator.AAx4Holder = () => aa4holdersHold;
+            Generator.twoFactorCount = () => twoFactorHold;
+            Generator.manufacturePresent = () => manufactureHold;
+            Generator.dayPresent = () => dayHold;
+            Generator.timeCount = () => timeHold;
         }
     }
     internal static class Generator
@@ -93,6 +141,11 @@ namespace BackgroundsRuleGenerator
         internal static List<IEnumerable<int>> options2 = new List<IEnumerable<int>>();
         internal static List<Func<Enum>> options3 = new List<Func<Enum>>();
         internal static List<Func<bool>> possibilities = new List<Func<bool>>();
+        internal static Func<KMBombInfo> BombInfo;
+        internal static Func<IEnumerable<string>> ports, indicators, onIndicators, offIndicators;
+        internal static Func<IEnumerable<string[]>> plates;
+        internal static Func<int> batteries, dV9Batteries, AABatteries, holders, empty, dV9Holder, AAHolder, AAx3Holder, AAx4Holder, twoFactorCount, timeCount;
+        internal static Func<bool> manufacturePresent, dayPresent;
 
         //Swap randomized values for seed 1 to output the original manual
         internal static List<Logger> Swaps(List<Logger> list)
@@ -285,9 +338,6 @@ namespace BackgroundsRuleGenerator
 
         public static List<Logger> Possibilities(Rule Rules)
         {
-            options1[0] = () => Rules.ColBacking;
-            options1[1] = () => Rules.ColButton;
-            options1[2] = () => Rules.Counter;
             var list = new List<Logger>();
             var mix = 0;
             //var listValues = new List<string>();
@@ -324,104 +374,88 @@ namespace BackgroundsRuleGenerator
                 }
             }
 
-            var ports = Rules.BombInfo.GetPorts();
-            var batteries = Rules.BombInfo.GetBatteryCount();
-            var dV9Batteries = Rules.BombInfo.GetBatteryCount(1);
-            var AABatteries = Rules.BombInfo.GetBatteryAACount();
-            var holders = Rules.BombInfo.GetBatteryHolderCount();
-            var empty = Rules.BombInfo.GetBatteryHolderCount(0);
-            var dV9Holder = Rules.BombInfo.GetBatteryHolderCount(1);
-            var AAHolder = Rules.BombInfo.GetBatteryHolderCount(2);
-            var AAx3Holder = Rules.BombInfo.GetBatteryHolderCount(3);
-            var AAx4Holder = Rules.BombInfo.GetBatteryHolderCount(4);
-            var plates = Rules.BombInfo.GetPortPlates();
-            var indicators = Rules.BombInfo.GetIndicators();
-            var onIndicators = Rules.BombInfo.GetOnIndicators();
-            var offIndicators = Rules.BombInfo.GetOffIndicators();
-            list.Add(new Logger(() => ports.Count() < 1, "There are no ports on the bomb"));
-            list.Add(new Logger(() => plates.Where(x => x.Length < 1).Count() > 0, "There is an empty port plate"));
-            list.Add(new Logger(() => ports.Count() == 1, "There is exactly one port on the bomb"));
-            list.Add(new Logger(() => ports.Count() > 2, "There are more than two ports on the bomb"));
-            list.Add(new Logger(() => plates.Count() > 1, "There is more than one port plate on the bomb"));
-            list.Add(new Logger(() => batteries < 1, "There are no batteries on the bomb"));
-            list.Add(new Logger(() => batteries % 2 == 1, "There are an odd number of batteries on the bomb"));
-            list.Add(new Logger(() => batteries % 2 == 0, "There are an even number of batteries on the bomb"));
-            list.Add(new Logger(() => dV9Batteries < 1, "There are no D batteries present on the bomb"));
-            list.Add(new Logger(() => dV9Batteries > 0, "There is one D battery present on the bomb"));
-            list.Add(new Logger(() => dV9Batteries > 1, "There is more than one D battery present on the bomb"));
-            list.Add(new Logger(() => AABatteries < 1, "There are no AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries > 1, "There are two AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries == 3, "There are exactly three AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries > 3, "There are four AA batteries present on the bomb"));
-            list.Add(new Logger(() => AABatteries > 4, "There are more than four AA batteries present on the bomb"));
-            list.Add(new Logger(() => holders < 1, "There are no battery holders on the bomb"));
-            list.Add(new Logger(() => holders == 1, "There is exactly one battery holder on the bomb"));
-            list.Add(new Logger(() => holders > 1, "There is more than one battery holder on the bomb"));
-            list.Add(new Logger(() => empty > 0, "There is an empty battery holder on the bomb"));
-            list.Add(new Logger(() => AAHolder > 0, "There is a battery holder with exactly two batteries on the bomb"));
-            list.Add(new Logger(() => AAx3Holder > 0, "There is a battery holder with exactly three batteries on the bomb"));
-            list.Add(new Logger(() => dV9Holder + AAx3Holder > 1, "There are multiple battery holders with an odd number of batteries on the bomb"));
-            list.Add(new Logger(() => AAx4Holder > 0, "There is a battery holder with exactly four batteries on the bomb"));
-            list.Add(new Logger(() => empty + AAHolder + AAx4Holder > 1, "There are multiple battery holders with an even number of batteries on the bomb"));
-            list.Add(new Logger(() => indicators.Count() < 1, "There are no indicators on the bomb"));
-            list.Add(new Logger(() => indicators.Count() == 1, "There is exactly one indicator on the bomb"));
-            list.Add(new Logger(() => indicators.Count() > 1, "There is more than one indicator on the bomb"));
-            list.Add(new Logger(() => onIndicators.Count() < 1, "There are no lit indicators on the bomb"));
-            list.Add(new Logger(() => onIndicators.Count() == 1, "There is exactly one lit indicator on the bomb"));
-            list.Add(new Logger(() => onIndicators.Count() > 1, "There is more than one lit indicator on the bomb"));
-            list.Add(new Logger(() => offIndicators.Count() < 1, "There are no unlit indicators on the bomb"));
-            list.Add(new Logger(() => offIndicators.Count() == 1, "There is exactly one unlit indicator on the bomb"));
-            list.Add(new Logger(() => offIndicators.Count() > 1, "There is more than one unlit indicator on the bomb"));
+            list.Add(new Logger(() => ports().Count() < 1, "There are no ports on the bomb"));
+            list.Add(new Logger(() => plates().Where(x => x.Length < 1).Count() > 0, "There is an empty port plate"));
+            list.Add(new Logger(() => ports().Count() == 1, "There is exactly one port on the bomb"));
+            list.Add(new Logger(() => ports().Count() > 2, "There are more than two ports on the bomb"));
+            list.Add(new Logger(() => plates().Count() > 1, "There is more than one port plate on the bomb"));
+            list.Add(new Logger(() => batteries() < 1, "There are no batteries on the bomb"));
+            list.Add(new Logger(() => batteries() % 2 == 1, "There are an odd number of batteries on the bomb"));
+            list.Add(new Logger(() => batteries() % 2 == 0, "There are an even number of batteries on the bomb"));
+            list.Add(new Logger(() => dV9Batteries() < 1, "There are no D batteries present on the bomb"));
+            list.Add(new Logger(() => dV9Batteries() > 0, "There is one D battery present on the bomb"));
+            list.Add(new Logger(() => dV9Batteries() > 1, "There is more than one D battery present on the bomb"));
+            list.Add(new Logger(() => AABatteries() < 1, "There are no AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries() > 1, "There are two AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries() == 3, "There are exactly three AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries() > 3, "There are four AA batteries present on the bomb"));
+            list.Add(new Logger(() => AABatteries() > 4, "There are more than four AA batteries present on the bomb"));
+            list.Add(new Logger(() => holders() < 1, "There are no battery holders on the bomb"));
+            list.Add(new Logger(() => holders() == 1, "There is exactly one battery holder on the bomb"));
+            list.Add(new Logger(() => holders() > 1, "There is more than one battery holder on the bomb"));
+            list.Add(new Logger(() => empty() > 0, "There is an empty battery holder on the bomb"));
+            list.Add(new Logger(() => AAHolder() > 0, "There is a battery holder with exactly two batteries on the bomb"));
+            list.Add(new Logger(() => AAx3Holder() > 0, "There is a battery holder with exactly three batteries on the bomb"));
+            list.Add(new Logger(() => dV9Holder() + AAx3Holder() > 1, "There are multiple battery holders with an odd number of batteries on the bomb"));
+            list.Add(new Logger(() => AAx4Holder() > 0, "There is a battery holder with exactly four batteries on the bomb"));
+            list.Add(new Logger(() => empty() + AAHolder() + AAx4Holder() > 1, "There are multiple battery holders with an even number of batteries on the bomb"));
+            list.Add(new Logger(() => indicators().Count() < 1, "There are no indicators on the bomb"));
+            list.Add(new Logger(() => indicators().Count() == 1, "There is exactly one indicator on the bomb"));
+            list.Add(new Logger(() => indicators().Count() > 1, "There is more than one indicator on the bomb"));
+            list.Add(new Logger(() => onIndicators().Count() < 1, "There are no lit indicators on the bomb"));
+            list.Add(new Logger(() => onIndicators().Count() == 1, "There is exactly one lit indicator on the bomb"));
+            list.Add(new Logger(() => onIndicators().Count() > 1, "There is more than one lit indicator on the bomb"));
+            list.Add(new Logger(() => offIndicators().Count() < 1, "There are no unlit indicators on the bomb"));
+            list.Add(new Logger(() => offIndicators().Count() == 1, "There is exactly one unlit indicator on the bomb"));
+            list.Add(new Logger(() => offIndicators().Count() > 1, "There is more than one unlit indicator on the bomb"));
 
             foreach (Func<Enum> value in options3)
             {
                 if (value() is Port)
                 {
                     var itemName = value().ToString();
-                    list.Add(new Logger(() => ports.Contains(itemName), "There is a " + itemName + " port on the bomb"));
-                    list.Add(new Logger(() => ports.Where(x => x == itemName).Count() > 1, "There is more than 1 " + itemName + " port on the bomb"));
-                    list.Add(new Logger(() => ports.Where(x => x == itemName).Count() == 1, "There is exactly 1 " + itemName + " port on the bomb"));
-                    list.Add(new Logger(() => ports.Where(x => x == itemName).Count() < 1, "There are no " + itemName + " ports on the bomb"));
+                    list.Add(new Logger(() => ports().Contains(itemName), "There is a " + itemName + " port on the bomb"));
+                    list.Add(new Logger(() => ports().Where(x => x == itemName).Count() > 1, "There is more than 1 " + itemName + " port on the bomb"));
+                    list.Add(new Logger(() => ports().Where(x => x == itemName).Count() == 1, "There is exactly 1 " + itemName + " port on the bomb"));
+                    list.Add(new Logger(() => ports().Where(x => x == itemName).Count() < 1, "There are no " + itemName + " ports on the bomb"));
                 }
                 if (value() is Indicator)
                 {
                     var itemName = value().ToString();
-                    list.Add(new Logger(() => indicators.Contains(itemName), "There is a " + itemName + " indicator present on the bomb"));
-                    list.Add(new Logger(() => !indicators.Contains(itemName), "There is not a " + itemName + " indicator present on the bomb"));
-                    list.Add(new Logger(() => onIndicators.Contains(itemName), "There is a lit " + itemName + " indicator present on the bomb"));
-                    list.Add(new Logger(() => !onIndicators.Contains(itemName), "There is not a lit " + itemName + " indicator present on the bomb"));
-                    list.Add(new Logger(() => offIndicators.Contains(itemName), "There is an unlit " + itemName + " indicator present on the bomb"));
-                    list.Add(new Logger(() => !offIndicators.Contains(itemName), "There is not an unlit " + itemName + " indicator present on the bomb"));
+                    list.Add(new Logger(() => indicators().Contains(itemName), "There is a " + itemName + " indicator present on the bomb"));
+                    list.Add(new Logger(() => !indicators().Contains(itemName), "There is not a " + itemName + " indicator present on the bomb"));
+                    list.Add(new Logger(() => onIndicators().Contains(itemName), "There is a lit " + itemName + " indicator present on the bomb"));
+                    list.Add(new Logger(() => !onIndicators().Contains(itemName), "There is not a lit " + itemName + " indicator present on the bomb"));
+                    list.Add(new Logger(() => offIndicators().Contains(itemName), "There is an unlit " + itemName + " indicator present on the bomb"));
+                    list.Add(new Logger(() => !offIndicators().Contains(itemName), "There is not an unlit " + itemName + " indicator present on the bomb"));
 
                     foreach (IndicatorColor color in Enum.GetValues(typeof(IndicatorColor)))
                     {
                         if (color.GetHashCode() < 2) continue;
-                        var coloredIndicator = Rules.BombInfo.GetColoredIndicators(color);
                         var colorName = Enum.GetName(typeof(IndicatorColor), color);
                         //The colors only need to be checked once
                         //It's here because I only wanted to iterate the colors in one place
                         if (!check)
                         {
-                            list.Add(new Logger(() => coloredIndicator.Count() > 0, "There is a " + color.ToString() + " indicator present"));
+                            list.Add(new Logger(() => BombInfo().GetColoredIndicators(color).Count() > 0, "There is a " + color.ToString() + " indicator present"));
                         }
-                        var coloredIndicators = Rules.BombInfo.GetColoredIndicators(colorName, itemName);
-                        list.Add(new Logger(() => coloredIndicators.Count() > 0, string.Format("There is a {0} {1} indicator present", color.ToString(), itemName)));
+                        list.Add(new Logger(() => BombInfo().GetColoredIndicators(colorName, itemName).Count() > 0, string.Format("There is a {0} {1} indicator present", color.ToString(), itemName)));
                     }
                     check = true;
                 }
             }
-            list.Add(new Logger(() => !Rules.BombInfo.IsTwoFactorPresent(), "There is not a Two Factor widget present"));
-            list.Add(new Logger(() => Rules.BombInfo.GetTwoFactorCounts() == 1, "There is exactly one Two Factor widget present"));
-            list.Add(new Logger(() => Rules.BombInfo.GetTwoFactorCounts() > 1, "There is more than one Two Factor widget present"));
-            list.Add(new Logger(() => !Rules.BombInfo.IsManufacturePresent(), "There is not a Date of Manufacture widget present"));
-            list.Add(new Logger(() => Rules.BombInfo.IsManufacturePresent(), "There is a Date of Manufacture widget present"));
-            list.Add(new Logger(() => !Rules.BombInfo.IsDayOfWeekPresent(), "There is not a Day of Week widget present"));
-            list.Add(new Logger(() => Rules.BombInfo.IsDayOfWeekPresent(), "There is a Day of Week widget present"));
-            list.Add(new Logger(() => Rules.BombInfo.IsManufacturePresent() && Rules.BombInfo.IsDayOfWeekPresent(), "Thereis both a Date of Manufacture and Day of Week widget present"));
-            list.Add(new Logger(() => !Rules.BombInfo.IsRandomTimePresent(), "There is not a Randomized Time widget present"));
-            list.Add(new Logger(() => Rules.BombInfo.GetRandomTimeCount() < 2, "There are less than two Randomized Time widgets present"));
-            list.Add(new Logger(() => Rules.BombInfo.GetRandomTimeCount() == 2, "There are exactly two Randomized Time widgets present"));
-            list.Add(new Logger(() => Rules.BombInfo.GetRandomTimeCount() > 2, "There are more than two Randomized Time widgets present"));
+            list.Add(new Logger(() => twoFactorCount() < 1, "There is not a Two Factor widget present"));
+            list.Add(new Logger(() => twoFactorCount() == 1, "There is exactly one Two Factor widget present"));
+            list.Add(new Logger(() => twoFactorCount() > 1, "There is more than one Two Factor widget present"));
+            list.Add(new Logger(() => !manufacturePresent(), "There is not a Date of Manufacture widget present"));
+            list.Add(new Logger(() => manufacturePresent(), "There is a Date of Manufacture widget present"));
+            list.Add(new Logger(() => !dayPresent(), "There is not a Day of Week widget present"));
+            list.Add(new Logger(() => dayPresent(), "There is a Day of Week widget present"));
+            list.Add(new Logger(() => manufacturePresent() && dayPresent(), "Thereis both a Date of Manufacture and Day of Week widget present"));
+            list.Add(new Logger(() => timeCount() < 1, "There is not a Randomized Time widget present"));
+            list.Add(new Logger(() => timeCount() < 2, "There are less than two Randomized Time widgets present"));
+            list.Add(new Logger(() => timeCount() == 2, "There are exactly two Randomized Time widgets present"));
+            list.Add(new Logger(() => timeCount() > 2, "There are more than two Randomized Time widgets present"));
             possibleCount = list.Count;
             if (!pass)
             {
