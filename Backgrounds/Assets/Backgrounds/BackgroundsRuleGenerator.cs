@@ -20,6 +20,8 @@ namespace BackgroundsRuleGenerator
             var list = new List<bool>();
             //var log = new List<string>();
             rng = Module.RuleSeed.GetRNG();
+            if (Generator._rng != null && Generator._rng.Seed != rng.Seed)
+                Generator.pass = false;
             var one = rng.Seed == 1;
             ColBacking = UnityEngine.Random.Range(0, 8);
             ColButton = UnityEngine.Random.Range(0, 9);
@@ -32,7 +34,13 @@ namespace BackgroundsRuleGenerator
             Module.coordX = coordX;
             Module.coordY = coordY;
             Module.BGManualTable = ManualTable;
-            Possibilities = Generator.Swaps(Generator.Possibilities(this));
+            if (!Generator.pass) Possibilities = Generator.Swaps(Generator.Possibilities(this));
+            else
+            {
+                Generator.options1[0] = () => ColBacking;
+                Generator.options1[1] = () => ColButton;
+                Generator.options1[2] = () => Counter;
+            }
             //Rules that check if the submit button contains a digit
             var Submit = Module.Submit.GetComponentInChildren<UnityEngine.TextMesh>();
             if ((Generator.RuleIndicies.Contains(2) || Generator.RuleIndicies.Contains(3)) && Counter == 1) Submit.text = Submit.text + " 0";
@@ -57,24 +65,27 @@ namespace BackgroundsRuleGenerator
         }
         internal static bool pass = false;
         //Instance of RuleSeed
-        private static MonoRandom _rng;
+        internal static MonoRandom _rng;
         //The number of rules Backgrounds uses
         private const int count = 9;
         //Rules to be chosen, primary colors to be chosen
         public static int[] RuleIndicies = new int[count], additive,
             //Original manual values to be randomized
             //May look into doing the randomization from scratch in the future
-            coordX = { 0, 3, 2, 3, 1, 5, 4, 1, 2, 4 },
-            coordY = { 2, 1, 4, 3, 5, 4, 1, 2, 3, 0 },
-            ManualTable = {
+            coordXOriginal = { 0, 3, 2, 3, 1, 5, 4, 1, 2, 4 },
+            coordX,
+            coordYOriginal = { 2, 1, 4, 3, 5, 4, 1, 2, 3, 0 },
+            coordY,
+            ManualTableOriginal = {
                 3, 2, 9, 1, 7, 4,
                 7, 9, 8, 8, 2, 3,
                 5, 1, 7, 4, 4, 6,
                 6, 4, 2, 6, 8, 5,
                 5, 1, 5, 3, 9, 9,
                 1, 2, 3, 6, 7, 8
-            };
-        private static bool check, check2;
+            },
+            ManualTable;
+        private static bool check;
         private static int possibleCount;
 
         //Individual items that will be used for comparisons in Possibilities
@@ -208,9 +219,10 @@ namespace BackgroundsRuleGenerator
 
         public static void Rules(Rule Rules)
         {
-            //This shouldn't be reached? I saw it in Morse-A-Maze's code
             if (_rng != null && _rng.Seed == Rules.rng.Seed) return;
             _rng = Rules.rng;
+            if (!pass)
+                ClearAll();
             if (_rng.Seed != 1)
             {
                 _rng.ShuffleFisherYates(coordX);
@@ -228,6 +240,18 @@ namespace BackgroundsRuleGenerator
                     Rule.ManualTable[i, j] = ManualTable[6 * i + j];
                 }
             }
+        }
+
+        static void ClearAll()
+        {
+            coordX = coordXOriginal.ToArray();
+            coordY = coordYOriginal.ToArray();
+            ManualTable = ManualTableOriginal.ToArray();
+            options1.Clear();
+            options2.Clear();
+            options3.Clear();
+            possibilities.Clear();
+            check = false;
         }
 
         //Determine which primary system is being used
@@ -248,6 +272,13 @@ namespace BackgroundsRuleGenerator
                 Backgrounds.color[5] = UnityEngine.Color.magenta;
                 Backgrounds.colorList[5] = "magenta";
                 return list2.Concat(list4).ToList();
+            }
+            else
+            {
+                Backgrounds.color[1] = Backgrounds.orange;
+                Backgrounds.colorList[1] = "orange";
+                Backgrounds.color[5] = Backgrounds.purple;
+                Backgrounds.colorList[5] = "purple";
             }
             return list1.Concat(list3).ToList();
         }
@@ -288,8 +319,8 @@ namespace BackgroundsRuleGenerator
                 {
                     //Delegates remember the last iterated value, so declare a new variable in the iteration
                     var k = j;
-                    list.Add(new Logger(() => option.Contains(options1[k]()), string.Format("if the {0} {1} {2}", j == 0 ? "backing" : "button", option.Count == 1 ? "is the color" : "is either", string.Join("", option.Select(x => ((x.Equals(option.Last()) && option.Count > 2) ? ", or " : (x.Equals(option.Last()) && option.Count == 2) ? " or " : !x.Equals(option.First()) && option.Count > 2 ? ", " : "") + Backgrounds.colorList[x]).ToArray()))));
-                    list.Add(new Logger(() => !option.Contains(options1[k]()), string.Format("if the {0} {1} {2}", j == 0 ? "backing" : "button", option.Count == 1 ? "is not the color" : "is neither", string.Join("", option.Select(x => ((x.Equals(option.Last()) && option.Count > 2) ? ", or " : (x.Equals(option.Last()) && option.Count == 2) ? " or " : !x.Equals(option.First()) && option.Count > 2 ? ", " : "") + Backgrounds.colorList[x]).ToArray()))));
+                    list.Add(new Logger(() => option.Contains(options1[k]()), string.Format("if the {0} {1} {2}", k == 0 ? "backing" : "button", option.Count == 1 ? "is the color" : "is either", string.Join("", option.Select(x => ((x.Equals(option.Last()) && option.Count > 2) ? ", or " : (x.Equals(option.Last()) && option.Count == 2) ? " or " : !x.Equals(option.First()) && option.Count > 2 ? ", " : "") + Backgrounds.colorList[x]).ToArray()))));
+                    list.Add(new Logger(() => !option.Contains(options1[k]()), string.Format("if the {0} {1} {2}", k == 0 ? "backing" : "button", option.Count == 1 ? "is not the color" : "is neither", string.Join("", option.Select(x => ((x.Equals(option.Last()) && option.Count > 2) ? ", or " : (x.Equals(option.Last()) && option.Count == 2) ? " or " : !x.Equals(option.First()) && option.Count > 2 ? ", " : "") + Backgrounds.colorList[x]).ToArray()))));
                 }
             }
 
@@ -369,14 +400,14 @@ namespace BackgroundsRuleGenerator
                         var colorName = Enum.GetName(typeof(IndicatorColor), color);
                         //The colors only need to be checked once
                         //It's here because I only wanted to iterate the colors in one place
-                        if (!check2)
+                        if (!check)
                         {
                             list.Add(new Logger(() => coloredIndicator.Count() > 0, "There is a " + color.ToString() + " indicator present"));
                         }
                         var coloredIndicators = Rules.BombInfo.GetColoredIndicators(colorName, itemName);
                         list.Add(new Logger(() => coloredIndicators.Count() > 0, string.Format("There is a {0} {1} indicator present", color.ToString(), itemName)));
                     }
-                    check2 = true;
+                    check = true;
                 }
             }
             list.Add(new Logger(() => !Rules.BombInfo.IsTwoFactorPresent(), "There is not a Two Factor widget present"));
@@ -395,7 +426,12 @@ namespace BackgroundsRuleGenerator
             if (!pass)
             {
                 for (int i = 0; i < count; i++)
-                    RuleIndicies[i] = _rng.Next(0, possibleCount);
+                {
+                    var value = _rng.Next(0, possibleCount);
+                    while (RuleIndicies.Contains(value))
+                        value = _rng.Next(0, possibleCount);
+                    RuleIndicies[i] = value;
+                }
             }
             pass = true;
             /*var hold1 = new List<string>();

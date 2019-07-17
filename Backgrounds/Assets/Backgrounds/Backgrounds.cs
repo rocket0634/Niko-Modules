@@ -16,6 +16,7 @@ public class Backgrounds : MonoBehaviour
     }
 
     private static int Backgrounds_moduleIdCounter = 1;
+    private static int Faulty_moduleIdCounter = 1;
     private int Backgrounds_moduleId;
     public KMBombInfo BombInfo;
     public KMBombModule BombModule;
@@ -123,7 +124,7 @@ public class Backgrounds : MonoBehaviour
         var faulty = new Faulty();
         Rules.Module = this;
         faulty.Module = this;
-        Backgrounds_moduleId = Backgrounds_moduleIdCounter++;
+        Backgrounds_moduleId = ModuleType == Type.Faulty ? Faulty_moduleIdCounter++ : Backgrounds_moduleIdCounter++;
 
         Submit.OnInteract += HandlePressSubmit;
         
