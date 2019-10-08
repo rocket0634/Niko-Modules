@@ -280,8 +280,16 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-        string[] MazeModules = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", /*"Blind Maze",*/ "Polyhedral Maze", "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze", "Factory Maze", "Module Maze" };
-        int MazeBased = BombInfo.GetModuleNames().Intersect(MazeModules).Count();
+        string[] MazeModuleDisplayNames = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", /*"Blind Maze",*/ "Polyhedral Maze",
+            "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze", "Factory Maze", "Module Maze", "Mazematics", "Maze³", "A-maze-ing Buttons", "RGB Maze", "Faulty RGB Maze" };
+        string[] MazeModules = new[] { "Maze", "MouseInTheMaze", "spwiz3DMaze", "HexamazeModule", "MorseAMaze", "PolyhedralMazeModule", /*"BlindMaze,"*/ "USA",
+            "MazeScrambler", "boolMaze", "crystalMaze", "factoryMaze", "ModuleMaze", "mazematics", "maze3", "ksmAmazeingButtons", "rgbMaze", "faultyrgbMaze" };
+        int MazeBased = 0;
+        //compatibility with 1.8.3 and lower I guess
+        if (BombInfo.ModuleIDsHandler != null)
+            MazeBased = BombInfo.GetModuleIDs().Intersect(MazeModules).Count();
+        else
+            MazeBased = BombInfo.GetModuleNames().Intersect(MazeModuleDisplayNames).Count();
         DebugLog("There are {0} compatible maze-type modules on the bomb, not including Blind Maze.", MazeBased);
 
         int MazeRule = 7;
