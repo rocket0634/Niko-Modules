@@ -1,4 +1,4 @@
-﻿using KMBombInfoExtensions;
+﻿using KModkit;
 using UnityEngine;
 using System;
 using System.Linq;
@@ -280,20 +280,14 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-        string[] MazeModuleDisplayNames = new[] { "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", /*"Blind Maze",*/ "Polyhedral Maze",
-            "Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "The Crystal Maze", "Factory Maze", "Module Maze", "Mazematics", "Maze³", "A-maze-ing Buttons", "RGB Maze", "Faulty RGB Maze" };
         string[] MazeModules = new[] { "Maze", "MouseInTheMaze", "spwiz3DMaze", "HexamazeModule", "MorseAMaze", "PolyhedralMazeModule", /*"BlindMaze,"*/ "USA",
             "MazeScrambler", "boolMaze", "crystalMaze", "factoryMaze", "ModuleMaze", "mazematics", "maze3", "ksmAmazeingButtons", "rgbMaze", "faultyrgbMaze" };
         int MazeBased = 0;
-        //compatibility with 1.8.3 and lower I guess
-        if (BombInfo.ModuleIDsHandler != null)
-            MazeBased = BombInfo.GetModuleIDs().Intersect(MazeModules).Count();
-        else
-            MazeBased = BombInfo.GetModuleNames().Intersect(MazeModuleDisplayNames).Count();
+        MazeBased = BombInfo.GetModuleIDs().Intersect(MazeModules).Count();
         DebugLog("There are {0} compatible maze-type modules on the bomb, not including Blind Maze.", MazeBased);
 
         int MazeRule = 7;
-        int[] rulesCount = { COLORKEYS[0], BombInfo.GetBatteryCount(), COLORKEYS[4], COLORKEYS[0], MazeBased, BombInfo.GetPorts().Distinct().Count(), COLORKEYS[1], COLORKEYS[2], COLORKEYS[3], BombInfo.GetBatteryCount(KMBI.KnownBatteryType.AA), BombInfo.GetBatteryCount(KMBI.KnownBatteryType.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetPortCount(), BombInfo.GetPortPlateCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count() };
+        int[] rulesCount = { COLORKEYS[0], BombInfo.GetBatteryCount(), COLORKEYS[4], COLORKEYS[0], MazeBased, BombInfo.GetPorts().Distinct().Count(), COLORKEYS[1], COLORKEYS[2], COLORKEYS[3], BombInfo.GetBatteryCount(Battery.AA), BombInfo.GetBatteryCount(Battery.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetPortCount(), BombInfo.GetPortPlateCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count() };
         int[] conditionCount = { 2, 5, 1, 1, 1 };
         int conditionIndicator = 3;
         int[] mazeRotation = { 1, 1, 2, 1, 2, 1 };
@@ -327,7 +321,7 @@ public class BlindMaze : MonoBehaviour
             rules(0);
         } else if (rulesCount[1] >= conditionCount[1]) {
             rules(1);
-        } else if (BombInfo.GetIndicators().Contains(((KMBI.KnownIndicatorLabel)conditionIndicator).ToString())) {
+        } else if (BombInfo.GetIndicators().Contains(((Indicator)conditionIndicator).ToString())) {
             rules(2);
         } else if (rulesCount[2] == 0 && rulesCount[3] >= conditionCount[2]) {
             rules(3);

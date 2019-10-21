@@ -1016,7 +1016,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 960d0367b771c594fa4c8cbe818a2c84, type: 2}
+  - {fileID: 2100000, guid: c0f6606dddae46d4a975f416c1a51c17, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1467,7 +1467,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ModuleType: BlindMaze
   ModuleDisplayName: Blind Maze
-  RequiresTimerVisibility: 1
+  RequiresTimerVisibility: 0
 --- !u!114 &114423280851915428
 MonoBehaviour:
   m_ObjectHideFlags: 1
