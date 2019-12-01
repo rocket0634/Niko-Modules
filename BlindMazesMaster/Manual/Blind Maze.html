@@ -19,19 +19,23 @@
         var rules = document.getElementsByClassName("rules");
         var colorNames = [ "red", "green", "blue", "gray", "yellow" ];
         var indicatorNames = [ "SND", "CLR", "CAR", "IND", "FRQ", "SIG", "NSA", "MSA", "TRN", "BOB", "FRK" ];
-        var rulesCount = [ "red buttons", "batteries", "yellow buttons", "red buttons", "modules with “Maze” in its name other than “Blind Maze”", "port types", "green buttons", "blue buttons", "gray buttons", "AA batteries", "D batteries", "battery holders", "ports", "port plates", "indicators", "lit indicators", "unlit indicators" ];
-		var rulesCountCopy;
-        var conditionCount = [ 2, 5, 1, 1, 1 ];
-		var conditionCountCopy;
+        var rulesCount = [ "red buttons", "batteries", "yellow buttons", "red buttons", "other distinct maze-based modules present on the bomb", "port types", "green buttons", "blue buttons", "gray buttons", "AA batteries", "D batteries", "battery holders", "ports", "port plates", "indicators", "lit indicators", "unlit indicators" ];
+        var mazeBased = [ "Maze", "Mouse In The Maze", "3D Maze", "Hexamaze", "Morse-A-Maze", "Polyhedral Maze", "USA Maze", "Maze Scrambler", "Boolean Maze", "IKEA", "Factory Maze", "Module Maze", "Mazematics", "Maze³", "A-Maze-ing Buttons", "RGB Maze", "Faulty RGB Maze", "Colored Maze", "The Labyrinth", "Cruel Boolean Maze" ].sort((a, b) => (a.replace("The ", "") > b.replace("The ", "")) ? 1 : -1);
+        var sortedRules;
+        var mazeBasedCopy;
+        var rulesCountCopy;
+        var conditionCount = [ 2, 5, 1, 2, 1 ];
+        var conditionCountCopy;
         var conditionIndicator = 3;
         var mazeRotation = [ 1, 1, 2, 1, 2, 1 ];
-		var mazeRotationCopy;
+        var mazeRotationCopy;
         var clockwise = [ true, true, true, false, true, false ];
-		var clockwiseCopy;
+        var clockwiseCopy;
         var calculate = [ false, true, false, false, true, true ];
-		var calculateCopy;
-		var generated;
-		var pass;
+        var calculateCopy;
+        var generated;
+        var pass;
+        var connected = true;
 
         var rng;
 
@@ -135,43 +139,60 @@
             for (var i = 0; i < 4; i++) {
                 Array.from(document.getElementsByClassName("colorTable" + (i + 1))).forEach((x, y) => x.innerHTML = colorTable[y + (5 * i)]);
             }
-            handleRules(true);
-			if (!pass)
-				generateSVG();
+            handleRules();
+            if (!pass)
+              generateSVG();
+            //I don't think JS has a last function
+            //Faster to say "USA Maze" than mazeBased.length - 1
+            var footnoteElement = document.getElementsByClassName("footnotes")[0];
+            footnoteElement.innerHTML = "<p>Modules detected as \"maze-based\" only include " + mazeBased.slice(0, -1).join(", ") + ", and USA Maze</p>";
         }
 
         //Rule Seed rules
         function setRules(rnd) {
             rng = rnd;
-
-			pass = true;
+            console.log(mazeBased);
+            pass = true;
             setDefaultRules();
-			pass = false;
+            //Call maze types from ktane.timwi.de/json/raw
+            getJSON();
+        }
+        
+        function shuffleRules() {
+          pass = false;
 
-            for (var i = 0; i < 10; i++)
-                checkCell(i, rng.nextMax(4), rng.nextMax(4));
+          for (var i = 0; i < 10; i++)
+              checkCell(i, rng.nextMax(4), rng.nextMax(4));
 
-            var colorTable = [];
+          var colorTable = [];
 
-            for (var i = 0; i < 20; i++)
-                colorTable.push(rng.next(1, 5));
+          for (var i = 0; i < 20; i++)
+              colorTable.push(rng.next(1, 5));
 
-            for (var i = 0; i < 5; i++) {
-                Array.from(document.getElementsByClassName("colorTable" + (i + 1))).forEach((x, y) => x.innerHTML = colorTable[y + (5 * i)]);
-            }
-            rulesCountCopy = rng.shuffleFisherYates(rulesCountCopy).slice(0, 7);
-            conditionIndicator = rng.nextMax(11);
+          for (var i = 0; i < 5; i++) {
+              Array.from(document.getElementsByClassName("colorTable" + (i + 1))).forEach((x, y) => x.innerHTML = colorTable[y + (5 * i)]);
+          }
+          //SetDefaultRules alters rulesCountCopy, so we should reset it here.
+          rulesCountCopy = rulesCount.slice();
+          rulesCountCopy = rng.shuffleFisherYates(rulesCountCopy).slice(0, 7);
+          conditionIndicator = rng.nextMax(11);
 
-            for (var i = 0; i < 6; i++) {
-                if (i < 5) conditionCountCopy[i] = rng.next(1, 5);
+          for (var i = 0; i < 6; i++) {
+              if (i < 5) conditionCountCopy[i] = rng.next(1, 5);
 
-                mazeRotationCopy[i] = rng.next(1, 4);
-                clockwiseCopy[i] = (rng.nextMax(2) == 1) ? true : false;
-                calculateCopy[i] = (rng.nextMax(2) == 1) ? true : false;
-            }
+              mazeRotationCopy[i] = rng.next(1, 4);
+              clockwiseCopy[i] = (rng.nextMax(2) == 1) ? true : false;
+              calculateCopy[i] = (rng.nextMax(2) == 1) ? true : false;
+          }
 
-            handleRules(rng.seed == 1);
-			generateSVG();
+          handleRules();
+          generateSVG();
+          if (connected)
+            mazeBasedCopy = rng.shuffleFisherYates(sortedNames).slice(0, 20).sort((a,b) => (a.SortKey > b.SortKey) ? 1 : -1).map(a => a.Name);
+          var footnoteElement = document.getElementsByClassName("footnotes")[0];
+          footnoteElement.innerHTML = "<p>Modules detected as \"maze-based\" includes " + mazeBasedCopy.slice(0, -1).join(", ") + ", and " + mazeBasedCopy[mazeBasedCopy.length - 1] + "</p>";
+          if (!connected)
+            footnoteElement.innerHTML = footnoteElement.innerHTML + "<p>This detection is based on the default list of maze modules. If you see this message, detection will work best if the bomb cannot connect to the internet.</p>";
         }
 
         //Recursive algorithm for the maze generation
@@ -197,13 +218,13 @@
         function handleRules(original) {
             var countRule = 0;
             var countCondition = 0;
-			if (!rulesCountCopy || original){
-				rulesCountCopy = rulesCount.slice();
-				conditionCountCopy = conditionCount.slice();
-				clockwiseCopy = clockwise.slice();
-				mazeRotationCopy = mazeRotation.slice();
-				calculateCopy = calculate.slice();
-			}
+            if (!rulesCountCopy || original){
+              rulesCountCopy = rulesCount.slice();
+              conditionCountCopy = conditionCount.slice();
+              clockwiseCopy = clockwise.slice();
+              mazeRotationCopy = mazeRotation.slice();
+              calculateCopy = calculate.slice();
+            }
 
             var ruleTemplates = [
                 "If there are at least {c} {r}, {m}.",
@@ -218,7 +239,7 @@
             for (var i = 0; i < rules.length; i++) {
                 var ruleText = ruleTemplates[i];
                 if (i != 2) {
-                    if (conditionCount[countCondition] == 1) {
+                    if (conditionCountCopy[countCondition] == 1) {
                         if (countCondition != 2) {
                             ruleText = ruleText.replace("there are", "there is");
                             rulesCountCopy[countRule] = makeSingular(rulesCountCopy[countRule]);
@@ -245,46 +266,79 @@
 		
         function makeSingular(text) {
             if (text.includes("batteries")) text = text.replace("batteries", "battery");
-            else if (text.includes("Blind Maze")) text = text.replace("modules", "module");
+            else if (text.includes("maze-based")) text = text.replace("modules", "module");
             else text = text.substring(0, text.length - 1);
 
             return text;
         }
+        
+        function getJSON() {
+            document.getElementsByClassName("footnotes")[0].innerHTML = document.getElementsByClassName("footnotes")[0].innerHTML + "<p>Waiting on Ruleseed...</p>";
+            var xhttp = new XMLHttpRequest();
+            xhttp.addEventListener("error", function (evt)
+            {
+              mazeBasedCopy = mazeBased.slice();
+              connected = false;
+              shuffleRules();
+            });
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var json = JSON.parse(this.responseText).KtaneModules;
+                    mazeBasedCopy = [];
+                    sortedNames = [];
+                    var count = 0;
+                    json.forEach(function(item, i){
+                      if (item.Name.toLowerCase == "blind maze")
+                        return;
+                      if (item.Name.toLowerCase().includes("maze") || item.Description.toLowerCase().includes("maze")){
+                        sortedNames.push(item);
+                      }
+                    });
+                    shuffleRules();
+                }
+            }
+            var link = "https://ktane.timwi.de/json/raw";
+            if (window.location.hostname == "ktane.timwi.de"){
+              link = "../../json/raw";
+              }
+            xhttp.open("GET", link, true);
+            xhttp.send();
+        }
 		
-		function generateSVG() {
+        function generateSVG() {
 			
-			var svg = document.getElementsByClassName("mazes")[0].getElementsByTagName("svg")[0];
-			if (!generated)
-			{
-				var mazes = document.createElementNS("http://www.w3.org/2000/svg", "g");
-				svg.appendChild(mazes);
-			}
-			generated = true;
-			mazes = svg.firstChild;
-			mazes.innerHTML = '';
+            var svg = document.getElementsByClassName("mazes")[0].getElementsByTagName("svg")[0];
+            if (!generated)
+            {
+              var mazes = document.createElementNS("http://www.w3.org/2000/svg", "g");
+              svg.appendChild(mazes);
+            }
+            generated = true;
+            mazes = svg.firstChild;
+            mazes.innerHTML = '';
 
             for (var i = 0; i < 10; i++) {
-				var text = document.createTextNode(i.toString());
-				var textElement = setElement(document.createElementNS("http://www.w3.org/2000/svg", "text"),
-				[ "x",                     "y" ],
-				[ `${59 + 145 * (i % 5)}`, `${15 + 150 * Math.floor(i / 5)}` ]);
-				textElement.appendChild(text);
-				mazes.appendChild(textElement);
+                var text = document.createTextNode(i.toString());
+                var textElement = setElement(document.createElementNS("http://www.w3.org/2000/svg", "text"),
+                [ "x",                     "y" ],
+                [ `${59 + 145 * (i % 5)}`, `${15 + 150 * Math.floor(i / 5)}` ]);
+                textElement.appendChild(text);
+                mazes.appendChild(textElement);
 
-				var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-				[ "class",         "x",                     "y",                                "width", "height", "fill" ],
-				[ "highlightable", `${-9 + 145 * (i % 5)}`, `${1.5 + 150 * Math.floor(i / 5)}`, "145",   "18",     "transparent" ]);
-				mazes.appendChild(highlight);
+                var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+                [ "class",         "x",                     "y",                                "width", "height", "fill" ],
+                [ "highlightable", `${-9 + 145 * (i % 5)}`, `${1.5 + 150 * Math.floor(i / 5)}`, "145",   "18",     "transparent" ]);
+                mazes.appendChild(highlight);
 
-				var square = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-				[ "x",                    "y",                               "width", "height", "fill",        "stroke", "stroke-width" ],
-				[ `${2 + 145 * (i % 5)}`, `${21 + 150 * Math.floor(i / 5)}`, "125",   "125",    "transparent", "black",  "2" ]);
-				mazes.appendChild(square);
+                var square = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+                [ "x",                    "y",                               "width", "height", "fill",        "stroke", "stroke-width" ],
+                [ `${2 + 145 * (i % 5)}`, `${21 + 150 * Math.floor(i / 5)}`, "125",   "125",    "transparent", "black",  "2" ]);
+                mazes.appendChild(square);
 
-				var exit = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-				[ "x",                     "y",                               "width", "height", "fill" ],
-				[ `${52 + 145 * (i % 5)}`, `${18 + 150 * Math.floor(i / 5)}`, "25",    "6",      "white" ]);
-				mazes.appendChild(exit);
+                var exit = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+                [ "x",                     "y",                               "width", "height", "fill" ],
+                [ `${52 + 145 * (i % 5)}`, `${18 + 150 * Math.floor(i / 5)}`, "25",    "6",      "white" ]);
+                mazes.appendChild(exit);
             }
 
             for (var i = 0; i < 10; i++) {
@@ -292,10 +346,10 @@
                     for (var k = 0; k < 5; k++) {
                         var x = 2 + 25 * k + 145 * (i % 5);
                         var y = 21 + 25 * j + 150 * Math.floor(i / 5);
-						var small = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-						[ "x",          "y",          "width", "height", "fill" ],
-						[ `${x + 9.5}`, `${y + 9.5}`, "5",     "5",      "black" ]);
-						mazes.appendChild(small);
+                        var small = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+                        [ "x",          "y",          "width", "height", "fill" ],
+                        [ `${x + 9.5}`, `${y + 9.5}`, "5",     "5",      "black" ]);
+                        mazes.appendChild(small);
 
                         if (k < 4 && !cells[i][j][k].directions.E) {
                             var e = setElement(document.createElementNS("http://www.w3.org/2000/svg", "line"),
@@ -305,19 +359,19 @@
                         }
 
                         if (j < 4 && !cells[i][j][k].directions.S) {
-							var s = setElement(document.createElementNS("http://www.w3.org/2000/svg", "line"),
-							[ "x1",   "y1",        "x2",        "y2",        "stroke", "stroke-width" ],
-							[ `${x}`, `${y + 25}`, `${x + 25}`, `${y + 25}`, "black", "2" ]);
-							mazes.appendChild(s);
+                            var s = setElement(document.createElementNS("http://www.w3.org/2000/svg", "line"),
+                            [ "x1",   "y1",        "x2",        "y2",        "stroke", "stroke-width" ],
+                            [ `${x}`, `${y + 25}`, `${x + 25}`, `${y + 25}`, "black", "2" ]);
+                            mazes.appendChild(s);
                         }
-						var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
-						[ "class",         "x",        "y",    "width", "height", "fill" ],
-						[ "highlightable", `${x - 1}`, `${y}`, "25",    "25",     "transparent" ]);
-						mazes.appendChild(highlight);
+                        var highlight = setElement(document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+                        [ "class",         "x",        "y",    "width", "height", "fill" ],
+                        [ "highlightable", `${x - 1}`, `${y}`, "25",    "25",     "transparent" ]);
+                        mazes.appendChild(highlight);
                     }
                 }
             }
-		}
+        }
 
         function setElement(element, names, values) {
             if (names.length <= 0 || values.length <= 0) return null;
@@ -345,6 +399,26 @@
             div.mazes > img {
                 width:90%;
             }
+            
+        div.footnotes {
+            position: relative;
+            left: 0;
+            bottom: 0;
+            font-size: smaller;
+            margin: 0 0 1em;
+        }
+
+            div.footnotes p {
+                margin: .3em 0;
+            }
+        @media screen and (max-width: 900px) {
+            div.footnotes {
+                position: relative;
+            }
+                div.footnotes p {
+                    margin: .3em 0;
+                }
+        }
     </style>
 </head>
 <body>
@@ -451,6 +525,10 @@
                             <td class="colorTable3">2</td>
                         </tr>
                     </table>
+                    <p></p>
+                    <div class="footnotes">
+                        <p>Modules detected as "maze-based" only include 3D Maze, A-Maze-ing Buttons, Blind Maze, Blockbusters, Boolean Maze, Colored Maze, Cruel Boolean Maze,  Factory Maze, Faulty RGB Maze, Hexamaze, IKEA, The Labyrinth, Maze, Maze³,  Mazematics, Maze Scrambler, Mineseeker, Module Maze, Morse-A-Maze, Polyhedral Maze, Red Arrows, RGB Maze, and USA Maze</p>
+                    </div>
                 </div>
                 <div class="page-footer relative-footer">Page 2 of 2</div>
             </div>
