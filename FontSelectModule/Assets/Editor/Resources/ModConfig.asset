@@ -13,8 +13,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: FontSelect
   title: Font Select
-  description: "Module by JoketteWuzHere\n\nModule ID: FontSelect\n\r\nManual Page:
-    https://docs.google.com/document/d/1DIqRCYhZ9OqGyAocZquCQai7Gfmt0JiZeuK4oXA6wAI/edit?usp=sharing"
+  description: "Module by JoketteWuzHere\n\nModule ID: FontSelect\n\r\nManual (HTML):
+    https://ktane.timwi.de/HTML/Font%20Select.html"
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 2090177e0e043ca4286b11e9813be37a, type: 3}

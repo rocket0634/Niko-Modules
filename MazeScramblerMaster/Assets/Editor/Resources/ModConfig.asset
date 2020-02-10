@@ -20,7 +20,9 @@ MonoBehaviour:
 
     Module: JoketteWuzHere
 
-    ModuleID: MazeScrambler'
+    ModuleID: MazeScrambler
+
+    Manual: https://ktane.timwi.de/HTML/Maze%20Scrambler.html'
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 08f63f14a74e46844ab7301d2de89509, type: 3}

@@ -16,13 +16,16 @@ MonoBehaviour:
   description: "Navigate through a Maze You can't see! Not that you couldn't see the
     walls before, so how hard could it be?\n\nModule ID: BlindMaze\r\n\r\nManual Page:
     https://ktane.timwi.de/HTML/Blind%20Maze.html\n\nCurrently supported \"Maze-Type\"
-    modules: 3D Maze, A-maze-ing Buttons, Boolean Maze, The Crystal Maze, Factory
-    Maze, Faulty RGB Maze, Hexamaze, Mazes, Mazematics, Maze Scrambler, Maze\xB3\r,
-    Module Maze, Morse-A-Maze, Mouse In The Maze, Polyhedral Maze, RGB Maze, and USA
-    Maze.\n\nMod originally created by JoketteWuzHere/McNiko67, now managed by Riverbui.\n\nSpecial
-    Thanks to Sam, Cait, and Timwi for providing assistence with the coding.\n\nAny
-    feedback is welcome- If you have any suggestions or fixes, there's a pretty good
-    chance I'll accept pull requests. Source will be available on request."
+    modules: 3D Maze, A-maze-ing Buttons, Boolean Maze, Colored Maze, The Crystal
+    Maze, Factory Maze, Faulty RGB Maze, Hexamaze, Mazes, Mazematics, Maze Scrambler,
+    Maze\xB3\r, Module Maze, Morse-A-Maze, Mouse In The Maze, Polyhedral Maze, RGB
+    Maze, and USA Maze.\nThis module is not currently supported on versions of KTaNE
+    below 1.9.4 - however, a compatible version of the module can be downloaded from
+    the Github: https://github.com/rocket0634/Niko-Modules/releases\n\n\nMod originally
+    created by JoketteWuzHere/McNiko67, now managed by Riverbui.\n\nSpecial Thanks
+    to Sam, Cait, and Timwi for providing assistence with the coding.\n\nAny feedback
+    is welcome- If you have any suggestions or fixes, there's a pretty good chance
+    I'll accept pull requests."
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 2090177e0e043ca4286b11e9813be37a, type: 3}

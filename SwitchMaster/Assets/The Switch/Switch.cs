@@ -197,7 +197,7 @@ public class Switch : MonoBehaviour
         else if (BottomColor == 4)
         {
             BottomLED.material.color = Color.green;
-            BottomName = "breen";
+            BottomName = "green";
         }
         else if (BottomColor == 5)
         {

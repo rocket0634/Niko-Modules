@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: ModConfig
   m_EditorClassIdentifier: 
   id: Sink
-  title: Sink
+  title: Sink & Faulty Sink
   description: "With the passing of ownership of The Sink to a new owner, The Sink
     is now available to the public! However... something may have went wrong in production,
     leading to more problems than solutions...\n\nModule ID: Sink\r\n\r\nManual Page
