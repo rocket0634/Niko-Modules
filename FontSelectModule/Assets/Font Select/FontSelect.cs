@@ -1,9 +1,11 @@
 ﻿using System;
 using UnityEngine;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 public class FontSelect : MonoBehaviour
 {
@@ -68,8 +70,8 @@ public class FontSelect : MonoBehaviour
 
     protected void Start()
     {
-        ModConfig modConfig = new ModConfig("FontSettings", typeof(FontSettings));
-        Settings = (FontSettings)modConfig.Settings;
+        ModConfig<FontSettings> modConfig = new ModConfig<FontSettings>("FontSettings");
+        Settings = modConfig.Settings;
         modConfig.Settings = Settings;
         FontSelect_moduleId = FontSelect_moduleIdCounter++;
         banned = Settings.disableKarmaMerriweather;
@@ -245,61 +247,84 @@ public class FontSelect : MonoBehaviour
         var logData = string.Format(log, args);
         Debug.LogFormat("[Font Select #{0}] {1}", FontSelect_moduleId, logData);
     }
+
+    private IEnumerator TwitchHandleForcedSolve()
+    {
+        var fontValues = new[] { FirstFont, SecondFont, ThirdFont };
+        var answers = fontValues.ToArray();
+        Array.Sort(answers);
+        var answer = Array.IndexOf(fontValues, answers[0]) + 1;
+        var dir = answer > CurrentFont ? Right : answer < CurrentFont ? Left : null;
+        while (CurrentFont != answer)
+        {
+            yield return dir.OnInteract();
+            yield return true;
+        }
+        yield return Submit.OnInteract();
+    }
 }
 class FontSettings
 {
     public bool disableKarmaMerriweather = false;
 }
 
-class ModConfig
+class ModConfig<T>
 {
-    public ModConfig(string name, Type settingsType)
+    public ModConfig(string filename)
     {
-        _filename = name;
-        _settingsType = settingsType;
+        SettingsPath = Path.Combine(Path.Combine(Application.persistentDataPath, "Modsettings"), filename + ".json");
     }
 
-    readonly string _filename = null;
-    readonly Type _settingsType = null;
+    readonly string SettingsPath = null;
 
-    string SettingsPath
+    public string SerializeSettings(T settings)
     {
-        get
-        {
-            return Path.Combine(Application.persistentDataPath, "Modsettings\\" + _filename + ".json");
-        }
+        return JsonConvert.SerializeObject(settings, Formatting.Indented, new StringEnumConverter());
     }
 
-    public object Settings
+    static readonly object settingsFileLock = new object();
+
+    public T Settings
     {
         get
         {
             try
             {
-                if (!File.Exists(SettingsPath))
+                lock (settingsFileLock)
                 {
-                    File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Activator.CreateInstance(_settingsType), Formatting.Indented));
-                }
+                    if (!File.Exists(SettingsPath))
+                    {
+                        File.WriteAllText(SettingsPath, SerializeSettings(Activator.CreateInstance<T>()));
+                    }
 
-                return JsonConvert.DeserializeObject(File.ReadAllText(SettingsPath), _settingsType);
+                    T deserialized = JsonConvert.DeserializeObject<T>(
+                        File.ReadAllText(SettingsPath),
+                        new JsonSerializerSettings { Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) => args.ErrorContext.Handled = true }
+                    );
+                    return deserialized != null ? deserialized : Activator.CreateInstance<T>();
+                }
             }
-            catch
+            catch (Exception e)
             {
-                return Activator.CreateInstance(_settingsType);
+                Debug.LogException(e);
+                return Activator.CreateInstance<T>();
             }
         }
 
         set
         {
-            if (value.GetType() == _settingsType)
+            if (value.GetType() == typeof(T))
             {
-                File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(value, Formatting.Indented));
+                lock (settingsFileLock)
+                {
+                    File.WriteAllText(SettingsPath, SerializeSettings(value));
+                }
             }
         }
     }
 
     public override string ToString()
     {
-        return JsonConvert.SerializeObject(Settings, Formatting.Indented);
+        return SerializeSettings(Settings);
     }
 }

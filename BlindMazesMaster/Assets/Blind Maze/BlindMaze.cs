@@ -249,7 +249,9 @@ public class BlindMaze : MonoBehaviour
         DebugLog("Using rule seed: {0}", rng.Seed);
         GenerateMazes();
 
-		//check what the serial ends with and make an integer for it
+        //check what the serial ends with and make an integer for it
+        if (BombInfo.GetSerialNumberNumbers() == null)
+            DebugLog("The serial number doesn't exist, we're all doomed.");
 		LastDigit = BombInfo.GetSerialNumberNumbers().Last();
 
         if (rng.Seed != 1) {
@@ -280,8 +282,8 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-        string[] MazeModules = new[] { "Maze", "MouseInTheMaze", "spwiz3DMaze", "HexamazeModule", "MorseAMaze", "PolyhedralMazeModule", /*"BlindMaze,"*/ "USA",
-            "MazeScrambler", "boolMaze", "crystalMaze", "factoryMaze", "ModuleMaze", "mazematics", "maze3", "ksmAmazeingButtons", "rgbMaze", "faultyrgbMaze" };
+        string[] MazeModules = new[] { "Maze", "MouseInTheMaze", "spwiz3DMaze", "HexamazeModule", "MorseAMaze", "PolyhedralMazeModule", "USA",
+            "MazeScrambler", "boolMaze", "qSwedishMaze", "factoryMaze", "ModuleMaze", "mazematics", "maze3", "ksmAmazeingButtons", "rgbMaze", "faultyrgbMaze", "coloredMaze", "boolMazeCruel" };
         int MazeBased = 0;
         MazeBased = BombInfo.GetModuleIDs().Intersect(MazeModules).Count();
         DebugLog("There are {0} compatible maze-type modules on the bomb, not including Blind Maze.", MazeBased);

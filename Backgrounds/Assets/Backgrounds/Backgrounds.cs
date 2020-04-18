@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using BackgroundsRuleGenerator;
@@ -235,5 +236,19 @@ public class Backgrounds : MonoBehaviour
         var logData = string.Format(log, args);
         if (ModuleType == Type.Normal) Debug.LogFormat("<Backgrounds #{0}> {1}", Backgrounds_moduleId, logData);
         else Debug.LogFormat("<Faulty Backgrounds #{0}> {1}", Backgrounds_moduleId, logData);
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        var correctButton = ButtonA;
+        while (Presses != GoalPresses)
+        {
+            var presses = Presses;
+            correctButton.OnInteract();
+            yield return null;
+            if (presses == Presses)
+                correctButton = ButtonB;
+        }
+        Submit.OnInteract();
     }
 }

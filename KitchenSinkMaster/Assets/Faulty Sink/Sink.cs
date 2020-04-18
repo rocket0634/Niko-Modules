@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ public class Sink : MonoBehaviour
     public MeshRenderer ColdMesh, HotMesh, FaucetMesh, PipeMesh;
     public TextMesh C, H;
     public Texture[] knobColors;
+    public Transform moduleTransform;
     public Type ModuleType;
     //For Unity, no use in game
     public int forceSpin;
@@ -108,9 +110,24 @@ public class Sink : MonoBehaviour
         }
         string Input = tpInput.ToLowerInvariant();
 
-        if (Input == "sinkcommands")
+        if (Input == "sinkcommands" && isFaulty)
         {
             yield return "sendtochat Sink: Interact with the module by using !{1} Hot or !{1} Cold. You may chain commands by using !{1} cch or !{1} cold cold hot. Manual: https://ktane.timwi.de/HTML/Sink.html";
+            yield break;
+        }
+
+        if (isFaulty && (Input.Equals("hover") || Input.Equals("highlight")))
+        {
+            var cooked = Hot.Equals(Pipe) || Hot.Equals(Faucet);
+            if (!cooked)
+                yield break;
+            var highlight = Hot.Highlight.GetComponent("Highlightable");
+            var e = highlight.GetType().GetNestedType("HighlightTypeEnum", BindingFlags.Public);
+            var highlightMethod = highlight.GetType().GetMethod("On", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(bool), e }, null);
+            var enumValue = Enum.ToObject(e, 1);
+            highlightMethod.Invoke(highlight, new[] { true, enumValue });
+            yield return new WaitForSeconds(1.5f);
+            highlightMethod.Invoke(highlight, new[] { false, enumValue });
             yield break;
         }
 
@@ -147,6 +164,7 @@ public class Sink : MonoBehaviour
             queue.Enqueue(ButtonPress(tapList.First()));
             yield break;
         }
+        var fullCount = tapList.Count;
 
         while (tapList.Count != 0)
         {
@@ -155,6 +173,8 @@ public class Sink : MonoBehaviour
             yield return null;
             yield return new KMSelectable[] { tapList.First() };
             tapList.RemoveAt(0);
+            var processed = fullCount - tapList.Count;
+            var plural = processed != 1;
             yield return new WaitUntil(() => canPress || rotating);
             if (rotating && c == 2)
             {
@@ -163,7 +183,7 @@ public class Sink : MonoBehaviour
             }
             if (isRotating != rotating && tapList.Count > 0)
             {
-                yield return "sendtochaterror Due to a sudden change, not all inputs were processed.";
+                yield return string.Format("sendtochaterror Due to a sudden change, only {0} {1} processed.", processed, plural ? "inputs were" : "input was");
                 processingInput = false;
                 yield break;
             }
@@ -189,8 +209,6 @@ public class Sink : MonoBehaviour
         }
         else
         {
-            Module.ModuleDisplayName = "Faulty Sink";
-            Module.ModuleType = "Faulty Sink";
             moduleID = fSink_moduleIDCounter++;
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
@@ -275,7 +293,7 @@ public class Sink : MonoBehaviour
                     Steps(false);
                     goto start;
                 case 4:
-                    transform.Rotate(0, 180, 0);
+                    moduleTransform.Rotate(0, 180, 0);
                     Steps(true);
                     Apply(new[] { 3, 2, 1, 0 });
                     goto start;
@@ -681,6 +699,60 @@ public class Sink : MonoBehaviour
             }
         }
 #endif
+    }
+
+    private IEnumerator TwitchHandleForcedSolve()
+    {
+        if ((coroutine != null) || (coroutine2 != null))
+            Skip();
+        if (coroutine3 != null)
+            StopCoroutine(coroutine3);
+        rotate = false;
+        spin = 0;
+        Func<int, KMSelectable> correct = (int i) => knob2Turn[i] ? Hot : Cold;
+        if (isFaulty)
+            switch (faulty)
+            {
+                case 0:
+                    if (curKnob == 0)
+                    {
+                        Hot.OnInteract();
+                        yield return new WaitForSeconds(.1f);
+                        Basin.OnInteract();
+                    }
+                    else
+                        Basin.OnInteract();
+                    yield return new WaitUntil(() => SOLVED);
+                    yield break;
+                case 2:
+                    if (!o)
+                    {
+                        if (!knob2Turn[0])
+                        {
+                            if (HotMesh.material == null)
+                                buttonMasher = ColdMesh.material;
+                            else
+                                buttonMasher = HotMesh.material;
+                        }
+                        HotMesh.material = buttonMasher;
+                        ColdMesh.material = buttonMasher;
+                        o = true;
+                        Steps(false);
+                    }
+                    break;
+                case 3:
+                    var hot = Faucet.Equals(Hot) ? Faucet : Pipe;
+                    correct = (int i) => knob2Turn[i] ? hot : Cold;
+                    break;
+            }
+        var correctSelectables = new[] { correct(0), correct(1), correct(2) };
+        for (int i = curKnob; i < correctSelectables.Count(); i++)
+        {
+            correctSelectables[i].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+        while (!SOLVED)
+            yield return true;
     }
 
     #endregion

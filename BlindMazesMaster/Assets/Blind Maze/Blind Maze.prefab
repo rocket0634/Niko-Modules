@@ -234,7 +234,7 @@ GameObject:
   - component: {fileID: 114152858082747394}
   - component: {fileID: 114410110360776226}
   - component: {fileID: 114715048997529392}
-  - component: {fileID: 114990987783348764}
+  - component: {fileID: 114934617343802484}
   - component: {fileID: 114568558767801396}
   - component: {fileID: 114014258312943670}
   m_Layer: 0
@@ -1281,7 +1281,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57aad41493e1a3b4d8f90b2baef20fe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BombInfo: {fileID: 114990987783348764}
+  BombInfo: {fileID: 114934617343802484}
   BombModule: {fileID: 114410110360776226}
   Audio: {fileID: 114568558767801396}
   RuleSeed: {fileID: 114152858082747394}
@@ -1682,7 +1682,7 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
---- !u!114 &114990987783348764
+--- !u!114 &114934617343802484
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}

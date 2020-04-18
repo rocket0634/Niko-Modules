@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 
 public class MazeScrambler : MonoBehaviour
@@ -42,14 +43,14 @@ public class MazeScrambler : MonoBehaviour
         Green = new string[] { "Right", "Up", "Up", "Left", "Left", "Down", "Right", "Left", "Right", "Up", "Green" },
         Yellow = new string[] { "Down", "Down", "Right", "Right", "Up", "Left", "Down", "Down", "Left", "Right", "Yellow" };
 
-    private string TwitchHelpMessage = "Use !{0} rgby to move North West South East.";
+    private string TwitchHelpMessage = "Use !{0} rgby to press the Red, Green, Blue, and Yellow buttons. Use !{0} Reset to reset the module.";
     
 
     protected KMSelectable[] ProcessTwitchCommand(string TPInput)
     {
         string tpinput = TPInput.ToLowerInvariant();
         var command = tpinput.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (tpinput.Equals("r") || tpinput.Equals("reset")) return new KMSelectable[] { Reset };
+        if (tpinput.Equals("reset")) return new KMSelectable[] { Reset };
         List<KMSelectable> Moves = new List<KMSelectable>();
         foreach (string s in command)
         {
@@ -97,7 +98,7 @@ public class MazeScrambler : MonoBehaviour
         return Moves.ToArray();
     }
 
-    private void Direction(string dir)
+    private bool Direction(string dir)
     {
         if (CurrentP.Contains(dir.First().ToString()))
         {
@@ -125,10 +126,11 @@ public class MazeScrambler : MonoBehaviour
             BombModule.HandleStrike();
             CurX = StartX;
             CurY = StartY;
-            CurrentPress = 0;
+            CurrentPress = 1;
             DebugLog("Sequence reset:\n[Maze Scrambler #{0}]: Sel | New Pos | Red | Blue | Yellow | Green", MazeScrambler_moduleId);
         }
         UpdateLEDs(dir);
+        return strike;
     }
 
     private void UpdateLEDs(string dir = null)
@@ -351,11 +353,12 @@ public class MazeScrambler : MonoBehaviour
 
                 return false;
             }
-            Direction(color[(CurrentPress - 1) % 10]);
-            CurrentPress++;
+            if (!Direction(color[(CurrentPress - 1) % 10]))
+                CurrentPress++;
+            else
+                strike = !strike;
             var c = (CurrentPress - 1) % 10;
             if (!SOLVED) DebugLog("{0} | [{1},{2}] | {3} | {4} | {5} | {6}", color.Last(), CurX + 1, CurY + 1, Red[c], Blue[c], Yellow[c], Green[c]);
-            strike = false;
         }
         return false;
     }
@@ -369,5 +372,113 @@ public class MazeScrambler : MonoBehaviour
     {
         var logData = string.Format(log, args);
         Debug.LogFormat("[Maze Scrambler #{0}] {1}", MazeScrambler_moduleId, logData);
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        var end = false;
+        var movement = new Stack<int[]>();
+        var explored = new List<int[]>();
+        movement.Push(new[] { GoalX, GoalY, -1 });
+        var direction = new[] { 0, CurrentPress - 1 };
+        var dir = new[] { 'D', 'L', 'U', 'R' };
+        var curLoc = new[] { GoalX, GoalY };
+        var color = new[] { Red, Blue, Green, Yellow };
+        var moveDir = new Func<int[]>[] { () => new[] { curLoc[0], curLoc[1] + 1 }, () => new[] { curLoc[0] - 1, curLoc[1] }, () => new[] { curLoc[0], curLoc[1] - 1 }, () => new[] { curLoc[0] + 1, curLoc[1] } };
+        while (!end)
+        {
+            if (direction[0] > 3)
+            {
+                movement.Pop();
+                explored.Add(curLoc.ToArray());
+                curLoc = moveDir[(movement.Peek()[2] + 2) % 4]();
+                direction[0] = movement.Peek()[2] + 1;
+                continue;
+            }
+            if (MazeWalls[curLoc[1], curLoc[0]].Contains(dir[direction[0]]))
+            {
+                curLoc = moveDir[direction[0]]();
+                if (movement.Any(x => x[0] == curLoc[0] && x[1] == curLoc[1]) || explored.Any(x => x.SequenceEqual(curLoc)))
+                    curLoc = moveDir[(direction[0] + 2) % 4]();
+                else
+                {
+                    movement.Peek()[2] = direction[0];
+                    movement.Push(new[] { curLoc[0], curLoc[1], 0 });
+                    direction[0] = -1;
+                }
+            }
+            direction[0] += 1;
+            if (curLoc.SequenceEqual(new[] { CurX, CurY }))
+                end = true;
+            yield return null;
+        }
+        movement.Pop();
+        end = !end;
+        var buttons = new List<int>();
+        foreach (int step in movement.Select(x => x[2]))
+        {
+            int curStep = (step + 2) % 4;
+            while (!color.Any(x => x[direction[1] % 10].Contains(dir[curStep])))
+            {
+                var validChars = MazeWalls[curLoc[1], curLoc[0]].Replace(" ", "").Replace(dir[curStep].ToString(), "");
+                for (int i = 0; i < validChars.Count(); i++)
+                {
+                    var button = color.First(x => x[direction[1] % 10].Contains(validChars[i]));
+                    var charDir = Array.IndexOf(dir, validChars[i]);
+                    var inverseCharDir = charDir + 2;
+                    if (button == null)
+                    {
+                        DebugLog("Something went wrong");
+                        BombModule.HandlePass();
+                        yield break;
+                    }
+                    var index = Array.IndexOf(color, button);
+                    curLoc = moveDir[charDir]();
+                    if (color.Any(x => x[(direction[1] + 1) % 10].Contains(dir[inverseCharDir % 4])))
+                    {
+                        buttons.Add(index);
+                        DebugLog("Adding button {0} with expected value of {1}", index, validChars[i]);
+                        button = color.First(x => x[(direction[1] + 1) % 10].Contains(dir[inverseCharDir % 4]));
+                        if (button == null)
+                        {
+                            DebugLog("Something else went wrong");
+                            BombModule.HandlePass();
+                            yield break;
+                        }
+                        index = Array.IndexOf(color, button);
+                        buttons.Add(index);
+                        DebugLog("Adding button {0} with expected value of {1}", index, dir[inverseCharDir % 4]);
+                        direction[1] += 2;
+                        curLoc = moveDir[inverseCharDir % 4]();
+                        break;
+                    }
+                    curLoc = moveDir[inverseCharDir % 4]();
+                }
+                yield return null;
+            }
+            var selectButton = color.First(x => x[direction[1] % 10].Contains(dir[curStep]));
+            if (selectButton == null)
+            {
+                DebugLog("Who's on first? Not me, I'm broke.");
+                BombModule.HandlePass();
+                yield break;
+            }
+            buttons.Add(Array.IndexOf(color, selectButton));
+            direction[1] += 1;
+            curLoc = moveDir[curStep]();
+        }
+        DebugLog(string.Join(", ", buttons.Select(x => x.ToString()).ToArray()));
+        if (!curLoc.SequenceEqual(new int[] { GoalX, GoalY }))
+        {
+            DebugLog("Whoops. {0}, {1}, {2}, {3}", curLoc[0], curLoc[1], GoalX, GoalY);
+            BombModule.HandlePass();
+            yield break;
+        }
+        var selectables = new[] { BRed, BBlue, BGreen, BYellow };
+        foreach (int num in buttons)
+        {
+            selectables[num].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 }
