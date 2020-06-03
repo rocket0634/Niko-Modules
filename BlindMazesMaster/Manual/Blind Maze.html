@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -7,10 +7,10 @@
     <meta name="viewport" content="initial-scale=1">
     <link rel="stylesheet" type="text/css" href="css/normalize.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
-    <link rel="stylesheet" type='text/css' href="css/font.css">
+    <link rel="stylesheet" type="text/css" href="css/font.css">
     <script src="js/ktane-utils.js"></script>
     <script src="js/ruleseed.js"></script>
-    
+
     <script>
         var cells = [];
         var cardinal = [ "N", "E", "W", "S" ];
@@ -141,17 +141,16 @@
             }
             handleRules();
             if (!pass)
-              generateSVG();
-            //I don't think JS has a last function
-            //Faster to say "USA Maze" than mazeBased.length - 1
-            var footnoteElement = document.getElementsByClassName("footnotes")[0];
-            footnoteElement.innerHTML = "<p>Modules detected as \"maze-based\" only include " + mazeBased.slice(0, -1).join(", ") + ", and USA Maze</p>";
+                generateSVG();
+                //I don't think JS has a last function
+                //Faster to say "USA Maze" than mazeBased.length - 1
+                var footnoteElement = document.getElementsByClassName("footnotes")[0];
+                footnoteElement.innerHTML = "<p>Modules detected as \"maze-based\" only include " + mazeBased.slice(0, -1).join(", ") + ", and USA Maze</p>";
         }
 
         //Rule Seed rules
         function setRules(rnd) {
             rng = rnd;
-            console.log(mazeBased);
             pass = true;
             setDefaultRules();
             //Call maze types from ktane.timwi.de/json/raw
@@ -198,17 +197,17 @@
         //Recursive algorithm for the maze generation
         function checkCell(maze, row, col, prevDir = -1) {
             if (!inRange(row, 0, 4) || !inRange(col, 0, 4) || cells[maze][row][col].visited) return false;
-            
+
             cells[maze][row][col].visited = true;
             var start = rng.nextMax(4);
-            
+
             for (var i = 0; i < 4; i++) {
                 var point = (start + i) % 4;
                 cells[maze][row][col].directions[cardinal[point]] = checkCell(maze, row + locations[0][point], col + locations[1][point], point);
             }
-            
+
             if (prevDir != -1) cells[maze][row][col].directions[cardinal[3 - prevDir]] = true;
-            
+
             return true;
         }
 
@@ -219,11 +218,11 @@
             var countRule = 0;
             var countCondition = 0;
             if (!rulesCountCopy || original){
-              rulesCountCopy = rulesCount.slice();
-              conditionCountCopy = conditionCount.slice();
-              clockwiseCopy = clockwise.slice();
-              mazeRotationCopy = mazeRotation.slice();
-              calculateCopy = calculate.slice();
+                rulesCountCopy = rulesCount.slice();
+                conditionCountCopy = conditionCount.slice();
+                clockwiseCopy = clockwise.slice();
+                mazeRotationCopy = mazeRotation.slice();
+                calculateCopy = calculate.slice();
             }
 
             var ruleTemplates = [
@@ -235,35 +234,36 @@
                 "Otherwise, if there is at most {c} {r}, {m}.",
                 "Otherwise, keep the maze as it is."];
 
-
-            for (var i = 0; i < rules.length; i++) {
-                var ruleText = ruleTemplates[i];
-                if (i != 2) {
-                    if (conditionCountCopy[countCondition] == 1) {
-                        if (countCondition != 2) {
-                            ruleText = ruleText.replace("there are", "there is");
-                            rulesCountCopy[countRule] = makeSingular(rulesCountCopy[countRule]);
+            if (!pass) {
+                for (var i = 0; i < rules.length; i++) {
+                    var ruleText = ruleTemplates[i];
+                    if (i != 2) {
+                        if (conditionCountCopy[countCondition] == 1) {
+                            if (countCondition != 2) {
+                                ruleText = ruleText.replace("there are", "there is");
+                                rulesCountCopy[countRule] = makeSingular(rulesCountCopy[countRule]);
+                            } else {
+                                rulesCountCopy[countRule + 1] = makeSingular(rulesCountCopy[countRule + 1]);
+                            }
                         } else {
-                            rulesCountCopy[countRule + 1] = makeSingular(rulesCountCopy[countRule + 1]);
+                            ruleText = ruleText.replace("there is", "there are");
                         }
+
+                        if (i == 3) ruleText = ruleText.replace("{r1}", rulesCountCopy[countRule++]).replace("{c}", conditionCountCopy[countCondition++]).replace("{r2}", rulesCountCopy[countRule++]);
+                        else ruleText = ruleText.replace("{c}", conditionCountCopy[countCondition++]).replace("{r}", rulesCountCopy[countRule++]);
                     } else {
-                        ruleText = ruleText.replace("there is", "there are");
+                        if (conditionIndicator != 3) ruleText = ruleText.replace("an", "a");
+
+                        ruleText = ruleText.replace("{i}", indicatorNames[conditionIndicator]);
                     }
-                    
-                    if (i == 3) ruleText = ruleText.replace("{r1}", rulesCountCopy[countRule++]).replace("{c}", conditionCountCopy[countCondition++]).replace("{r2}", rulesCountCopy[countRule++]);
-                    else ruleText = ruleText.replace("{c}", conditionCountCopy[countCondition++]).replace("{r}", rulesCountCopy[countRule++]);
-                } else {
-                    if (conditionIndicator != 3) ruleText = ruleText.replace("an", "a");
 
-                    ruleText = ruleText.replace("{i}", indicatorNames[conditionIndicator]);
+                    if (calculateCopy[i]) ruleText = ruleText.replace("{m}", `calculate the starting position, then rotate the maze ${mazeRotationCopy[i] * 90} degrees ${clockwiseCopy[i] ? "clockwise": "counter-clockwise"}`);
+                    else ruleText = ruleText.replace("{m}", `rotate the maze ${mazeRotationCopy[i] * 90} degrees ${clockwiseCopy[i] ? "clockwise": "counter-clockwise"}, then calculate the starting position`);
+                    rules[i].innerHTML = ruleText;
                 }
-
-                if (calculateCopy[i]) ruleText = ruleText.replace("{m}", `calculate the starting position, then rotate the maze ${mazeRotationCopy[i] * 90} degrees ${clockwiseCopy[i] ? "clockwise": "counter-clockwise"}`);
-                else ruleText = ruleText.replace("{m}", `rotate the maze ${mazeRotationCopy[i] * 90} degrees ${clockwiseCopy[i] ? "clockwise": "counter-clockwise"}, then calculate the starting position`);
-                rules[i].innerHTML = ruleText;
             }
         }
-		
+
         function makeSingular(text) {
             if (text.includes("batteries")) text = text.replace("batteries", "battery");
             else if (text.includes("maze-based")) text = text.replace("modules", "module");
@@ -288,7 +288,7 @@
                     sortedNames = [];
                     var count = 0;
                     json.forEach(function(item, i){
-                      if (item.Name.toLowerCase == "blind maze")
+                      if (item.Name.toLowerCase() == "blind maze")
                         return;
                       if (item.Name.toLowerCase().includes("maze") || item.Description.toLowerCase().includes("maze")){
                         sortedNames.push(item);
@@ -304,14 +304,14 @@
             xhttp.open("GET", link, true);
             xhttp.send();
         }
-		
+
         function generateSVG() {
-			
+
             var svg = document.getElementsByClassName("mazes")[0].getElementsByTagName("svg")[0];
             if (!generated)
             {
-              var mazes = document.createElementNS("http://www.w3.org/2000/svg", "g");
-              svg.appendChild(mazes);
+                var mazes = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                svg.appendChild(mazes);
             }
             generated = true;
             mazes = svg.firstChild;
@@ -422,116 +422,114 @@
     </style>
 </head>
 <body>
-    <div id="ManualContent">
-        <div class="section">
-            <div class="page page-bg-01">
-                <div class="page-header">
-                    <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
-                    <span class="page-header-section-title">Blind Maze</span>
-                </div>
-                <div class="page-content">
-                    <img src="img/Component/Blind Maze.svg" class="diagram">
-                    <h2>On the Subject of Blind Maze</h2>
-                    <p class="flavour-text">Not only do you have to find the exit, you have to find the beginning!</p>
-                    <p>
-                        This module has four buttons labeled N for North, E for East, S for South, and W for West. The defuser must use these buttons to navigate through a maze they cannot see. Use the following steps to discover what the maze looks like, where you are in the maze, and which side of the maze the exit is on.
-                    </p>
-                    <h3>Step 1: Finding the Maze</h3>
-                    <ul>
-                        <li>Take the last digit of the serial number and add the number of solved modules.
-                        <li>If the number is above nine, subtract 10 until it is between 0 and 9.
-                        <li>Locate the maze below with the same number as the result. This is your maze, but it may be rotated.
-                    </ul>
-                    <div class="mazes">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-9 1.5 725 300"></svg>
-                    </div>
-                </div>
-                <div class="page-footer relative-footer">Page 1 of 2</div>
+    <div class="section">
+        <div class="page page-bg-01">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Blind Maze</span>
             </div>
-            <div class="page page-bg-02">
-                <div class="page-header">
-                    <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
-                    <span class="page-header-section-title">Blind Maze</span>
+            <div class="page-content">
+                <img src="img/Component/Blind Maze.svg" class="diagram">
+                <h2>On the Subject of Blind Maze</h2>
+                <p class="flavour-text">Not only do you have to find the exit, you have to find the beginning!</p>
+                <p>
+                    This module has four buttons labeled N for North, E for East, S for South, and W for West. The defuser must use these buttons to navigate through a maze they cannot see. Use the following steps to discover what the maze looks like, where you are in the maze, and which side of the maze the exit is on.
+                </p>
+                <h3>Step 1: Finding the Maze</h3>
+                <ul>
+                    <li>Take the last digit of the serial number and add the number of solved modules.
+                    <li>If the number is above nine, subtract 10 until it is between 0 and 9.
+                    <li>Locate the maze below with the same number as the result. This is your maze, but it may be rotated.
+                </ul>
+                <div class="mazes">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-9 1.5 725 300"></svg>
                 </div>
-                <div class="page-content">
-                    <h3>Step 2: Finding the Rotation</h3>
-                    <p>
-                        Use the first conditional that applies out of the following list to determine what rotation the maze has.
-                    </p>
-                    <ul>
-                        <li class="rules">If there are at least {c} {r}, {m}.
-                        <li class="rules">Otherwise, if there are at least {c} {r}, {m}.
-                        <li class="rules">Otherwise, if there is an {i} indicator, {m}.
-                        <li class="rules">Otherwise, if there are no {r1} and at least {c} {r2}, {m}.
-                        <li class="rules">Otherwise, if there is at least {c} {r}, {m}.
-                        <li class="rules">Otherwise, if there is at most {c} {r}, {m}.
-                        <li class="rules">Otherwise, keep the maze as it is.
-                    </ul>
-                    <h3>Step 3: Finding the Starting Location</h3>
-                    <p>
-                        Look at each button and use the table below to determine it's value. Then, use these rules to determine the starting location in the maze:
-                    </p>
-                    <ul>
-                        <li>X Position: Add the values of the North and South buttons together.
-                        <li>Y Position: Add the values of the East and West buttons together.
-                        <li>If the sum is above 5, subtract 5 until the number is between 1 and 5.
-                        <li>Column X moves from left to right and Row Y moves from top to bottom. The top left coordinate of the maze is [1,1].
-                    </ul>
-                    <table>
-                        <col width="80px">
-                        <col width="80px">
-                        <col width="80px">
-                        <col width="80px">
-                        <col width="80px">
-                        <col width="80px">
-                        <tr>
-                            <td class="corner"></td>
-                            <th>Red</th>
-                            <th>Green</th>
-                            <th>Blue</th>
-                            <th>Gray</th>
-                            <th>Yellow</th>
-                        </tr>
-                        <tr>
-                            <th>North</th>
-                            <td class="colorTable1">1</td>
-                            <td class="colorTable1">5</td>
-                            <td class="colorTable1">2</td>
-                            <td class="colorTable1">2</td>
-                            <td class="colorTable1">3</td>
-                        </tr>
-                        <tr>
-                            <th>East</th>
-                            <td class="colorTable2">3</td>
-                            <td class="colorTable2">1</td>
-                            <td class="colorTable2">5</td>
-                            <td class="colorTable2">5</td>
-                            <td class="colorTable2">2</td>
-                        </tr>
-                        <tr>
-                            <th>West</th>
-                            <td class="colorTable4">2</td>
-                            <td class="colorTable4">5</td>
-                            <td class="colorTable4">3</td>
-                            <td class="colorTable4">1</td>
-                            <td class="colorTable4">4</td>
-                        </tr>
-                        <tr>
-                            <th>South</th>
-                            <td class="colorTable3">3</td>
-                            <td class="colorTable3">2</td>
-                            <td class="colorTable3">4</td>
-                            <td class="colorTable3">3</td>
-                            <td class="colorTable3">2</td>
-                        </tr>
-                    </table>
-                    <p></p>
-                    <div class="footnotes">
-                        <p>Modules detected as "maze-based" only include 3D Maze, A-Maze-ing Buttons, Blind Maze, Blockbusters, Boolean Maze, Colored Maze, Cruel Boolean Maze,  Factory Maze, Faulty RGB Maze, Hexamaze, IKEA, The Labyrinth, Maze, Maze³,  Mazematics, Maze Scrambler, Mineseeker, Module Maze, Morse-A-Maze, Polyhedral Maze, Red Arrows, RGB Maze, and USA Maze</p>
-                    </div>
-                </div>
-                <div class="page-footer relative-footer">Page 2 of 2</div>
             </div>
+            <div class="page-footer relative-footer">Page 1 of 2</div>
+        </div>
+        <div class="page page-bg-02">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Blind Maze</span>
+            </div>
+            <div class="page-content">
+                <h3>Step 2: Finding the Rotation</h3>
+                <p>
+                    Use the first conditional that applies out of the following list to determine what rotation the maze has.
+                </p>
+                <ul>
+                    <li class="rules">If there are at least {c} {r}, {m}.
+                    <li class="rules">Otherwise, if there are at least {c} {r}, {m}.
+                    <li class="rules">Otherwise, if there is an {i} indicator, {m}.
+                    <li class="rules">Otherwise, if there are no {r1} and at least {c} {r2}, {m}.
+                    <li class="rules">Otherwise, if there is at least {c} {r}, {m}.
+                    <li class="rules">Otherwise, if there is at most {c} {r}, {m}.
+                    <li class="rules">Otherwise, keep the maze as it is.
+                </ul>
+                <h3>Step 3: Finding the Starting Location</h3>
+                <p>
+                    Look at each button and use the table below to determine it's value. Then, use these rules to determine the starting location in the maze:
+                </p>
+                <ul>
+                    <li>X Position: Add the values of the North and South buttons together.
+                    <li>Y Position: Add the values of the East and West buttons together.
+                    <li>If the sum is above 5, subtract 5 until the number is between 1 and 5.
+                    <li>Column X moves from left to right and Row Y moves from top to bottom. The top left coordinate of the maze is [1,1].
+                </ul>
+                <table>
+                    <col width="80px">
+                    <col width="80px">
+                    <col width="80px">
+                    <col width="80px">
+                    <col width="80px">
+                    <col width="80px">
+                    <tr>
+                        <td class="corner"></td>
+                        <th>Red</th>
+                        <th>Green</th>
+                        <th>Blue</th>
+                        <th>Gray</th>
+                        <th>Yellow</th>
+                    </tr>
+                    <tr>
+                        <th>North</th>
+                        <td class="colorTable1">1</td>
+                        <td class="colorTable1">5</td>
+                        <td class="colorTable1">2</td>
+                        <td class="colorTable1">2</td>
+                        <td class="colorTable1">3</td>
+                    </tr>
+                    <tr>
+                        <th>East</th>
+                        <td class="colorTable2">3</td>
+                        <td class="colorTable2">1</td>
+                        <td class="colorTable2">5</td>
+                        <td class="colorTable2">5</td>
+                        <td class="colorTable2">2</td>
+                    </tr>
+                    <tr>
+                        <th>West</th>
+                        <td class="colorTable4">2</td>
+                        <td class="colorTable4">5</td>
+                        <td class="colorTable4">3</td>
+                        <td class="colorTable4">1</td>
+                        <td class="colorTable4">4</td>
+                    </tr>
+                    <tr>
+                        <th>South</th>
+                        <td class="colorTable3">3</td>
+                        <td class="colorTable3">2</td>
+                        <td class="colorTable3">4</td>
+                        <td class="colorTable3">3</td>
+                        <td class="colorTable3">2</td>
+                    </tr>
+                </table>
+                <br>
+                <div class="footnotes">
+                    <p>Modules detected as "maze-based" only include 3D Maze, A-Maze-ing Buttons, Blind Maze, Blockbusters, Boolean Maze, Colored Maze, Cruel Boolean Maze,  Factory Maze, Faulty RGB Maze, Hexamaze, IKEA, The Labyrinth, Maze, Maze³,  Mazematics, Maze Scrambler, Mineseeker, Module Maze, Morse-A-Maze, Polyhedral Maze, Red Arrows, RGB Maze, and USA Maze</p>
+                </div>
+            </div>
+            <div class="page-footer relative-footer">Page 2 of 2</div>
         </div>
     </div>
 </body>
