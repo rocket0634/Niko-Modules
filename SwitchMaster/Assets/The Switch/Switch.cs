@@ -2,7 +2,6 @@
 using System;
 using UnityEngine;
 using System.Linq;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 
@@ -51,6 +50,17 @@ public class Switch : MonoBehaviour
             }
         }
         yield break;
+    }
+
+    System.Collections.IEnumerator TwitchHandleForcedSolve()
+    {
+        int times = FirstSuccess ? 1 : 2;
+        for (int i = 0; i < times; i++)
+        {
+            while (FlipperMoving) yield return true;
+            while (TimerSeconds1 != NeededNumber && TimerSeconds2 != NeededNumber) yield return true;
+            FlipperSelectable.OnInteract();
+        }
     }
 
     private System.Collections.IEnumerator MoveSwitch()
