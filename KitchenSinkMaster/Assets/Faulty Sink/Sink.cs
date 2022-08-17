@@ -197,6 +197,7 @@ public class Sink : MonoBehaviour
     protected void Start()
     {
         isFaulty = ModuleType == Type.Faulty;
+        Debug.LogFormat("<{1}Sink #{0}> KitchenSink - 2.22 Edition", moduleID, isFaulty ? "Faulty " : "");
         ColKnobs = UnityEngine.Random.Range(0, 3);
         ColFaucet = UnityEngine.Random.Range(0, 3);
         ColPipe = UnityEngine.Random.Range(0, 3);
@@ -531,8 +532,7 @@ public class Sink : MonoBehaviour
             wait = true;
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
-            coroutine2 = Timer();
-            k[r].OnInteract = delegate () { h = true; StartCoroutine(coroutine2); return false; };
+            k[r].OnInteract = delegate () { h = true; StartCoroutine(coroutine2 = Timer()); return false; };
             k[r].OnInteractEnded = WaitForSelect();
         }
         if (c == 3)
@@ -584,7 +584,7 @@ public class Sink : MonoBehaviour
             else if (c == 2 && canPress == false)
             {
                 StopCoroutine(coroutine2);
-                DebugLog("Reset failed.");
+                DebugLog("Debug: Reset failed after {0} seconds.", dT);
                 if (spin > 1500 && dT > 5) Module.HandleStrike();
             }
             else StopCoroutine(coroutine2);
