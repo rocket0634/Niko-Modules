@@ -12,23 +12,29 @@ public class Switch : MonoBehaviour
     public KMBombInfo BombInfo;
     public KMBombModule BombModule;
     public KMAudio KMAudio;
+    public KMColorblindMode CBMode;
     public KMSelectable FlipperSelectable;
     public Transform FlipperPosition;
     public MeshRenderer TopLED;
     public MeshRenderer BottomLED;
+    public TextMesh TopCBText;
+    public TextMesh BottomCBText;
 
+    protected string TopName = "none";
+    protected string BottomName = "none";
     protected bool SOLVED = false;
     protected bool FlipperDown = false;
     protected bool FirstSuccess = false;
     protected bool InitMove = true;
     protected bool FlipperMoving = false;
+    protected bool CBEnabled = false;
     protected int BottomColor;
     protected int TopColor;
     protected int TimerSeconds1;
     protected int TimerSeconds2;
     protected int NeededNumber;
     
-    private string TwitchHelpMessage = "Use !{0} flip 5 to flip when the seconds digits of the timer contains 5";
+    private string TwitchHelpMessage = "Use !{0} flip 5 to flip when the seconds digits of the timer contains 5. Use !{0} colorblind to toggle colorblind mode.";
 
     System.Collections.IEnumerator ProcessTwitchCommand(string command)
     {
@@ -41,12 +47,27 @@ public class Switch : MonoBehaviour
             {
                 while (TimerSeconds1 != PressOn && TimerSeconds2 != PressOn)
                 {
-                    yield return null;
+                    yield return "trycancel";
                 }
                 yield return FlipperSelectable;
                 yield return null;
                 yield return FlipperSelectable;
                 yield break;
+            }
+        }
+        else if (Regex.IsMatch(LowerCommand, @"\s*colorblind|colourblind|cb\s*$"))
+        {
+            yield return null;
+            CBEnabled = !CBEnabled;
+            if (CBEnabled)
+            {
+                TopCBText.text = TopName[0].ToString();
+                BottomCBText.text = BottomName[0].ToString();
+            }
+            else
+            {
+                TopCBText.text = "";
+                BottomCBText.text = "";
             }
         }
         yield break;
@@ -95,8 +116,6 @@ public class Switch : MonoBehaviour
         TopColor = UnityEngine.Random.Range(1, 7);
         BottomColor = UnityEngine.Random.Range(1, 7);
 
-        string TopName = "none";
-        string BottomName = "none";
         Color Orange = new Color(1f, 0.5f, 0f);
         Color Purple = new Color(0.75f, 0f, 0.75f);
         int RuleNumber;
@@ -222,11 +241,21 @@ public class Switch : MonoBehaviour
 
         if (SOLVED)
         {
+            if (CBEnabled)
+            {
+                TopCBText.text = "";
+                BottomCBText.text = "";
+            }
             BottomLED.material.color = Color.black;
             TopLED.material.color = Color.black;
         }
         else
         {
+            if (CBEnabled)
+            {
+                TopCBText.text = TopName[0].ToString();
+                BottomCBText.text = BottomName[0].ToString();
+            }
             DebugLog("Switch is {0}. Top LED is {1}, bottom LED is {2}", FlipperDown ? "down" : "up", TopName, BottomName);
             DebugLog("Rule is {0}, number needed is {1}", RuleNumber.ToString(), NeededNumber.ToString());
         }
@@ -235,6 +264,7 @@ public class Switch : MonoBehaviour
 
     protected void Start()
     {
+        CBEnabled = CBMode.ColorblindModeActive;
         int FlipInt = UnityEngine.Random.Range(0, 2);
         if (FlipInt == 1)
         {
