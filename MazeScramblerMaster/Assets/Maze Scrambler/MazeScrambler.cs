@@ -1,5 +1,4 @@
-﻿using KMBombInfoExtensions;
-using System;
+﻿using System;
 using UnityEngine;
 using System.Linq;
 using System.Collections;
@@ -9,7 +8,6 @@ public class MazeScrambler : MonoBehaviour
 {
     private static int MazeScrambler_moduleIdCounter = 1;
     private int MazeScrambler_moduleId;
-    public KMBombInfo BombInfo;
     public KMBombModule BombModule;
     public KMAudio KMAudio;
     public KMSelectable BRed;

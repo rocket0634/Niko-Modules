@@ -49,10 +49,6 @@ public static class MazeGeneration {
 
     private static bool InRange(int value, int min, int max) { return (value >= min && value <= max); }
 
-    public static string Join<T>(this IEnumerable<T> elements, string seperator = " ") {
-        return string.Join(seperator, elements.OfType<object>().Select(x => x.ToString()).ToArray());
-    }
-
     public static T[,] ToArray2D<T>(this T[] array1D, int rowLen, int colLen) {
         T[,] setArray2D = new T[rowLen, colLen];
 

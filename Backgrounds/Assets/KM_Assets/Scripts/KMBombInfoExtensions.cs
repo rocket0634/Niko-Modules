@@ -73,7 +73,7 @@ namespace KModkit
         Orange,
         None
     }
-
+    
     public enum Month
     {
         JAN,
@@ -105,6 +105,7 @@ namespace KModkit
         #region JSON Types
 
         public static string WidgetQueryTwofactor = "twofactor";
+        public static string WidgetTwofactorKey = "twofactor_key";
         public static string WidgetQueryManufacture = "manufacture";
         public static string WidgetQueryDay = "day";
         public static string WidgetQueryTime = "time";
@@ -186,47 +187,47 @@ namespace KModkit
 
         private static IEnumerable<IndicatorJSON> GetIndicatorEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<IndicatorJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_INDICATOR, null);
+            return GetJSONEntries<IndicatorJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_INDICATOR, null).Where(x => x != null);
         }
 
         private static IEnumerable<ColorIndicatorJSON> GetColorIndicatorEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<ColorIndicatorJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_INDICATOR + "Color", null);
+            return GetJSONEntries<ColorIndicatorJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_INDICATOR + "Color", null).Where(x => x != null);
         }
 
         private static IEnumerable<BatteryJSON> GetBatteryEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<BatteryJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_BATTERIES, null);
+            return GetJSONEntries<BatteryJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_BATTERIES, null).Where(x => x != null);
         }
 
         private static IEnumerable<PortsJSON> GetPortEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<PortsJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_PORTS, null);
+            return GetJSONEntries<PortsJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_PORTS, null).Where(x => x != null);
         }
 
         private static IEnumerable<SerialNumberJSON> GetSerialNumberEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<SerialNumberJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_SERIAL_NUMBER, null);
+            return GetJSONEntries<SerialNumberJSON>(bombInfo, KMBombInfo.QUERYKEY_GET_SERIAL_NUMBER, null).Where(x => x != null);
         }
 
         private static IEnumerable<TwoFactorJSON> GetTwoFactorEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<TwoFactorJSON>(bombInfo, WidgetQueryTwofactor, null);
+            return GetJSONEntries<TwoFactorJSON>(bombInfo, WidgetQueryTwofactor, null).Where(x => x != null);
         }
 
         private static IEnumerable<ManufactureJSON> GetManufactureEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<ManufactureJSON>(bombInfo, WidgetQueryManufacture, null);
+            return GetJSONEntries<ManufactureJSON>(bombInfo, WidgetQueryManufacture, null).Where(x => x != null);
         }
 
         private static IEnumerable<DayJSON> GetDayEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<DayJSON>(bombInfo, WidgetQueryDay, null);
+            return GetJSONEntries<DayJSON>(bombInfo, WidgetQueryDay, null).Where(x => x != null);
         }
 
         private static IEnumerable<TimeJSON> GetTimeEntries(KMBombInfo bombInfo)
         {
-            return GetJSONEntries<TimeJSON>(bombInfo, WidgetQueryTime, null);
+            return GetJSONEntries<TimeJSON>(bombInfo, WidgetQueryTime, null).Where(x => x != null);
         }
 
         #endregion
@@ -408,7 +409,7 @@ namespace KModkit
 
         public static IEnumerable<string[]> GetPortPlates(this KMBombInfo bombInfo)
         {
-            return GetPortEntries(bombInfo).Select((x) => x.presentPorts);
+            return GetPortEntries(bombInfo).Where(x => x != null).Select((x) => x.presentPorts);
         }
 
         public static bool IsPortPresent(this KMBombInfo bombInfo, Port portType)

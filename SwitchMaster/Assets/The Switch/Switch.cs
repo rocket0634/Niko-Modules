@@ -1,4 +1,4 @@
-﻿using KMBombInfoExtensions;
+﻿using KModkit;
 using System;
 using UnityEngine;
 using System.Linq;
@@ -130,7 +130,7 @@ public class Switch : MonoBehaviour
         }
         else
         {
-            if ((TopColor == 6 || BottomColor == 6) && (BombInfo.IsPortPresent(KMBI.KnownPortType.RJ45)))
+            if ((TopColor == 6 || BottomColor == 6) && (BombInfo.IsPortPresent(Port.RJ45)))
             {
                 NeededNumber = 1;
                 RuleNumber = 1;
@@ -145,7 +145,7 @@ public class Switch : MonoBehaviour
                 NeededNumber = 7;
                 RuleNumber = 3;
             }
-            else if (BombInfo.GetBatteryCount() > 1 && BombInfo.IsIndicatorOff(KMBI.KnownIndicatorLabel.TRN))
+            else if (BombInfo.GetBatteryCount() > 1 && BombInfo.IsIndicatorOff(Indicator.TRN))
             {
                 NeededNumber = 8;
                 RuleNumber = 4;
