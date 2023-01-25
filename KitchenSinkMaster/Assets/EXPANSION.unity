@@ -390,6 +390,28 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 23040864735843510, guid: c5acd57537559224995914f32ac14f3c,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 18dd031c3534f3e47bdc3389f8fe1d17, type: 2}
+    - target: {fileID: 102249876927513298, guid: c5acd57537559224995914f32ac14f3c,
+        type: 2}
+      propertyPath: m_Font
+      value: 
+      objectReference: {fileID: 12800000, guid: 1ebe1d96973a920409b439b3a0e2bb63,
+        type: 3}
+    - target: {fileID: 23761391032737330, guid: c5acd57537559224995914f32ac14f3c,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 18dd031c3534f3e47bdc3389f8fe1d17, type: 2}
+    - target: {fileID: 102610877235684114, guid: c5acd57537559224995914f32ac14f3c,
+        type: 2}
+      propertyPath: m_Font
+      value: 
+      objectReference: {fileID: 12800000, guid: 1ebe1d96973a920409b439b3a0e2bb63,
+        type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c5acd57537559224995914f32ac14f3c, type: 2}
   m_IsPrefabParent: 0
