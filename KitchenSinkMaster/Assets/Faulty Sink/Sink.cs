@@ -48,8 +48,7 @@ public class Sink : MonoBehaviour
     //ChooseTexture variable
     private Texture hold;
     private Material buttonMasher;
-    //1 - Spinning or KnobTurn / 2 - KnobTurn or Timer / 3 - Updating spin [was previously in Update]
-    private IEnumerator coroutine, coroutine2, coroutine3;
+    private Coroutine KnobTurn1, KnobTurn2, Timer;
     //Handles rotation position of the Hot and Cold knobs. dT - used only for Timer
     protected float coldP, hotP, dT;
     //Used mostly for Vanilla Sink, as most Faulty functions bypass the queue.
@@ -82,7 +81,7 @@ public class Sink : MonoBehaviour
                     return new List<KMSelectable> { hotHolder };
                 }
                 //Don't interact with a selectable if it isn't active
-                else if (Info.GetComponent<KMSelectable>().Children[indicies[i]] != null)
+                else if (GetComponent<KMSelectable>().Children[indicies[i]] != null)
                     list.Add(items[i]);
                 else
                     return null;
@@ -178,7 +177,7 @@ public class Sink : MonoBehaviour
             yield return new WaitUntil(() => canPress || rotating);
             if (rotating && c == 2)
             {
-                Skip();
+                Reset();
                 yield return new WaitUntil(() => !rotating);
             }
             if (isRotating != rotating && tapList.Count > 0)
@@ -197,24 +196,19 @@ public class Sink : MonoBehaviour
     protected void Start()
     {
         isFaulty = ModuleType == Type.Faulty;
-        Debug.LogFormat("<{1}Sink #{0}> KitchenSink - 2.22 Edition", moduleID, isFaulty ? "Faulty " : "");
+        moduleID = isFaulty ? fSink_moduleIDCounter++ : sink_moduleIDCounter;
+        Debug.LogFormat("<{1}Sink #{0}> KitchenSink - 2.22TP Edition", moduleID, isFaulty ? "Faulty " : "");
         ColKnobs = UnityEngine.Random.Range(0, 3);
         ColFaucet = UnityEngine.Random.Range(0, 3);
         ColPipe = UnityEngine.Random.Range(0, 3);
 
         Rules = new bool[6] { Info.GetOffIndicators().Contains("NSA"), Info.GetSerialNumberLetters().Any("AEIOU".Contains), (ColKnobs == 2), (ColFaucet == 1), (ColPipe == 0), Info.GetPorts().Contains("HDMI") || Info.GetPorts().Contains("RJ45") };
 
-        if (!isFaulty)
+        if (isFaulty)
         {
-            moduleID = sink_moduleIDCounter++;
-        }
-        else
-        {
-            moduleID = fSink_moduleIDCounter++;
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
-            coroutine3 = Spin();
-            StartCoroutine(coroutine3);
+            StartCoroutine(Spin());
             spin = forceSpin + UnityEngine.Random.Range(0, 20);
             forceSpin = spin;
             if (spin > 10)
@@ -404,9 +398,7 @@ public class Sink : MonoBehaviour
             canPress = false;
             if ((knob == Hot && knob2Turn[curKnob]) || (knob == Cold && !knob2Turn[curKnob]))
             {
-                coroutine = KnobTurn(knob, 2.5f);
-                while (coroutine.MoveNext())
-                    yield return coroutine.Current;
+                yield return KnobTurn(knob, 2.5f);
                 hotP += knob == Hot ? 2.5f : 0;
                 coldP += knob == Cold ? 2.5f : 0;
                 if (curKnob == 2)
@@ -435,13 +427,11 @@ public class Sink : MonoBehaviour
             }
             else
             {
-                coroutine = KnobTurn(knob, -2.5f);
-                while (coroutine.MoveNext())
-                    yield return coroutine.Current;
+                yield return KnobTurn(knob, -2.5f);
                 hotP += knob == Hot ? -2.5f : 0;
                 coldP += knob == Cold ? -2.5f : 0;
-                coroutine = KnobTurn(Cold, -coldP);
-                coroutine2 = KnobTurn(Hot, -hotP);
+                IEnumerator coroutine = KnobTurn(Cold, -coldP);
+                IEnumerator coroutine2 = KnobTurn(Hot, -hotP);
                 while (coroutine.MoveNext() && coroutine2.MoveNext())
                 {
                     yield return new [] { coroutine.Current, coroutine2.Current};
@@ -494,7 +484,7 @@ public class Sink : MonoBehaviour
         }
     }
 
-    private IEnumerator Timer()
+    private IEnumerator Countdown()
     {
         dT = 0;
         /*Due to the Timer being stopped after rotation,
@@ -516,8 +506,7 @@ public class Sink : MonoBehaviour
         canPress = false;
         var r = UnityEngine.Random.Range(0, 2);
         var k = new[] { Hot, Cold };
-        coroutine = Spinning(k[r]);
-        StartCoroutine(coroutine);
+        StartCoroutine(Spinning(k[r]));
         if (c == 1)
         {
             DebugLog("Debug: Rotation error, reverse the inputs to disable.");
@@ -532,7 +521,7 @@ public class Sink : MonoBehaviour
             wait = true;
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
-            k[r].OnInteract = delegate () { h = true; StartCoroutine(coroutine2 = Timer()); return false; };
+            k[r].OnInteract = delegate () { h = true; Timer = StartCoroutine(Countdown()); return false; };
             k[r].OnInteractEnded = WaitForSelect();
         }
         if (c == 3)
@@ -541,21 +530,7 @@ public class Sink : MonoBehaviour
             HotHandler = Hot.OnInteract;
             ColdHandler = Cold.OnInteract;
             k[r].OnInteract = delegate () { Module.HandleStrike(); processingInput = false; return false; };
-            k[(r + 1) % 2].OnInteract = delegate () { Fix(k[r]); return false; };
-        }
-    }
-
-    private void Fix(KMSelectable selectable)
-    {
-        if (c == 3)
-        {
-            StopCoroutine(coroutine);
-            rotating = false;
-            canPress = true;
-            c = 0;
-            curKnob++;
-            Hot.OnInteract = HotHandler;
-            Cold.OnInteract = ColdHandler;
+            k[(r + 1) % 2].OnInteract = delegate () { Reset(); return false; };
         }
     }
 
@@ -579,34 +554,39 @@ public class Sink : MonoBehaviour
         {
             if (dT >= 3 && dT <= 5)
             {
-                Skip();
+                Reset();
             }
             else if (c == 2 && canPress == false)
             {
-                StopCoroutine(coroutine2);
+                StopCoroutine(Timer);
                 DebugLog("Debug: Reset failed after {0} seconds.", dT);
                 if (spin > 1500 && dT > 5) Module.HandleStrike();
             }
-            else StopCoroutine(coroutine2);
+            else StopCoroutine(Timer);
             h = false;
         };
     }
 
-    private void Skip()
+    private void Reset()
     {
         canPress = true;
         wait = false;
-        StopCoroutine(coroutine);
-        StopCoroutine(coroutine2);
+        StopAllCoroutines();
+        StartCoroutine(CheckForTurn());
+        if (rotate)
+            StartCoroutine(Spin());
         rotating = false;
-        Hot.OnInteract = HotHandler;
-        Cold.OnInteract = ColdHandler;
+        if (HotHandler != null)
+        {
+            Hot.OnInteract = HotHandler;
+            Cold.OnInteract = ColdHandler;
+        }
         Hot.OnInteractEnded = null;
         Cold.OnInteractEnded = null;
         curKnob++;
         c = 0;
-        if (!processingInput) DebugLog("Button reorientated.");
-        else Debug.LogFormat("<Faulty Sink #{0}> Button reorientated.", moduleID);
+        if (!processingInput && isFaulty) DebugLog("Button reorientated.");
+        else if (isFaulty) Debug.LogFormat("<Faulty Sink #{0}> Button reorientated.", moduleID);
     }
 
     private void FaultyPVC(int num)
@@ -671,8 +651,8 @@ public class Sink : MonoBehaviour
             {
                 ren[s].material = buttonMasher;
                 o = true;
-                Module.GetComponent<KMSelectable>().Children[1] = null;
-                Module.GetComponent<KMSelectable>().Children[7] = null;
+                GetComponent<KMSelectable>().Children[1] = null;
+                GetComponent<KMSelectable>().Children[7] = null;
                 UpdateChildren();
                 Steps(false);
             }
@@ -682,7 +662,8 @@ public class Sink : MonoBehaviour
 
     public void UpdateChildren()
     {
-        GetComponent<KMSelectable>().UpdateChildren();
+        GetComponent<KMSelectable>().UpdateChildrenProperly();/*
+        I don't think this works.
 #if UNITY_EDITOR
         for (int i = 0; i < GetComponent<KMSelectable>().Children.Count(); i++)
         {
@@ -698,15 +679,13 @@ public class Sink : MonoBehaviour
                 GetComponent<TestSelectable>().Children[i] = selectable.GetComponent<TestSelectable>();
             }
         }
-#endif
+#endif*/
     }
 
     private IEnumerator TwitchHandleForcedSolve()
     {
-        if ((coroutine != null) || (coroutine2 != null))
-            Skip();
-        if (coroutine3 != null)
-            StopCoroutine(coroutine3);
+        if (rotating)
+            Reset();
         rotate = false;
         spin = 0;
         Func<int, KMSelectable> correct = (int i) => knob2Turn[i] ? Hot : Cold;
@@ -729,7 +708,7 @@ public class Sink : MonoBehaviour
                     {
                         if (!knob2Turn[0])
                         {
-                            if (HotMesh.material == null)
+                            if (HotMesh.material.mainTexture == null)
                                 buttonMasher = ColdMesh.material;
                             else
                                 buttonMasher = HotMesh.material;
