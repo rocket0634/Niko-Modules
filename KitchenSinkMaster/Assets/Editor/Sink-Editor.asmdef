@@ -1,0 +1,10 @@
+{
+    "name": "Sink-Editor",
+    "references": [
+        "Sink"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

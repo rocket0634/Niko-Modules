@@ -1,13 +1,13 @@
-﻿using KMBombInfoExtensions;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using KModkit;
 using UnityEngine;
 
-public class Sink : MonoBehaviour
+public class SinkOld : MonoBehaviour
 {
     #region Fields
     public enum Type
@@ -117,16 +117,26 @@ public class Sink : MonoBehaviour
 
         if (isFaulty && (Input.Equals("hover") || Input.Equals("highlight")))
         {
+            if (Application.isEditor)
+            {
+                yield return "sendtochat This command is not currently compatible with the editor.";
+                yield break;
+            }
             var cooked = Hot.Equals(Pipe) || Hot.Equals(Faucet);
             if (!cooked)
                 yield break;
-            var highlight = Hot.Highlight.GetComponent("Highlightable");
+            /*var highlight = Hot.Highlight.GetComponent("Highlightable");
             var e = highlight.GetType().GetNestedType("HighlightTypeEnum", BindingFlags.Public);
             var highlightMethod = highlight.GetType().GetMethod("On", BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(bool), e }, null);
             var enumValue = Enum.ToObject(e, 1);
             highlightMethod.Invoke(highlight, new[] { true, enumValue });
             yield return new WaitForSeconds(1.5f);
-            highlightMethod.Invoke(highlight, new[] { false, enumValue });
+            highlightMethod.Invoke(highlight, new[] { false, enumValue });*/
+            var highlightAnimator = Hot.Highlight.GetComponentInChildren<Animator>(true);
+            highlightAnimator.gameObject.SetActive(true);
+            highlightAnimator.Play("InteractionPulse");
+            yield return new WaitForSeconds(1.5f);
+            highlightAnimator.gameObject.SetActive(false);
             yield break;
         }
 
