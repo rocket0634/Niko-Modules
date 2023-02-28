@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 114625393304615704}
   - component: {fileID: 114842808066954718}
   m_Layer: 0
-  m_Name: basin
+  m_Name: Basin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 114042103229155070}
   - component: {fileID: 114898962159364696}
   m_Layer: 0
-  m_Name: pipe
+  m_Name: Pipe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

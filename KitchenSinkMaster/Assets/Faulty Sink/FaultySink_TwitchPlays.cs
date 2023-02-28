@@ -65,7 +65,7 @@ partial class FaultySink
                         Reset();
                         yield return new WaitUntil(() => !rotating);
                     }
-                    if (isRotating != rotating && tapList.Count > 0)
+                    if (rotating && !isRotating && tapList.Count > 0)
                     {
                         yield return string.Format("sendtochaterror Due to a sudden change, only {0} {1} processed.", processed, plural ? "inputs were" : "input was");
                         processingInput = false;

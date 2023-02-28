@@ -53,7 +53,7 @@ partial class FaultySink
             {
                 () => curKnob == 2 && spin > 1500,
                 () => spin > 1295,
-                () => true
+                () => spin > 900
             };
             for (int i = 0; i < rot.Length; i++)
             {
@@ -152,7 +152,9 @@ partial class FaultySink
             if (spin > 1500 && dT > 5) Module.HandleStrike();
             Log("Debug: Reset failed after {0} seconds.", dT);
         }
-        else StopCoroutine(Timer);
+        // WaitForSelect can be called after selecting a knob before the spinning rule activates
+        // This would result in WaitForSelect being called before the Timer starts.
+        else if (holding) StopCoroutine(Timer);
         holding = false;
     }
     private void Reset()

@@ -17,35 +17,21 @@ partial class FaultySink
 
     private bool FaultyPVC(KMSelectable knob)
     {
-        var num = Array.IndexOf(new[] { Hot, Basin, Cold }, knob);
-        switch(num + curKnob * 3)
+        var step = curKnob == 1;
+        if (knob == Basin && step)
+            Solve();
+        else if (knob == Hot && !step)
         {
-            // 0 + 0
-            case 0:
-                Hot.transform.Rotate(Vector3.up, -50f);
-                curKnob++;
-            break;
-            // 1 + 0
-            case 1:
-                Module.HandleStrike();
-                Log("Warning: Invalid button [BasinMesh] selected.");
-            break;
-            // 2 + 0, 2 + 3
-            case 2:
-            case 5:
-                Module.HandleStrike();
-            break;
-            // 0 + 3
-            case 3:
-                Module.HandleStrike();
-                Log("Warning: Invalid button [HotMesh] selected.");
-            break;
-            // 1 + 3
-            case 4:
-                Solve();
-            break;
+            Hot.transform.Rotate(Vector3.up, -50f);
+            curKnob++;
         }
-        processingInput = false;
+        else
+        {
+            Module.HandleStrike();
+            if (knob != Cold)
+                Log("Warning: Invalid button [{0}Mesh] selected.", knob.name);
+            processingInput = false;
+        }
         return false;
     }
 }

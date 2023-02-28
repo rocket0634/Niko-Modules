@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 partial class FaultySink
@@ -35,9 +35,8 @@ partial class FaultySink
     }
     private bool ChooseTexture(KMSelectable selectable, int r)
     {
-        var selectables = new[] { Cold, Hot, Faucet, Pipe };
-        var s = selectables.IndexOf(x => selectable);
-
+        var selectables = new List<KMSelectable> { Cold, Hot, Faucet, Pipe };
+        var s = selectables.IndexOf(selectable);
         if (r != s && !knob2Turn[0].temp && s < 2)
         {
             Module.HandleStrike();
@@ -54,7 +53,6 @@ partial class FaultySink
         {
             texHold = ren[s].material.mainTexture;
             buttonMasher = ren[s].material;
-            processingInput = false;
             Log("Texture [{0}] chosen.", texHold.name);
             knob2Turn[0].temp = true;
         }

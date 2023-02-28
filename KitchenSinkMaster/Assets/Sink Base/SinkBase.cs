@@ -236,7 +236,9 @@ abstract partial class SinkBase : MonoBehaviour {
 				{
 					var i = matches.IndexOf(c);
 					if (i > -1 && _selectableChildren[indicies[i]] != null)
-					q.Add(_selectableChildren[indicies[i]]);
+						q.Add(_selectableChildren[indicies[i]]);
+					else
+						return new List<KMSelectable>();
 				}
 		}
 		return q;
