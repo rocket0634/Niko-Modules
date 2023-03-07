@@ -122,9 +122,9 @@ partial class FaultySink
         }
         return false;
     }
-    private bool Opposite(bool correct)
+    private bool Opposite(bool isSpinning)
     {
-        if (correct)
+        if (!isSpinning)
             Reset();
         else
         {
