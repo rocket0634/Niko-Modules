@@ -14,10 +14,18 @@ public static class AssemblyDefinitions
     private static readonly DirectoryInfo rootDirectory = Directory.GetParent(Application.dataPath);
     private static readonly string slnFile = Path.Combine(rootDirectory.FullName, rootDirectory.Name) + ".sln";
     private static readonly string editorPath = Path.Combine(Application.dataPath, "Editor");
+
+    private static readonly string[] ignoredDefinitions = new[]
+    {
+        "GameProxies"
+    };
+    
     internal static bool DefinitionExists()
     {
         return CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyName(ModConfig.ID) != null;
     }
+    
+    
     internal static void RunChecks()
     {
         // Don't do anything if the ID hasn't changed. This also avoids a false error from reserved due to the current assembly definition being loaded in the project.
@@ -39,6 +47,8 @@ public static class AssemblyDefinitions
         var currentDefinitions = CompilationPipeline.GetAssemblies().Select(x => x.name);
         foreach (string definition in currentDefinitions)
         {
+            if(ignoredDefinitions.Contains(definition))
+                continue;
             var defPath = CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyName(definition);
             File.Delete(Path.Combine(rootDirectory.FullName, definition + ".csproj"));
             // If no definitions exist, there are no more files to delete.
@@ -71,15 +81,18 @@ public static class AssemblyDefinitions
     }
 
     // Unity does not supply an option to generate assembly definitions through code, so we must create our own.
-    class AssemblyDefinition
+    internal class AssemblyDefinition
     {
         internal static AssemblyDefinition CreateDefinition(string id)
         {
-            return new AssemblyDefinition
+            var asmDef = new AssemblyDefinition
             {
                 name = id,
                 _filePath = Path.Combine(Application.dataPath, id + ".asmdef")
             };
+            if(!string.IsNullOrEmpty(CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyName("GameProxies")))
+                asmDef.references = new[] { "GameProxies" };
+            return asmDef;
         }
 
         internal static AssemblyDefinition CreateEditorDefinition(string id)
@@ -92,6 +105,15 @@ public static class AssemblyDefinitions
                 // Assembly-CSharp does this automatically but this is overwritten if an assembly definition is created in the /Assets folder.
                 includePlatforms = new [] { "Editor" },
                 _filePath = Path.Combine(editorPath, id + "-Editor.asmdef")
+            };
+        }
+
+        internal static AssemblyDefinition CreateProxyDefinition()
+        {
+            return new AssemblyDefinition
+            {
+                name = "GameProxies",
+                _filePath = Path.Combine(Application.dataPath, "Scripts/GameProxies/GameProxies.asmdef")
             };
         }
 
