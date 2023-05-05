@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 114248961524055866}
   - component: {fileID: 114157106575913378}
   - component: {fileID: 114713731120410072}
+  - component: {fileID: 114608702702492134}
   - component: {fileID: 114466375058815886}
   - component: {fileID: 114392748205265134}
   m_Layer: 0
@@ -143,6 +144,17 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
+--- !u!114 &114608702702492134
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1098658895200760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a47a6398dfe071a44a91c7b4d7a5ccc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114713731120410072
 MonoBehaviour:
   m_ObjectHideFlags: 1

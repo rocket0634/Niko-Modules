@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 114184606965725450}
   - component: {fileID: 114145681764135568}
   - component: {fileID: 114258247800651440}
+  - component: {fileID: 114788468232930222}
   - component: {fileID: 114813848932171830}
   - component: {fileID: 114890402825852726}
   m_Layer: 0
@@ -131,6 +132,17 @@ MonoBehaviour:
   ModuleType: FaultySink
   ModuleDisplayName: Faulty Sink
   RequiresTimerVisibility: 0
+--- !u!114 &114788468232930222
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1498308267680234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a47a6398dfe071a44a91c7b4d7a5ccc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114813848932171830
 MonoBehaviour:
   m_ObjectHideFlags: 1

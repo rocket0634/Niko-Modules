@@ -1,3 +1,6 @@
-﻿{
-	"name": "Sink"
+{
+    "name": "Sink",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": []
 }

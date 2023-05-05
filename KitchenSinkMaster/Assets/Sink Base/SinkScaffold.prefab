@@ -55,7 +55,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4820104986744510}
-  - component: {fileID: 114361766189978394}
   - component: {fileID: 114671143365556208}
   m_Layer: 0
   m_Name: SinkScaffold
@@ -1051,17 +1050,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - KT/Mobile/DiffuseTint
---- !u!114 &114361766189978394
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1389932886835184}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a47a6398dfe071a44a91c7b4d7a5ccc2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &114461989660245152
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1167,13 +1155,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd0736ed849a5274798221d424e76e5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ModSource: {fileID: 114361766189978394}
   Cold: {fileID: 114472001647392948}
   Hot: {fileID: 114208640007988304}
   KnobColors:
   - {fileID: 2800000, guid: 817676c5cf9da1947927c5c661c7a6e4, type: 3}
   - {fileID: 2800000, guid: 4700e2fda51eafd418b416fa8171bf79, type: 3}
   - {fileID: 2800000, guid: 15fe469a69f51a24f93e3eeb857e326e, type: 3}
+  ModSource: {fileID: 114820471493973676, guid: d38bf9a1d6218c6469c93900071f709a,
+    type: 2}
   Faucet: {fileID: 114607910581873958}
   Pipe: {fileID: 114898962159364696}
   Basin: {fileID: 114842808066954718}
