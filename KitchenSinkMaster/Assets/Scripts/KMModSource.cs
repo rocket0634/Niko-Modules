@@ -76,7 +76,7 @@ public class KMModSource : MonoBehaviour
             ModInfo y;
             // InstalledModInfos isn't written to by Tweaks, and won't work if workshop mods are loaded locally.
             if (!Manager.InstalledModInfos.TryGetValue(x.modDirectory, out y))
-                Manager.GetModInfoFromPath(x.modDirectory, 0);
+                y = Manager.GetModInfoFromPath(x.modDirectory, 0);
             return y;
         });
         if (applicableInfos.Count < 1)

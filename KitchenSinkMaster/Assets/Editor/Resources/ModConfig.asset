@@ -19,6 +19,6 @@ MonoBehaviour:
     leading to more problems than solutions...\n\nModule ID: Sink\r\n\r\nManual Page
     (HTML): https://ktane.timwi.de/HTML/Sink.html\n\nModule ID: FaultySink\n\nManual
     Page (HTML):\nhttps://ktane.timwi.de/HTML/Faulty%20Sink.html"
-  version: 2.33
+  version: 2.331
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 5e953aa7f4407ff4b85cba1df884b4c3, type: 3}
