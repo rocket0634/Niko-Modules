@@ -187,7 +187,7 @@ abstract partial class SinkBase : MonoBehaviour {
 				yield return ResetTurn();
 				knobs[Hot].p = 0;
 				knobs[Cold].p = 0;
-				Module.HandleStrike();
+				Strike();
 				curKnob = 0;
 			}
 			canPress = true;
@@ -268,6 +268,14 @@ abstract partial class SinkBase : MonoBehaviour {
 		SOLVED = true;
 		Module.HandlePass();
 		Log("The module has been disarmed.");
+	}
+	protected void Strike(string message = "")
+	{
+		Module.HandleStrike();
+		// Clear the queue for Twitch Plays
+		queue.Clear();
+		if (!string.IsNullOrEmpty(message))
+			Log(message);
 	}
 
 	protected void Log(string msg, params object[] args)

@@ -128,7 +128,7 @@ partial class FaultySink
             Reset();
         else
         {
-            Module.HandleStrike();
+            Strike();
             processingInput = false;
         }
         return false;
@@ -149,7 +149,7 @@ partial class FaultySink
         else if (rule == 2)
         {
             StopCoroutine(Timer);
-            if (spin > 1500 && dT > 5) Module.HandleStrike();
+            if (spin > 1500 && dT > 5) Strike();
             Log("Debug: Reset failed after {0} seconds.", dT);
         }
         // WaitForSelect can be called after selecting a knob before the spinning rule activates

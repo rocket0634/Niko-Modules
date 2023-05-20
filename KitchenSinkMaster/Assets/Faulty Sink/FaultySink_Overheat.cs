@@ -21,8 +21,7 @@ partial class FaultySink
         // Reassign the Hot selectable to a new function
         H.OnInteract += delegate
         {
-            Module.HandleStrike();
-            Log("Warning: Overheating");
+            Strike("Warning: Overheating");
             processingInput = false;
             return false;
         };

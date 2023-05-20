@@ -39,15 +39,13 @@ partial class FaultySink
         var s = selectables.IndexOf(selectable);
         if (r != s && !knob2Turn[0].temp && s < 2)
         {
-            Module.HandleStrike();
+            Strike("NullReferenceException: Object reference not set to an instance of an object.");
             processingInput = false;
-            Log("NullReferenceException: Object reference not set to an instance of an object.");
         }
         else if (r == s && !knob2Turn[0].temp)
         {
-            Module.HandleStrike();
+            Strike("Warning: Invalid button [" + ren[(r +1 ) % 2].material.mainTexture + "] selected.");
             processingInput = false;
-            Log("Warning: Invalid button [{0}] selected.", ren[(r + 1) % 2].material.mainTexture);
         }
         else if (!knob2Turn[0].temp)
         {

@@ -15,6 +15,7 @@ public class KMModSource : MonoBehaviour
     private static IEnumerable<Mod> _mods;
     private static string _modPath;
     private static string _version;
+    private static ModManager Manager = ModManager.Instance;
     /// <returns>
     /// The identifer for your mod. If the ModSource component is not available or if this is called in the Editor, it will instead return the calling assembly's name.
     /// </returns>
@@ -57,7 +58,7 @@ public class KMModSource : MonoBehaviour
 
     private string GetModPath()
     {
-        var applicableDirs = ModManager.Instance.loadedMods.Where(x => x.Value.ModID == ModID);
+        var applicableDirs = Manager.loadedMods.Where(x => x.Value.ModID == ModID);
         _mods = applicableDirs.Count() > 0 ? applicableDirs.Select(x => x.Value) : new List<Mod>();
         var dir = _mods.FirstOrDefault(x => x.ModObjects != null && x.ModObjects.Contains(gameObject));
         _modPath = dir == default(Mod) ? null : dir.modDirectory;
@@ -74,8 +75,8 @@ public class KMModSource : MonoBehaviour
         {
             ModInfo y;
             // InstalledModInfos isn't written to by Tweaks, and won't work if workshop mods are loaded locally.
-            if (!ModManager.Instance.InstalledModInfos.TryGetValue(x.modDirectory, out y))
-                ModManager.Instance.GetModInfoFromPath(x.modDirectory, 0);
+            if (!Manager.InstalledModInfos.TryGetValue(x.modDirectory, out y))
+                Manager.GetModInfoFromPath(x.modDirectory, 0);
             return y;
         });
         if (applicableInfos.Count < 1)
