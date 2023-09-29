@@ -282,11 +282,15 @@ public class BlindMaze : MonoBehaviour
 		SumEW = SumEW % 5;
 
         // Look for mazebased modules
-        string[] MazeModules = new[] { "Maze", "MouseInTheMaze", "spwiz3DMaze", "HexamazeModule", "MorseAMaze", "PolyhedralMazeModule", "USA",
-            "MazeScrambler", "boolMaze", "qSwedishMaze", "factoryMaze", "ModuleMaze", "mazematics", "maze3", "ksmAmazeingButtons", "rgbMaze", "faultyrgbMaze", "coloredMaze", "boolMazeCruel" };
+        string[] ModuleList = BombInfo.GetModuleNames().ToArray();
         int MazeBased = 0;
-        MazeBased = BombInfo.GetModuleIDs().Intersect(MazeModules).Count();
-        DebugLog("There are {0} compatible maze-type modules on the bomb, not including Blind Maze.", MazeBased);
+        for (var m = 0; m < ModuleList.Count(); m++) {
+            if (ModuleList[m] == "Blind Maze") { continue; }
+            if (ModuleList[m].ToLower().Contains("maze")) {
+                MazeBased++;
+            }
+        }
+        DebugLog("There are {0} modules containing \"maze\" on the bomb, not including Blind Maze.", MazeBased);
 
         int MazeRule = 7;
         int[] rulesCount = { COLORKEYS[0], BombInfo.GetBatteryCount(), COLORKEYS[4], COLORKEYS[0], MazeBased, BombInfo.GetPorts().Distinct().Count(), COLORKEYS[1], COLORKEYS[2], COLORKEYS[3], BombInfo.GetBatteryCount(Battery.AA), BombInfo.GetBatteryCount(Battery.D), BombInfo.GetBatteryHolderCount(), BombInfo.GetPortCount(), BombInfo.GetPortPlateCount(), BombInfo.GetIndicators().Count(), BombInfo.GetOnIndicators().Count(), BombInfo.GetOffIndicators().Count() };
