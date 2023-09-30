@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Name: WorkshopItem
   m_EditorClassIdentifier: 
   WorkshopPublishedFileID: 1286297509
-  Title: Blind Mazes
+  Title: Blind Maze
   Tags:
   - Regular Module

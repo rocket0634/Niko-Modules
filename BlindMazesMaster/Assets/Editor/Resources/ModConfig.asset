@@ -14,9 +14,11 @@ MonoBehaviour:
   id: BlindMaze
   title: Blind Maze
   author: McNiko67
-  description: "Navigate through a Maze You can't see! Not that you couldn't see the
-    walls before, so how hard could it be?\n\nModule by McNiko67\n\nModule ID: BlindMaze\r\nThe
-    manual can be found here: https://ktane.timwi.de/HTML/Blind%20Maze.html"
+  description: "Navigate through a maze you can't see! Not that you couldn't see the
+    walls before, so how hard could it be?\r\n\r\nModule ID: BlindMaze\r\n\r\nManual
+    Page: https://ktane.timwi.de/HTML/Blind%20Maze.html\r\n\r\nMod created by the
+    late McNiko67\r\n\r\nSpecial Thanks to Sam, Cait, and Timwi for providing assistence
+    with the coding.\r\n\r\nAny feedback is welcome."
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 0132e6e5fa5479c4ab17be5a703893c1, type: 3}
