@@ -224,9 +224,9 @@ public class BlindMaze : MonoBehaviour
                 new string[5, 5] {
                     { "U L R", "L U D", "N R", "L U", "U R"   },
                     { "L D",   "U R",   "L R", "L R", "L R D" },
-                    { "L U R", "D L",   "D",   "",    "D R"     },
+                    { "L U R", "D L",   "D",   "",    "U D R"     },
                     { "L",     "U R",   "U L", "",    "U D R"     },
-                    { "D L R", "D L",   "D R", "D",   "U R D"   }
+                    { "D L R", "D L",   "D R", "L D",   "U R D"   }
                 }
             };
         } else {
