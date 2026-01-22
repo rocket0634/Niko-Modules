@@ -32,6 +32,7 @@ public class FontSelect : MonoBehaviour
     protected int CurrentFont = 1;
     protected bool FontSelected;
     private int[] FontList = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    private static bool versionShowed;
 
     public string TwitchHelpMessage = "Use !{0} Left or !{0} Right to cycle fonts, !{0} Submit to submit the current font.";
 
@@ -70,6 +71,13 @@ public class FontSelect : MonoBehaviour
 
     protected void Start()
     {
+        
+        if (!versionShowed)
+        {
+            Debug.LogFormat("<Font Select> Mod version 2.1.4");
+            versionShowed = true;
+        }
+
         ModConfig<FontSettings> modConfig = new ModConfig<FontSettings>("FontSettings");
         Settings = modConfig.Settings;
         modConfig.Settings = Settings;
@@ -232,11 +240,12 @@ public class FontSelect : MonoBehaviour
         {
             { "Filename", "FontSettings.json" },
             { "Name", "Font Select" },
-            { "Listing", new List<Dictionary<string,object>> {
+            { "Listings", new List<Dictionary<string,object>> {
                 new Dictionary<string, object>
                 {
                     { "Key", "disableKarmaMerriweather" },
                     { "Text", "Disable Karma and Merriweather" },
+                    { "Description", "Disables the two fonts that look similar to one another." }
                 }
             } }
         }
@@ -261,6 +270,11 @@ public class FontSelect : MonoBehaviour
             yield return true;
         }
         yield return Submit.OnInteract();
+    }
+
+    private void OnDestroy()
+    {
+        versionShowed = false;
     }
 }
 class FontSettings
